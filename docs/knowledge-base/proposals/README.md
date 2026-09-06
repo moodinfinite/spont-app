@@ -8,7 +8,10 @@ not just something said once in a conversation and forgotten.
 Just describe your idea to your Claude session. Once it knows you're a
 non-technical contributor (it asks once, at the start, and remembers),
 it will write the idea up here in plain language and save it for you —
-you don't need to know how to create a file or use git. If you want a
+you don't need to know how to create a file or use git. (This works
+automatically in Claude Code. In Claude Desktop, ask your session to
+format your idea using `TEMPLATE.md`'s fields, then share that text with
+a technical contributor to save as a file.) If you want a
 quick sanity check on whether the idea conflicts with something already
 decided, ask it to run the idea past the `spont-product` agent first.
 

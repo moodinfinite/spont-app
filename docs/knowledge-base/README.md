@@ -28,4 +28,8 @@ and contribute product/design ideas.
 Just describe it to your Claude session — say you have a product or
 design idea. It'll ask if you're technical or not (once, and it
 remembers), then either write it up as a proposal for you or point you
-at the right next step.
+at the right next step. This automatic saving works in Claude Code,
+which can write files and commit on your behalf — in Claude Desktop,
+describe your idea and ask for it written up in the
+`proposals/TEMPLATE.md` format, then pass it to a technical contributor
+to save.

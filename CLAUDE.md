@@ -70,7 +70,11 @@ At the start of a session:
 2. If `.claude/memory/<username>/` doesn't exist yet, copy it from
    `.claude/memory/TEMPLATE/`.
 3. Read `.claude/memory/<username>/MEMORY.md` first — it's a short index.
-   Only open individual `persistent/*.md` files the index points at.
+   Only open individual `persistent/*.md` files the index points at,
+   with one named exception: `persistent/role.md` (if present) is
+   machine-read config for the `spont-onboarding` skill, not
+   human-authored memory — that skill reads it directly, regardless of
+   whether MEMORY.md's index mentions it.
 4. Don't read or write another contributor's `.claude/memory/<other>/`
    directory unless explicitly asked to (e.g. reviewing a teammate's notes).
 

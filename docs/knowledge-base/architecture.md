@@ -51,10 +51,9 @@ implementation directly.
 In plain terms: real login (via your actual Google account) is also
 gated behind that same Google approval process mentioned above. So for
 now, logging in just means picking a name from a list of test users —
-there's no password, no real account. This is intentionally temporary
-and is called out everywhere it matters (see
-`apps/web/lib/session.ts` and the login page) so nobody mistakes it for
-how the real app will work.
+there's no password, no real account. This is intentionally temporary,
+and the login page says so directly ("Dev-only picker") so nobody
+mistakes it for how the real app will work.
 
 ## Where to look for "why does X exist" that isn't answered here
 

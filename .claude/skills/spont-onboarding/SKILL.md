@@ -50,8 +50,14 @@ punctuation, one line), then commit it:
 
 ```bash
 git add .claude/memory/<username>/persistent/role.md
-git commit -m "chore: record contributor role for <username>"
+git commit -m "chore: record contributor role for <username>" -- .claude/memory/<username>/persistent/role.md
 ```
+
+Check first: if the working tree/index already has unrelated staged or
+uncommitted changes when this step runs, don't commit. Just write
+`role.md` and mention to the contributor that it was created — an
+auto-commit titled "record contributor role" shouldn't risk sweeping in
+whatever else is in flight.
 
 (This one commit is the same for both roles — recording your own role is
 infrastructure, not a git-workflow moment to differentiate on. Do it
