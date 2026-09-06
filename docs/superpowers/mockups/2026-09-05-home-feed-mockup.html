@@ -1,0 +1,762 @@
+<title>Spont Home Feed</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Public+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #F2F4F6;
+    --surface: #FFFFFF;
+    --surface-muted: #E9ECEF;
+    --ink: #1D222B;
+    --ink-soft: #5C6570;
+    --ink-faint: #8A93A0;
+    --line: #DCE1E6;
+    --accent: #FF6B47;
+    --accent-ink: #B8391A;
+    --accent-soft: #FFE4DA;
+    --system: #4A7290;
+    --system-soft: #E4EBF0;
+    --approve: #2E9E6E;
+    --approve-ink: #1F7350;
+    --deny: #B75048;
+    --deny-soft: #F6E6E4;
+    --av-bob: #3E8FA0;
+    --av-carol: #C98A2B;
+    --av-dave: #8B5FBF;
+    --av-erin: #C9527A;
+    --topbar-h: 58px;
+    --shadow: 0 1px 2px rgba(29,34,43,0.04), 0 6px 16px rgba(29,34,43,0.05);
+    --shadow-pop: 0 8px 24px rgba(29,34,43,0.14), 0 2px 8px rgba(29,34,43,0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171B;
+      --surface: #1B1F24;
+      --surface-muted: #23282E;
+      --ink: #EDEFF1;
+      --ink-soft: #9AA3AD;
+      --ink-faint: #6B7480;
+      --line: #2B3138;
+      --accent: #FF8465;
+      --accent-ink: #FFB49C;
+      --accent-soft: #3A241E;
+      --system: #8FB4CC;
+      --system-soft: #202A30;
+      --approve: #4CC38A;
+      --approve-ink: #8FE0BB;
+      --deny: #E2857B;
+      --deny-soft: #33211F;
+      --av-bob: #63B0C2;
+      --av-carol: #E0A94C;
+      --av-dave: #A886D9;
+      --av-erin: #E081A8;
+      --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.28);
+      --shadow-pop: 0 10px 30px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171B;
+    --surface: #1B1F24;
+    --surface-muted: #23282E;
+    --ink: #EDEFF1;
+    --ink-soft: #9AA3AD;
+    --ink-faint: #6B7480;
+    --line: #2B3138;
+    --accent: #FF8465;
+    --accent-ink: #FFB49C;
+    --accent-soft: #3A241E;
+    --system: #8FB4CC;
+    --system-soft: #202A30;
+    --approve: #4CC38A;
+    --approve-ink: #8FE0BB;
+    --deny: #E2857B;
+    --deny-soft: #33211F;
+    --av-bob: #63B0C2;
+    --av-carol: #E0A94C;
+    --av-dave: #A886D9;
+    --av-erin: #E081A8;
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.28);
+    --shadow-pop: 0 10px 30px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Public Sans', system-ui, sans-serif;
+    line-height: 1.5;
+  }
+
+  .status-strip {
+    text-align: center;
+    padding: 7px 12px;
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--line);
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  /* Topbar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0 24px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 30px; }
+
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--accent-ink);
+    letter-spacing: -0.01em;
+  }
+
+  .topnav { display: flex; gap: 20px; }
+  .topnav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 500;
+    padding: 4px 2px;
+    border-bottom: 2px solid transparent;
+  }
+  .topnav a:hover { color: var(--ink); }
+  .topnav a.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+  .topbar-right { display: flex; align-items: center; gap: 6px; position: relative; }
+
+  .icon-btn {
+    position: relative;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .icon-btn:hover { background: var(--surface-muted); color: var(--ink); }
+  .icon-btn svg { width: 19px; height: 19px; }
+  .icon-btn .badge-dot {
+    position: absolute; top: 7px; right: 8px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    border: 1.5px solid var(--bg);
+  }
+
+  .profile-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer;
+  }
+  .icon-btn:focus-visible, .profile-btn:focus-visible, .topnav a:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  /* Dropdowns */
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 260px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow-pop);
+    z-index: 40;
+    overflow: hidden;
+  }
+  .dropdown[hidden] { display: none; }
+  .dropdown-header {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--line);
+  }
+  .notif-item {
+    display: block;
+    padding: 11px 16px;
+    font-size: 13.5px;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .notif-item:last-of-type { border-bottom: none; }
+  .notif-item:hover { background: var(--surface-muted); }
+  .notif-item .when { display: block; font-size: 11.5px; color: var(--ink-faint); margin-top: 2px; }
+  .dropdown-footer {
+    display: block;
+    padding: 10px 16px;
+    font-size: 13px;
+    text-align: center;
+    color: var(--accent-ink);
+    text-decoration: none;
+    font-weight: 600;
+    background: var(--surface-muted);
+  }
+  .profile-menu { padding: 6px; }
+  .profile-menu a {
+    display: block;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 7px;
+  }
+  .profile-menu a:hover { background: var(--surface-muted); }
+  .profile-menu .divider { height: 1px; background: var(--line); margin: 5px 4px; }
+
+  main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 22px 20px 72px;
+  }
+
+  .section-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+  }
+
+  /* Month divider: prominent + sticky + banded */
+  .month-divider {
+    position: sticky;
+    top: var(--topbar-h);
+    z-index: 20;
+    background: var(--ink);
+    color: var(--bg);
+    margin: 0 -20px 18px;
+    padding: 13px 20px;
+  }
+  .month-divider:not(:first-child) { margin-top: 26px; }
+  .month-divider h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: 0.01em;
+    margin: 0;
+  }
+
+  .feed { display: flex; flex-direction: column; gap: 14px; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: opacity .35s ease, transform .35s ease, max-height .35s ease, margin .35s ease, padding .35s ease;
+  }
+  .card.system { border-left-style: dashed; border-left-color: var(--system); }
+
+  .card.leaving {
+    opacity: 0;
+    transform: scale(.97);
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    border-width: 0;
+  }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+
+  .who-row { display: flex; align-items: center; gap: 11px; }
+
+  .date-badge {
+    flex: 0 0 auto;
+    width: 40px;
+    text-align: center;
+    background: var(--surface-muted);
+    border-radius: 8px;
+    padding: 5px 0 6px;
+  }
+  .date-badge .dow {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+  }
+  .date-badge .dom {
+    display: block;
+    font-weight: 700;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+  }
+
+  .avatars { display: flex; }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    color: #fff;
+    border: 2px solid var(--surface);
+  }
+  .avatars .avatar + .avatar { margin-left: -9px; }
+
+  .card-headline { font-weight: 600; font-size: 15px; color: var(--ink); }
+  .card-when {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .duration-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    color: var(--ink-faint);
+  }
+  .duration-pill::before { content: "·"; margin-right: 6px; }
+
+  .reason {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--ink-faint);
+    padding-left: 51px;
+    margin-top: -6px;
+  }
+
+  .card-actions { display: flex; gap: 10px; margin-top: 2px; }
+  .btn {
+    flex: 1;
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .btn svg { width: 15px; height: 15px; }
+  .btn-approve {
+    background: var(--approve);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(46,158,110,0.28);
+  }
+  .btn-approve:hover { filter: brightness(1.06); }
+  .btn-deny {
+    background: transparent;
+    border-color: var(--line);
+    color: var(--ink-soft);
+  }
+  .btn-deny:hover { border-color: var(--deny); color: var(--deny); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Upcoming */
+  .upcoming { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; }
+  .upcoming-list { display: flex; flex-direction: column; gap: 2px; }
+  .upcoming-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--line);
+    transition: opacity .4s ease, transform .4s ease;
+  }
+  .upcoming-row:last-child { border-bottom: none; }
+  .upcoming-row.entering { animation: rowIn .5s ease; }
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .upcoming-row.entering { animation: none; } }
+  .upcoming-date { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ink-faint); width: 74px; flex: 0 0 auto; }
+  .upcoming-who { flex: 1 1 auto; font-size: 14px; font-weight: 500; }
+  .upcoming-time { font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+  .upcoming-tag { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--approve-ink); }
+  .upcoming-tag svg { width: 13px; height: 13px; }
+
+  .empty-note { color: var(--ink-faint); font-size: 14px; font-style: italic; padding: 18px 4px; }
+  .closing-note { margin-top: 30px; color: var(--ink-faint); font-size: 13px; text-align: center; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(10,12,15,0.45);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+  .modal-backdrop[hidden] { display: none; }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    max-width: 420px;
+    width: 100%;
+    padding: 26px 26px 22px;
+    box-shadow: var(--shadow-pop);
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 30px; height: 30px; border-radius: 50%;
+    border: none; background: var(--surface-muted); color: var(--ink-soft);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .modal-close:hover { color: var(--ink); }
+  .modal-close svg { width: 14px; height: 14px; }
+  .modal-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent-ink); margin: 0 0 10px;
+  }
+  .modal h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.2;
+    margin: 0 0 12px;
+    text-wrap: balance;
+    padding-right: 14px;
+  }
+  .modal p { margin: 0 0 18px; color: var(--ink-soft); font-size: 14px; }
+  .modal-ok {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 14.5px;
+    cursor: pointer;
+  }
+  .modal-ok:hover { filter: brightness(1.05); }
+  .modal-ok:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  @media (max-width: 520px) {
+    .topbar { padding: 0 14px; }
+    .topbar-left { gap: 16px; }
+    .topnav { gap: 12px; }
+    main { padding: 18px 14px 56px; }
+    .month-divider { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
+    .reason { padding-left: 0; }
+  }
+</style>
+
+<div class="status-strip">Design concept — home feed target (Phase 3–4) — not yet built</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="brand">Spont</div>
+    <nav class="topnav">
+      <a href="#" class="active">Home</a>
+      <a href="#">Friends</a>
+      <a href="#">Groups</a>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" id="bell-btn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 3a5 5 0 00-5 5v2.6c0 .5-.16 1-.46 1.4L3.6 13.6c-.6.8 0 1.9 1 1.9h10.8c1 0 1.6-1.1 1-1.9l-.94-1.6a2.4 2.4 0 01-.46-1.4V8a5 5 0 00-5-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 17a2 2 0 004 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <span class="badge-dot"></span>
+    </button>
+    <div class="dropdown" id="bell-menu" hidden>
+      <div class="dropdown-header">Notifications</div>
+      <a href="#" class="notif-item">Carol accepted your Trivia Crew invite<span class="when">2 hours ago</span></a>
+      <a href="#" class="notif-item">New: you and Dave are both free Friday<span class="when">Yesterday</span></a>
+      <a href="#" class="dropdown-footer">See all</a>
+    </div>
+
+    <button class="profile-btn" id="profile-btn" aria-haspopup="true" aria-expanded="false" aria-label="Your profile">A</button>
+    <div class="dropdown" id="profile-menu" hidden>
+      <div class="profile-menu">
+        <a href="#">Settings</a>
+        <div class="divider"></div>
+        <a href="#">Log out</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="feed" data-month="september">
+    <div class="month-divider"><h2>September</h2></div>
+
+    <div class="feed" data-month="september-cards">
+      <article class="card" data-date="Sun, Sep 6" data-who="Bob" data-time="5:30–7:00 PM">
+        <div class="who-row">
+          <div class="date-badge"><span class="dow">SUN</span><span class="dom">6</span></div>
+          <div class="avatars"><span class="avatar" style="background:var(--av-bob)">B</span></div>
+          <div>
+            <div class="card-headline">Bob wants to hang out</div>
+            <div class="card-when">5:30–7:00 PM <span class="duration-pill">90 MIN</span></div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-approve" data-action="approve">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            I'm in
+          </button>
+          <button class="btn btn-deny" data-action="deny">Not this time</button>
+        </div>
+      </article>
+
+      <article class="card system" data-date="Wed, Sep 9" data-who="Carol" data-time="6:00–7:00 PM">
+        <div class="who-row">
+          <div class="date-badge"><span class="dow">WED</span><span class="dom">9</span></div>
+          <div class="avatars"><span class="avatar" style="background:var(--av-carol)">C</span></div>
+          <div>
+            <div class="card-headline">You and Carol are both free</div>
+            <div class="card-when">6:00–7:00 PM <span class="duration-pill">60 MIN</span></div>
+          </div>
+        </div>
+        <div class="reason">You haven't hung out in 19 days</div>
+        <div class="card-actions">
+          <button class="btn btn-approve" data-action="approve">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            I'm in
+          </button>
+          <button class="btn btn-deny" data-action="deny">Not this time</button>
+        </div>
+      </article>
+
+      <article class="card" data-date="Sat, Sep 12" data-who="Trivia Crew" data-time="7:00–9:00 PM">
+        <div class="who-row">
+          <div class="date-badge"><span class="dow">SAT</span><span class="dom">12</span></div>
+          <div class="avatars">
+            <span class="avatar" style="background:var(--av-bob)">B</span>
+            <span class="avatar" style="background:var(--av-carol)">C</span>
+            <span class="avatar" style="background:var(--av-erin)">E</span>
+          </div>
+          <div>
+            <div class="card-headline">Trivia Crew wants to hang out</div>
+            <div class="card-when">7:00–9:00 PM <span class="duration-pill">120 MIN</span></div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-approve" data-action="approve">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            I'm in
+          </button>
+          <button class="btn btn-deny" data-action="deny">Not this time</button>
+        </div>
+      </article>
+
+      <article class="card system" data-date="Fri, Sep 18" data-who="Weekend Crew" data-time="2:00–4:00 PM">
+        <div class="who-row">
+          <div class="date-badge"><span class="dow">FRI</span><span class="dom">18</span></div>
+          <div class="avatars">
+            <span class="avatar" style="background:var(--av-dave)">D</span>
+            <span class="avatar" style="background:var(--av-erin)">E</span>
+          </div>
+          <div>
+            <div class="card-headline">You, Dave, and Erin are all free</div>
+            <div class="card-when">2:00–4:00 PM <span class="duration-pill">120 MIN</span></div>
+          </div>
+        </div>
+        <div class="reason">First afternoon this month you're all free</div>
+        <div class="card-actions">
+          <button class="btn btn-approve" data-action="approve">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            I'm in
+          </button>
+          <button class="btn btn-deny" data-action="deny">Not this time</button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="feed" data-month="october" id="feed-october">
+    <div class="month-divider"><h2>October</h2></div>
+    <div class="feed" data-month="october-cards">
+      <article class="card" data-date="Thu, Oct 1" data-who="Erin" data-time="12:00–1:00 PM">
+        <div class="who-row">
+          <div class="date-badge"><span class="dow">THU</span><span class="dom">1</span></div>
+          <div class="avatars"><span class="avatar" style="background:var(--av-erin)">E</span></div>
+          <div>
+            <div class="card-headline">Erin wants to hang out</div>
+            <div class="card-when">12:00–1:00 PM <span class="duration-pill">60 MIN</span></div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-approve" data-action="approve">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            I'm in
+          </button>
+          <button class="btn btn-deny" data-action="deny">Not this time</button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <section class="upcoming">
+    <p class="section-eyebrow">Upcoming — already locked in</p>
+    <div class="upcoming-list" id="upcoming-list">
+      <div class="upcoming-row">
+        <span class="upcoming-date">TUE SEP 8</span>
+        <span class="upcoming-who">With Dave</span>
+        <span class="upcoming-time">6:00–7:00 PM</span>
+        <span class="upcoming-tag">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          On your calendar
+        </span>
+      </div>
+      <div class="upcoming-row">
+        <span class="upcoming-date">SAT SEP 26</span>
+        <span class="upcoming-who">With Trivia Crew</span>
+        <span class="upcoming-time">7:00–9:00 PM</span>
+        <span class="upcoming-tag">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          On your calendar
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <p class="closing-note">That's everything for the next 30 days — one open slot a day, at most.</p>
+</main>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" id="modal-close" aria-label="Close">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <p class="modal-eyebrow">How this works</p>
+    <h2 id="modal-title">Hey Alice — here's who's got time for you.</h2>
+    <p>We check your Google Calendar's free/busy status — never what's actually on it — to catch the moments you're both open. Say yes and it's on your calendar instantly; nobody's waiting on the rest of the group.</p>
+    <button class="modal-ok" id="modal-ok">Got it</button>
+  </div>
+</div>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Modal
+  const backdrop = document.getElementById('modal-backdrop');
+  function closeModal() { backdrop.hidden = true; }
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-ok').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      closeDropdown(bellMenu, bellBtn);
+      closeDropdown(profileMenu, profileBtn);
+    }
+  });
+
+  // Dropdowns
+  const bellBtn = document.getElementById('bell-btn');
+  const bellMenu = document.getElementById('bell-menu');
+  const profileBtn = document.getElementById('profile-btn');
+  const profileMenu = document.getElementById('profile-menu');
+
+  function openDropdown(menu, btn) { menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
+  function closeDropdown(menu, btn) { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+  function toggleDropdown(menu, btn) { menu.hidden ? openDropdown(menu, btn) : closeDropdown(menu, btn); }
+
+  bellBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeDropdown(profileMenu, profileBtn);
+    toggleDropdown(bellMenu, bellBtn);
+  });
+  profileBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeDropdown(bellMenu, bellBtn);
+    toggleDropdown(profileMenu, profileBtn);
+  });
+  document.addEventListener('click', () => {
+    closeDropdown(bellMenu, bellBtn);
+    closeDropdown(profileMenu, profileBtn);
+  });
+
+  // Approve / deny interaction
+  function upcomingDateLabel(dateStr) { return dateStr.replace(',', '').toUpperCase(); }
+
+  function checkEmptyMonth(cardsWrap) {
+    if (cardsWrap.querySelectorAll('.card').length === 0) {
+      const monthGroup = cardsWrap.closest('[data-month]');
+      if (monthGroup) monthGroup.remove();
+    }
+  }
+
+  function checkAllEmpty() {
+    const remaining = document.querySelectorAll('main .card').length;
+    const main = document.querySelector('main');
+    if (remaining === 0 && !main.querySelector('.empty-note')) {
+      const note = document.createElement('p');
+      note.className = 'empty-note';
+      note.textContent = "You're all caught up — check back tomorrow.";
+      main.insertBefore(note, main.querySelector('.upcoming'));
+    }
+  }
+
+  function addUpcomingRow(card) {
+    const list = document.getElementById('upcoming-list');
+    const row = document.createElement('div');
+    row.className = 'upcoming-row' + (reduceMotion ? '' : ' entering');
+    row.innerHTML = `
+      <span class="upcoming-date">${upcomingDateLabel(card.dataset.date)}</span>
+      <span class="upcoming-who">With ${card.dataset.who}</span>
+      <span class="upcoming-time">${card.dataset.time}</span>
+      <span class="upcoming-tag">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        On your calendar
+      </span>`;
+    list.appendChild(row);
+  }
+
+  document.querySelector('main').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const card = btn.closest('.card');
+    const cardsWrap = card.parentElement;
+    const action = btn.dataset.action;
+
+    if (action === 'approve') addUpcomingRow(card);
+
+    if (reduceMotion) {
+      card.remove();
+      checkEmptyMonth(cardsWrap);
+      checkAllEmpty();
+      return;
+    }
+    card.classList.add('leaving');
+    card.addEventListener('transitionend', () => {
+      card.remove();
+      checkEmptyMonth(cardsWrap);
+      checkAllEmpty();
+    }, { once: true });
+  });
+</script>
