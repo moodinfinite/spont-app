@@ -1,0 +1,112 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  calendarAccounts     CalendarAccount[]
+  friendshipsInitiated Friendship[]      @relation("FriendshipUserA")
+  friendshipsReceived  Friendship[]      @relation("FriendshipUserB")
+  ownedGroups          Group[]
+  groupMemberships     GroupMembership[]
+  notifications        Notification[]
+}
+
+model CalendarAccount {
+  id         String   @id @default(cuid())
+  userId     String
+  provider   String
+  externalId String
+  createdAt  DateTime @default(now())
+
+  user   User            @relation(fields: [userId], references: [id])
+  events CalendarEvent[]
+
+  @@unique([userId, provider])
+}
+
+model CalendarEvent {
+  id                String   @id @default(cuid())
+  calendarAccountId String
+  title             String
+  startsAt          DateTime
+  endsAt            DateTime
+  rawLabel          String?
+  isBusy            Boolean  @default(true)
+
+  calendarAccount CalendarAccount @relation(fields: [calendarAccountId], references: [id])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+model Friendship {
+  id        String           @id @default(cuid())
+  userAId   String
+  userBId   String
+  status    FriendshipStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+
+  userA User @relation("FriendshipUserA", fields: [userAId], references: [id])
+  userB User @relation("FriendshipUserB", fields: [userBId], references: [id])
+
+  @@unique([userAId, userBId])
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  owner   User              @relation(fields: [ownerId], references: [id])
+  members GroupMembership[]
+}
+
+enum GroupMemberStatus {
+  INVITED
+  ACCEPTED
+  DECLINED
+}
+
+enum GroupMemberRole {
+  OWNER
+  MEMBER
+}
+
+model GroupMembership {
+  id        String            @id @default(cuid())
+  groupId   String
+  userId    String
+  status    GroupMemberStatus @default(INVITED)
+  role      GroupMemberRole   @default(MEMBER)
+  createdAt DateTime          @default(now())
+
+  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([groupId, userId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
