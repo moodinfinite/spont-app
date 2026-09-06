@@ -29,14 +29,17 @@ Local copy: `docs/superpowers/mockups/2026-09-05-home-feed-mockup.html`
 Note: the previously listed artifact URL (045f709f-…) no longer resolves
 and has been replaced by the one above.
 
-**Since then (2026-09-06):** the visual system was rebuilt around wine
-red and a poster/riso sensibility — see "Visual system" below. The
-corner notch was dropped. Copy voice is unchanged: buttons still say
-"I'm in" / "Not this time," not "Approve"/"Deny."
+**Since then (2026-09-06):** the visual system has been through two more
+passes — a wine-red poster direction, then the current white + red
+specimen-cue direction, which is where it stands. See "Visual system"
+below. A friends-only flake score was added to every proposal. Copy voice
+is unchanged: buttons still say "I'm in" / "Not this time," not
+"Approve"/"Deny."
 
-**Next open design question:** edge and empty states. With a
+**Next open design questions:** (1) edge and empty states — with a
 one-proposal-per-day cap, an empty or near-empty feed is a state people
-hit constantly, and nothing covers it yet.
+hit constantly, and nothing covers it; (2) the two flake-score visibility
+questions listed under "Flake score" below.
 
 ## Why this exists
 
@@ -100,64 +103,70 @@ for attention). Fixes applied:
   visual weight from the buttons. Structural prominence, not competing
   hue.
 
-## Visual system (revised 2026-09-06 — wine red / poster direction)
+## Visual system (revised 2026-09-06 — white + red, specimen cues)
 
-Superseded the earlier cool-grey + coral system. Driven by an AMBUSH
-poster reference: a flooded red field, oversized soft display type in
-bone, a high-contrast black figure printed over the color, riso grain,
-hard edges, and a small letterspaced mono wordmark.
+Third and current direction. Replaced the wine-red poster system, which
+in turn replaced the original cool-grey + coral one. Driven by two
+references: a BIRDIE typeface specimen (red field, black wide-tracked
+monoline caps, hairline rules, label/value pairs) and an ATL CREW riso
+poster (off-white paper, one red ink, heavy press grain).
 
-Three decisions were made explicitly before the reference arrived, and
-all three still hold:
+**Cues borrowed, not the format.** An earlier pass rendered the feed as a
+literal technical document — spec tables with `WHO / TIME / LENGTH`
+label-value rows. That was rejected: it reads as a form, not a feed. The
+feed is a feed. What carries over is the *vocabulary* — wide-tracked
+caps, hairline rules, one red on white, press grain, hard edges.
 
-- **Typefaces — sans + mono, plus one display face.** Public Sans (UI and
-  body) and Space Mono (data: dates, durations, wordmark, eyebrows).
-  Fraunces was cut. The reference then forced a third face back in:
-  **Fredoka 600** as the display voice, and only that — oversized
-  headlines, month bands, and the modal headline. Its whole identity is
-  the display type, so applying the reference without a display face
-  wasn't possible. Each face has exactly one job.
-- **Weights — two.** 400 and 600, nothing else. Fredoka and Space Mono
-  are each loaded at a single weight. Hierarchy comes from size, the
-  wine field, and space — not from weight.
-- **Color — one hue.** Wine red `#7B1E2B` is the only chromatic color in
-  the app. Green/approve, clay/deny, slate/system, and the four avatar
-  hues were all removed. Ink and bone carry everything else.
+- **Typefaces — two.** **Jost** (a geometric monoline grotesque, the
+  closest widely-available match to the BIRDIE specimen) for everything
+  non-numeric, at 400/500. **Space Mono** for data — dates, durations,
+  scores, captions. Fredoka, Fraunces and Public Sans are all cut.
+- **Why Jost and not the previous Fredoka.** Both are "round," which is
+  why the distinction matters: Fredoka is round because it is *soft* —
+  fat strokes, tiny closed counters, tight tracking — and reads as
+  friendly. Jost is round because its *skeleton* is geometric — even
+  monoline strokes, open counters, set at 0.18em+ tracking — and reads
+  as technical. The friendliness was never the roundness; it was the fat
+  terminals and the tight fit.
+- **Tracking is the load-bearing rule.** 0.42em for the wordmark, 0.30em
+  for month bands, 0.18–0.20em for labels/nav/buttons, 0.055em for
+  headlines. Tight caps in this system look like a mistake.
+- **Color — white, red, black.** Paper `#FFFFFF` on an off-white ground
+  `#F4F2EF`, ink `#111111`, red `#E12E1C`. Both references use black as
+  ink rather than as a color, and red as the only hue; red-on-white body
+  text would fail contrast at small sizes, so ink carries the reading.
+- **Red means structure or action** — month bands, figure plates, the
+  primary button, the active nav underline. Its one other use is a poor
+  flake score, which is deliberate: a low score should feel like it costs
+  something.
+- **Hairline rules do the work shadows used to.** No shadows, no radii.
+  Cards are 1.5px black rectangles on off-white.
+- **Press grain** at 3.5% over the page and 16% multiply over every red
+  field. Flat digital red looked wrong next to the hairlines.
 
-How the palette works:
+### Flake score
 
-- **Wine floods, it doesn't accent.** Month dividers are full-bleed wine
-  bands. Photo cards are a wine field, not a photograph. The primary
-  button is a solid wine block. Wine is the app's voice, at three
-  different scales.
-- **Bone `#F6F1E6` is what prints on wine**; near-black ink `#17120F` is
-  what prints on paper. Page ground is a warm paper `#EBE4D6`, cards a
-  lighter `#F7F3EA`.
-- **Grain everywhere.** A fine SVG turbulence layer sits over the whole
-  page at 5.5% and over every wine field at 30% in `overlay` blend, for
-  the riso/newsprint texture the reference has.
-- **Hard edges.** Card and button radii dropped from 12px/10px to 3px,
-  and card shadows removed entirely. Printed, not floating.
-- **Type/decline distinction survives without a second hue.** Friend
-  cards keep a solid wine left border; system-suggested cards get a
-  dashed near-neutral one, which reads as a perforated ticket edge and
-  suits the print theme. Decline is a plain outline button.
+New in this pass. Shows **how reliably each friend actually keeps a
+hangout they accepted** — friends' scores only; there is no self-score on
+the home feed.
 
-Known constraint: **Fredoka's uppercase I and V fuse at tight tracking**
-— "TRIVIA" read as "TRMIA". Display headlines carry `letter-spacing:
-0.055em` and month bands `0.06em` to separate them, which also matches
-the reference's own letterspaced caps. Do not tighten these below ~0.05em.
+- A ten-segment tick meter, the number in mono, and a plain-language
+  verdict ("Rarely bails" / "Usually shows" / "Often thins out" /
+  "Bails often"), ruled off between the headline and the buttons.
+- Group proposals show an aggregate plus a per-person breakdown line
+  (`Bob 92 · Carol 78 · Erin 45`), so a single unreliable member is
+  visible rather than averaged away.
+- Scores under 70 turn red — meter, number and verdict together.
+- The disclosure popup now states where scores come from and that only
+  you see them.
 
-The corner-notch signature mark was **removed**. It came from the earlier
-poster reference and read as a colored blob dropped on the artwork; the
-flooded wine field is now the signature device instead.
-
-Photo cards follow the reference's composition directly: black figure
-cutouts anchored right, oversized bone display type occupying the left
-70%, a wine-deep gradient behind the type for contrast, and a floating
-bone date chip. The figures are illustrated silhouettes standing in for
-a real user-attached photo — a real photo would need the same
-high-contrast monochrome treatment to sit on the wine field.
+**Product risk, flagged deliberately:** this turns the feed into a
+ranking of your friends, and it was chosen over a self-only score with
+that tradeoff understood. Two things are undecided and should be settled
+before Phase 3/4 specs: whether a person can see their own score, and
+whether anyone can see that you can see theirs. Both are visible in the
+current design as "only you see them," which is a claim the backend would
+have to actually honor.
 
 ## Photo-forward cards
 

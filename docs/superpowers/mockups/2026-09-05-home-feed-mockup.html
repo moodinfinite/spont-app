@@ -1,815 +1,827 @@
 <title>Spont Home Feed</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Public+Sans:wght@400;600&family=Space+Mono&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500&family=Space+Mono:wght@400;700&display=swap');
 
+  /* ------------------------------------------------------------------
+     Design cues borrowed from the BIRDIE specimen and the ATL CREW riso
+     poster -- wide-tracked monoline caps, hairline rules, one red on
+     white, faint press grain. Still a feed, not a document.
+     ------------------------------------------------------------------ */
   :root {
-    --bg: #EBE4D6;
-    --surface: #F7F3EA;
-    --surface-muted: #E0D7C6;
-    --ink: #17120F;
-    --ink-soft: #5B5148;
-    --ink-faint: #8C8175;
-    --line: #D5CAB6;
-    --accent: #7B1E2B;
-    --accent-ink: #6B1624;
-    --accent-soft: #E7D7D2;
-    --bone: #F6F1E6;
-    --topbar-h: 58px;
-    --shadow: none;
-    --shadow-pop: 0 10px 28px rgba(23,18,15,0.18);
-    /* Riso-style grain, laid over every flooded field */
-    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    --paper: #FFFFFF;
+    --paper-2: #F4F2EF;
+    --ink: #111111;
+    --ink-2: #6E6A66;
+    --ink-3: #A5A09A;
+    --rule: #111111;
+    --rule-soft: #D8D4CF;
+    --red: #E12E1C;
+    --red-deep: #B32213;
+    --topbar-h: 52px;
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #141110;
-      --surface: #1E1A17;
-      --surface-muted: #292320;
-      --ink: #F2EDE3;
-      --ink-soft: #A79C90;
-      --ink-faint: #7A7066;
-      --line: #332C27;
-      --accent: #B23C4B;
-      --accent-ink: #E39098;
-      --accent-soft: #3A1A1F;
-      --bone: #F6F1E6;
-      --shadow: none;
-      --shadow-pop: 0 12px 32px rgba(0,0,0,0.5);
+      --paper: #0E0E0E;
+      --paper-2: #171717;
+      --ink: #F2F0ED;
+      --ink-2: #918C86;
+      --ink-3: #6A6560;
+      --rule: #F2F0ED;
+      --rule-soft: #2E2C2A;
+      --red: #FF4632;
+      --red-deep: #E12E1C;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #141110;
-    --surface: #1E1A17;
-    --surface-muted: #292320;
-    --ink: #F2EDE3;
-    --ink-soft: #A79C90;
-    --ink-faint: #7A7066;
-    --line: #332C27;
-    --accent: #B23C4B;
-    --accent-ink: #E39098;
-    --accent-soft: #3A1A1F;
-    --bone: #F6F1E6;
-    --shadow: none;
-    --shadow-pop: 0 12px 32px rgba(0,0,0,0.5);
+    --paper: #0E0E0E;
+    --paper-2: #171717;
+    --ink: #F2F0ED;
+    --ink-2: #918C86;
+    --ink-3: #6A6560;
+    --rule: #F2F0ED;
+    --rule-soft: #2E2C2A;
+    --red: #FF4632;
+    --red-deep: #E12E1C;
   }
 
   * { box-sizing: border-box; }
 
   body {
-    background: var(--bg);
+    background: var(--paper-2);
     color: var(--ink);
-    font-family: 'Public Sans', system-ui, sans-serif;
-    line-height: 1.5;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.45;
   }
-  /* Paper tooth over the whole page */
+  /* Press tooth, kept faint -- this direction is precise, not distressed */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     background-image: var(--grain);
-    opacity: 0.055;
+    opacity: 0.035;
     pointer-events: none;
     z-index: 200;
   }
-  /* Ink-on-press grain for flooded wine fields */
-  .field-grain {
+
+  /* Every red field is "printed": flat digital red reads wrong next to
+     the hairline rules, so each one carries its own press texture. */
+  .month-band, .rec-plate { position: relative; }
+  .month-band::after, .rec-plate::after {
+    content: "";
     position: absolute;
     inset: 0;
     background-image: var(--grain);
-    mix-blend-mode: overlay;
-    opacity: 0.30;
+    mix-blend-mode: multiply;
+    opacity: 0.16;
     pointer-events: none;
+  }
+  .month-band > *, .rec-plate > * { position: relative; z-index: 1; }
+
+  /* Shared: wide-tracked caps. The single most load-bearing rule here. */
+  .caps {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 400;
   }
 
   .status-strip {
-    text-align: center;
-    padding: 7px 12px;
-    background: var(--surface-muted);
-    border-bottom: 1px solid var(--line);
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--rule-soft);
+    color: var(--ink-3);
     font-family: 'Space Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.06em;
-    color: var(--ink-faint);
+    font-size: 10px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    text-align: center;
+    padding: 7px 14px;
   }
 
-  /* Topbar */
+  /* ---------------- Sheet ---------------- */
+  .sheet {
+    max-width: 720px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+  main { padding: 0 20px 60px; }
+
+  /* ---------------- Masthead ---------------- */
   .topbar {
     position: sticky;
     top: 0;
     z-index: 30;
     height: var(--topbar-h);
+    background: var(--paper);
+    border-bottom: 1.5px solid var(--rule);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    padding: 0 24px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
+    padding: 0 20px;
+  }
+  .brand {
+    font-size: 15px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink);
+    padding-right: 4px;
   }
   .topbar-left { display: flex; align-items: center; gap: 30px; }
-
-  .brand {
-    font-family: 'Space Mono', monospace;
-    font-weight: 400;
-    font-size: 14px;
-    color: var(--accent);
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-  }
-
-  .topnav { display: flex; gap: 20px; }
+  .topnav { display: flex; gap: 22px; }
   .topnav a {
-    color: var(--ink-soft);
     text-decoration: none;
-    font-size: 14.5px;
-    font-weight: 400;
-    padding: 4px 2px;
-    border-bottom: 2px solid transparent;
+    color: var(--ink-2);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    padding: 3px 0;
+    border-bottom: 1.5px solid transparent;
   }
   .topnav a:hover { color: var(--ink); }
-  .topnav a.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .topnav a.active { color: var(--ink); border-bottom-color: var(--red); }
 
-  .topbar-right { display: flex; align-items: center; gap: 6px; position: relative; }
-
+  .topbar-right { display: flex; align-items: center; gap: 12px; position: relative; }
   .icon-btn {
     position: relative;
-    width: 36px; height: 36px;
-    border-radius: 50%;
+    width: 30px; height: 30px;
+    background: none;
     border: none;
-    background: transparent;
-    color: var(--ink-soft);
-    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-2);
     cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
   }
-  .icon-btn:hover { background: var(--surface-muted); color: var(--ink); }
-  .icon-btn svg { width: 19px; height: 19px; }
-  .icon-btn .badge-dot {
-    position: absolute; top: 7px; right: 8px;
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--accent);
-    border: 1.5px solid var(--bg);
+  .icon-btn:hover { color: var(--ink); }
+  .icon-btn svg { width: 17px; height: 17px; }
+  .badge-dot {
+    position: absolute;
+    top: 4px; right: 5px;
+    width: 6px; height: 6px;
+    background: var(--red);
   }
-
   .profile-btn {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--accent);
-    color: var(--bone);
+    width: 28px; height: 28px;
+    background: var(--ink);
+    color: var(--paper);
     border: none;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px; font-weight: 400;
     cursor: pointer;
-  }
-  .icon-btn:focus-visible, .profile-btn:focus-visible, .topnav a:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
   }
 
-  /* Dropdowns */
   .dropdown {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 260px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    box-shadow: var(--shadow-pop);
+    min-width: 250px;
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
     z-index: 40;
-    overflow: hidden;
   }
-  .dropdown[hidden] { display: none; }
   .dropdown-header {
-    padding: 12px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
+    font-size: 10px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--ink-faint);
-    border-bottom: 1px solid var(--line);
+    color: var(--paper);
+    background: var(--ink);
+    padding: 7px 14px;
   }
   .notif-item {
     display: block;
-    padding: 11px 16px;
-    font-size: 13.5px;
-    color: var(--ink);
+    padding: 11px 14px;
     text-decoration: none;
-    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-size: 13px;
+    border-bottom: 1px solid var(--rule-soft);
   }
-  .notif-item:last-of-type { border-bottom: none; }
-  .notif-item:hover { background: var(--surface-muted); }
-  .notif-item .when { display: block; font-size: 11.5px; color: var(--ink-faint); margin-top: 2px; }
+  .notif-item:hover { background: var(--paper-2); }
+  .notif-item .when {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 3px;
+  }
   .dropdown-footer {
     display: block;
-    padding: 10px 16px;
-    font-size: 13px;
+    padding: 9px 14px;
     text-align: center;
-    color: var(--accent-ink);
     text-decoration: none;
-    font-weight: 600;
-    background: var(--surface-muted);
+    color: var(--red);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
   }
-  .profile-menu { padding: 6px; }
   .profile-menu a {
     display: block;
-    padding: 9px 12px;
-    font-size: 13.5px;
-    color: var(--ink);
+    padding: 11px 14px;
     text-decoration: none;
-    border-radius: 7px;
-  }
-  .profile-menu a:hover { background: var(--surface-muted); }
-  .profile-menu .divider { height: 1px; background: var(--line); margin: 5px 4px; }
-
-  main {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 22px 20px 72px;
-  }
-
-  .section-eyebrow {
-    font-family: 'Space Mono', monospace;
-    font-size: 11.5px;
-    letter-spacing: 0.08em;
+    color: var(--ink);
+    font-size: 11px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--ink-faint);
-    margin: 0 0 14px;
   }
+  .profile-menu a:hover { background: var(--paper-2); }
+  .profile-menu .divider { height: 1px; background: var(--rule-soft); }
 
-  /* Month divider: prominent + sticky + banded */
-  .month-divider {
+  /* ---------------- Month band ---------------- */
+  .month-band {
     position: sticky;
     top: var(--topbar-h);
     z-index: 20;
-    background: var(--accent);
-    overflow: hidden;
-    margin: 0 -20px 18px;
-    padding: 12px 20px 14px;
+    background: var(--red);
+    color: #fff;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 26px 0 16px;
+    padding: 10px 16px 11px;
   }
-  .month-divider:not(:first-child) { margin-top: 32px; }
-  .month-divider h2 {
-    position: relative;
-    font-family: 'Fredoka', system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 28px;
-    line-height: 1;
-    letter-spacing: 0.06em;
+  .month:first-child .month-band { margin-top: 20px; }
+  .month-band h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.30em;
     text-transform: uppercase;
-    color: var(--bone);
-    margin: 0;
+    line-height: 1;
   }
-
-  .feed { display: flex; flex-direction: column; gap: 14px; }
-
-  /* Card */
-  .card {
-    position: relative;
-    overflow: hidden;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-left: 5px solid var(--accent);
-    border-radius: 3px;
-    padding: 16px 18px;
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: opacity .35s ease, transform .35s ease, max-height .35s ease, margin .35s ease, padding .35s ease;
-  }
-  .card.system { border-left-style: dashed; border-left-color: var(--ink-faint); }
-
-  .card.leaving {
-    opacity: 0;
-    transform: scale(.97);
-    max-height: 0;
-    margin: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    overflow: hidden;
-    border-width: 0;
-  }
-  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
-
-  .who-row { display: flex; align-items: center; gap: 11px; }
-
-  .date-badge {
-    flex: 0 0 auto;
-    width: 40px;
-    text-align: center;
-    background: var(--surface-muted);
-    border-radius: 3px;
-    padding: 5px 0 6px;
-  }
-  .date-badge .dow {
-    display: block;
+  .month-band .count {
     font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.04em;
-    color: var(--ink-faint);
-  }
-  .date-badge .dom {
-    display: block;
-    font-family: 'Space Mono', monospace;
-    font-weight: 400;
-    font-size: 15px;
-    font-variant-numeric: tabular-nums;
-    color: var(--ink-soft);
-  }
-
-  .avatars { display: flex; }
-  .avatar {
-    width: 30px; height: 30px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Space Mono', monospace;
-    font-weight: 400;
-    font-size: 12px;
-    background: var(--ink);
-    color: var(--bone);
-    border: 2px solid var(--surface);
-  }
-  .avatars .avatar + .avatar { margin-left: -9px; }
-
-  .card-headline {
-    font-family: 'Fredoka', system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 18px;
-    line-height: 1.15;
-    letter-spacing: 0;
-    color: var(--ink);
-  }
-  .card-when {
-    font-size: 12.5px;
-    color: var(--ink-faint);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-variant-numeric: tabular-nums;
-  }
-  .duration-pill {
-    font-family: 'Space Mono', monospace;
-    font-size: 9.5px;
-    color: var(--ink-faint);
-  }
-  .duration-pill::before { content: "·"; margin-right: 6px; }
-
-  .reason {
-    font-size: 12px;
-    color: var(--ink-faint);
-    padding-left: 51px;
-    margin-top: -6px;
-  }
-
-  .card-actions { display: flex; gap: 10px; margin-top: 2px; }
-  .btn {
-    flex: 1;
-    font-family: 'Public Sans', sans-serif;
-    font-weight: 600;
-    font-size: 14.5px;
-    padding: 12px 18px;
-    border-radius: 3px;
-    border: 1.5px solid transparent;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.85;
     white-space: nowrap;
   }
-  .btn svg { width: 15px; height: 15px; }
-  .btn-approve {
-    background: var(--accent);
-    color: var(--bone);
-  }
-  .btn-approve:hover { opacity: 0.88; }
-  .btn-deny {
-    background: transparent;
-    border-color: var(--ink-faint);
-    color: var(--ink-soft);
-  }
-  .btn-deny:hover { border-color: var(--ink); color: var(--ink); }
-  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  /* ---- Photo-forward card state ---- */
-  .card.has-photo { padding: 0; gap: 0; }
-
-  .card-photo {
-    position: relative;
-    min-height: 186px;
+  /* ---------------- Record ---------------- */
+  .rec {
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
+    margin-bottom: 14px;
+    padding: 0 16px;
     overflow: hidden;
-    background: var(--accent);
-    display: flex;
-    align-items: flex-end;
+    transition: opacity .3s ease, transform .3s ease, max-height .35s ease, margin .3s ease, border-width .3s ease;
+    max-height: 900px;
   }
-  /* Black figure printed over the wine field, anchored right like the poster */
-  .photo-art {
+  .rec.leaving {
+    opacity: 0;
+    transform: translateY(-6px);
+    max-height: 0;
+    margin-bottom: 0;
+    border-width: 0;
+  }
+
+  /* Figure plate: red ink, black subject, captioned like a document plate */
+  .rec-plate {
+    margin: 0 -16px;
+    background: var(--red);
+    border-bottom: 1.5px solid var(--rule);
+    height: 178px;
+    overflow: hidden;
+  }
+  .rec-plate svg {
     position: absolute;
-    right: 0; bottom: 0;
-    height: 88%;
-    width: 46%;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    height: 100%;
+    width: auto;
     display: block;
   }
-  .photo-scrim {
+  .plate-cap {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(to right,
-      rgba(90,17,32,0.62) 0%,
-      rgba(90,17,32,0.24) 52%,
-      rgba(90,17,32,0.00) 78%);
-  }
-
-  /* Floating pill chips on the photo */
-  .chip-date {
-    position: absolute;
-    top: 13px; left: 15px;
-    z-index: 3;
-    display: inline-flex;
-    align-items: baseline;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 2px;
-    background: var(--bone);
+    left: 16px; bottom: 10px;
     font-family: 'Space Mono', monospace;
-    color: #17120F;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--red-deep);
+    padding: 3px 7px;
   }
-  .chip-date .dow { font-size: 9.5px; letter-spacing: 0.08em; color: #5B5148; }
-  .chip-date .dom { font-size: 13px; font-weight: 400; font-variant-numeric: tabular-nums; }
 
-  .photo-foot {
-    position: relative;
-    z-index: 2;
-    width: 70%;
+  .rec-head {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 9px;
-    padding: 52px 15px 17px;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 0 9px;
+    flex-wrap: wrap;
   }
-  .avatars.chip-avatars { padding: 0; }
-  .chip-avatars .avatar {
-    width: 25px; height: 25px;
-    font-size: 10.5px;
-    background: var(--bone);
-    color: #17120F;
-    border: 2px solid var(--accent);
+  .rec-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-2);
   }
-  .chip-avatars .avatar + .avatar { margin-left: -8px; }
+  .rec-meta b { font-weight: 700; color: var(--red); }
+  .rec-meta .sep { color: var(--ink-3); padding: 0 4px; }
+  .rec-meta .nw, .rec-meta b { white-space: nowrap; }
+  .rec-tag {
+    font-size: 9px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    border: 1px solid var(--rule-soft);
+    padding: 3px 8px 2px;
+  }
+  .rec-tag.is-suggested { color: var(--ink); border-color: var(--rule); }
 
-  .photo-headline {
-    font-family: 'Fredoka', system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 31px;
-    line-height: 0.94;
+  .rec-title {
+    margin: 0 0 4px;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.08;
     letter-spacing: 0.055em;
     text-transform: uppercase;
-    color: var(--bone);
     text-wrap: balance;
   }
-  .card-when.on-photo { color: var(--bone); opacity: 0.82; margin-top: -2px; }
-  .card-when.on-photo .duration-pill { color: var(--bone); opacity: 0.7; }
 
-  /* Footer strip: same buttons, same weight, as every other card */
-  .card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px 15px 15px;
-    background: var(--surface);
+  .rec-who {
+    font-size: 13px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 13px;
   }
-  .card.has-photo .reason { padding-left: 0; margin-top: 0; }
+  .rec-reason {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    border-left: 2px solid var(--red);
+    padding-left: 10px;
+    margin-bottom: 13px;
+  }
 
-  /* Upcoming */
-  .upcoming { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; }
-  .upcoming-list { display: flex; flex-direction: column; gap: 2px; }
-  .upcoming-row {
+  /* ---------------- Flake score ---------------- */
+  .flake {
+    border-top: 1px solid var(--rule-soft);
+    border-bottom: 1px solid var(--rule-soft);
+    padding: 10px 0;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .flake-label {
+    font-size: 9.5px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .flake-val {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .meter {
+    display: inline-flex;
+    gap: 2px;
+    align-items: flex-end;
+  }
+  .meter i {
+    display: block;
+    width: 4px;
+    height: 13px;
+    border: 1px solid var(--ink-3);
+    background: transparent;
+  }
+  .meter i.on { background: var(--ink); border-color: var(--ink); }
+  .flake-num {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    min-width: 22px;
+  }
+  .flake-word {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  /* Red is reserved for structure and action -- a poor score earns it */
+  .flake-low .meter i.on { background: var(--red); border-color: var(--red); }
+  .flake-low .flake-num,
+  .flake-low .flake-word { color: var(--red); }
+
+  .flake-break {
+    padding: 8px 0 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .flake-break b { font-weight: 400; color: var(--ink-2); }
+  .flake-break .bad { color: var(--red); }
+
+  /* ---------------- Actions ---------------- */
+  .rec-actions {
+    display: flex;
+    gap: 10px;
+    padding: 14px 0 16px;
+  }
+  .btn {
+    flex: 1;
+    padding: 13px 12px;
+    border: 1.5px solid transparent;
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .btn-approve { background: var(--red); color: #fff; }
+  .btn-approve:hover { background: var(--red-deep); }
+  .btn-deny {
+    background: transparent;
+    border-color: var(--rule);
+    color: var(--ink);
+  }
+  .btn-deny:hover { background: var(--ink); color: var(--paper); }
+  .btn:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  /* ---------------- Upcoming ---------------- */
+  .upcoming { padding: 0; }
+  .section-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1.5px solid var(--rule);
+    padding: 26px 0 8px;
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .upcoming-row {
+    display: grid;
+    grid-template-columns: 76px 1fr auto;
+    align-items: baseline;
     gap: 14px;
-    padding: 12px 4px;
-    border-bottom: 1px solid var(--line);
-    transition: opacity .4s ease, transform .4s ease;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule-soft);
   }
-  .upcoming-row:last-child { border-bottom: none; }
-  .upcoming-row.entering { animation: rowIn .5s ease; }
-  @keyframes rowIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
+  .upcoming-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    color: var(--ink-3);
   }
-  @media (prefers-reduced-motion: reduce) { .upcoming-row.entering { animation: none; } }
-  .upcoming-date { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ink-faint); width: 74px; flex: 0 0 auto; }
-  .upcoming-who { flex: 1 1 auto; font-size: 14px; font-weight: 400; }
-  .upcoming-time { font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
-  .upcoming-tag { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 400; color: var(--ink-faint); }
-  .upcoming-tag svg { width: 13px; height: 13px; }
+  .upcoming-who { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .upcoming-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .upcoming-row.entering { animation: slide-in .3s ease both; }
+  @keyframes slide-in { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
 
-  .empty-note { color: var(--ink-faint); font-size: 14px; padding: 18px 4px; }
-  .closing-note { margin-top: 30px; color: var(--ink-faint); font-size: 13px; text-align: center; }
+  .empty-note, .closing-note {
+    padding: 22px 20px;
+    font-size: 12px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-align: center;
+  }
 
-  /* Modal */
+  /* ---------------- Disclosure ---------------- */
   .modal-backdrop {
-    position: fixed; inset: 0;
-    background: rgba(10,12,15,0.45);
-    display: flex; align-items: center; justify-content: center;
+    position: fixed;
+    inset: 0;
+    background: rgba(17,17,17,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 20px;
     z-index: 100;
   }
-  .modal-backdrop[hidden] { display: none; }
   .modal {
-    background: var(--surface);
-    border-radius: 4px;
-    max-width: 420px;
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
+    max-width: 430px;
     width: 100%;
-    padding: 26px 26px 22px;
-    box-shadow: var(--shadow-pop);
     position: relative;
   }
-  .modal-close {
-    position: absolute; top: 14px; right: 14px;
-    width: 30px; height: 30px; border-radius: 50%;
-    border: none; background: var(--surface-muted); color: var(--ink-soft);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-  }
-  .modal-close:hover { color: var(--ink); }
-  .modal-close svg { width: 14px; height: 14px; }
   .modal-eyebrow {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--ink-faint); margin: 0 0 10px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 7px 20px;
   }
-  .modal h2 {
-    font-family: 'Fredoka', system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 25px;
-    line-height: 1.08;
-    letter-spacing: 0;
+  .modal-inner { padding: 22px 20px 20px; }
+  .modal h3 {
     margin: 0 0 12px;
-    text-wrap: balance;
-    padding-right: 14px;
+    font-size: 25px;
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
-  .modal p { margin: 0 0 18px; color: var(--ink-soft); font-size: 14px; }
+  .modal p { margin: 0 0 18px; font-size: 14px; color: var(--ink-2); line-height: 1.6; }
   .modal-ok {
     width: 100%;
-    background: var(--accent);
-    color: var(--bone);
+    background: var(--red);
+    color: #fff;
     border: none;
-    border-radius: 3px;
-    padding: 12px;
-    font-weight: 600;
-    font-size: 14.5px;
+    padding: 13px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
     cursor: pointer;
   }
-  .modal-ok:hover { opacity: 0.88; }
-  .modal-ok:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .modal-close {
+    position: absolute;
+    top: 32px; right: 12px;
+    width: 26px; height: 26px;
+    background: none;
+    border: none;
+    color: var(--ink-2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close svg { width: 13px; height: 13px; }
 
-  @media (max-width: 520px) {
+  @media (max-width: 640px) {
     .topbar { padding: 0 14px; }
     .topbar-left { gap: 16px; }
-    .topnav { gap: 12px; }
-    main { padding: 18px 14px 56px; }
-    .month-divider { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
-    .reason { padding-left: 0; }
-    .card-photo { min-height: 164px; }
-    .photo-foot { padding: 48px 13px 15px; width: 74%; }
-    .photo-headline { font-size: 25px; }
-    .btn { font-size: 13.5px; padding: 12px 10px; }
-    .card-body { padding: 13px 13px 14px; }
-    .month-divider h2 { font-size: 25px; }
+    .brand { font-size: 13px; letter-spacing: 0.30em; }
+    .topnav { gap: 14px; }
+    .topnav a { font-size: 10px; letter-spacing: 0.12em; }
+    .month-band { padding: 10px 14px 11px; }
+    .month-band h2 { font-size: 17px; letter-spacing: 0.22em; }
+    main { padding: 0 14px 48px; }
+    .month-band { padding: 9px 13px 10px; }
+    .rec { padding: 0 13px; }
+    .rec-plate { margin: 0 -13px; height: 150px; }
+    .plate-cap { left: 13px; }
+    .rec-title { font-size: 21px; }
+    .upcoming-row { grid-template-columns: 62px 1fr; }
+    .upcoming-time { grid-column: 2; text-align: right; }
+    .btn { letter-spacing: 0.12em; padding: 13px 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
   }
 </style>
 
 <div class="status-strip">Design concept — home feed target (Phase 3–4) — not yet built</div>
 
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="brand">Spont</div>
-    <nav class="topnav">
-      <a href="#" class="active">Home</a>
-      <a href="#">Friends</a>
-      <a href="#">Groups</a>
-    </nav>
-  </div>
-  <div class="topbar-right">
-    <button class="icon-btn" id="bell-btn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
-      <svg viewBox="0 0 20 20" fill="none"><path d="M10 3a5 5 0 00-5 5v2.6c0 .5-.16 1-.46 1.4L3.6 13.6c-.6.8 0 1.9 1 1.9h10.8c1 0 1.6-1.1 1-1.9l-.94-1.6a2.4 2.4 0 01-.46-1.4V8a5 5 0 00-5-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 17a2 2 0 004 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      <span class="badge-dot"></span>
-    </button>
-    <div class="dropdown" id="bell-menu" hidden>
-      <div class="dropdown-header">Notifications</div>
-      <a href="#" class="notif-item">Carol accepted your Trivia Crew invite<span class="when">2 hours ago</span></a>
-      <a href="#" class="notif-item">New: you and Dave are both free Friday<span class="when">Yesterday</span></a>
-      <a href="#" class="dropdown-footer">See all</a>
+<div class="sheet">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="brand">Spont</div>
+      <nav class="topnav">
+        <a href="#" class="active">Home</a>
+        <a href="#">Friends</a>
+        <a href="#">Groups</a>
+      </nav>
     </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="bell-btn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 3a5 5 0 00-5 5v2.6c0 .5-.16 1-.46 1.4L3.6 13.6c-.6.8 0 1.9 1 1.9h10.8c1 0 1.6-1.1 1-1.9l-.94-1.6a2.4 2.4 0 01-.46-1.4V8a5 5 0 00-5-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 17a2 2 0 004 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span class="badge-dot"></span>
+      </button>
+      <div class="dropdown" id="bell-menu" hidden>
+        <div class="dropdown-header">Notifications</div>
+        <a href="#" class="notif-item">Carol accepted your Trivia Crew invite<span class="when">2 hours ago</span></a>
+        <a href="#" class="notif-item">New: you and Dave are both free Friday<span class="when">Yesterday</span></a>
+        <a href="#" class="dropdown-footer">See all</a>
+      </div>
 
-    <button class="profile-btn" id="profile-btn" aria-haspopup="true" aria-expanded="false" aria-label="Your profile">A</button>
-    <div class="dropdown" id="profile-menu" hidden>
-      <div class="profile-menu">
-        <a href="#">Settings</a>
-        <div class="divider"></div>
-        <a href="#">Log out</a>
+      <button class="profile-btn" id="profile-btn" aria-haspopup="true" aria-expanded="false" aria-label="Your profile">A</button>
+      <div class="dropdown" id="profile-menu" hidden>
+        <div class="profile-menu">
+          <a href="#">Settings</a>
+          <div class="divider"></div>
+          <a href="#">Log out</a>
+        </div>
       </div>
     </div>
   </div>
+
+  <main>
+    <section class="month" data-month="september">
+      <div class="month-band">
+        <h2>September</h2>
+        <span class="count">04 open</span>
+      </div>
+
+      <div class="recs">
+        <article class="rec" data-date="Sun, Sep 6" data-who="Bob" data-time="5:30–7:00 PM">
+          <div class="rec-plate">
+            <svg viewBox="0 0 300 178" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+              <g fill="#111111">
+                <circle cx="112" cy="62" r="25"/>
+                <path d="M90 92 C62 103 62 130 62 178 L162 178 C162 130 162 103 134 92 Z"/>
+                <circle cx="196" cy="50" r="22"/>
+                <path d="M177 76 C152 87 152 114 152 178 L240 178 C240 114 240 87 215 76 Z"/>
+              </g>
+            </svg>
+            <span class="plate-cap">Bob + you, June</span>
+          </div>
+          <div class="rec-head">
+            <span class="rec-meta"><b>Sun 06</b><span class="sep">/</span><span class="nw">5:30–7:00 PM</span><span class="sep">/</span>90 min</span>
+            <span class="rec-tag">Invite</span>
+          </div>
+          <h3 class="rec-title">Bob wants to hang out</h3>
+          <div class="flake">
+            <span class="flake-label">Flake score</span>
+            <span class="flake-val">
+              <span class="meter" role="img" aria-label="Flake score 92 of 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+              <span class="flake-num">92</span>
+              <span class="flake-word">Rarely bails</span>
+            </span>
+          </div>
+          <div class="rec-actions">
+            <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
+            <button class="btn btn-deny" data-action="deny">Not this time</button>
+          </div>
+        </article>
+
+        <article class="rec" data-date="Wed, Sep 9" data-who="Carol" data-time="6:00–7:00 PM">
+          <div class="rec-head">
+            <span class="rec-meta"><b>Wed 09</b><span class="sep">/</span><span class="nw">6:00–7:00 PM</span><span class="sep">/</span>60 min</span>
+            <span class="rec-tag is-suggested">Suggested</span>
+          </div>
+          <h3 class="rec-title">You and Carol are both free</h3>
+          <div class="rec-reason">You haven't hung out in 19 days.</div>
+          <div class="flake">
+            <span class="flake-label">Flake score</span>
+            <span class="flake-val">
+              <span class="meter" role="img" aria-label="Flake score 78 of 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+              <span class="flake-num">78</span>
+              <span class="flake-word">Usually shows</span>
+            </span>
+          </div>
+          <div class="rec-actions">
+            <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
+            <button class="btn btn-deny" data-action="deny">Not this time</button>
+          </div>
+        </article>
+
+        <article class="rec" data-date="Sat, Sep 12" data-who="Trivia Crew" data-time="7:00–9:00 PM">
+          <div class="rec-plate">
+            <svg viewBox="0 0 300 178" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+              <g fill="#111111">
+                <circle cx="76" cy="72" r="21"/>
+                <path d="M58 97 C34 108 34 133 34 178 L118 178 C118 133 118 108 94 97 Z"/>
+                <circle cx="152" cy="50" r="24"/>
+                <path d="M132 78 C106 89 106 116 106 178 L198 178 C198 116 198 89 172 78 Z"/>
+                <circle cx="228" cy="68" r="22"/>
+                <path d="M209 94 C184 105 184 131 184 178 L272 178 C272 131 272 105 247 94 Z"/>
+              </g>
+            </svg>
+            <span class="plate-cap">Trivia Crew, March</span>
+          </div>
+          <div class="rec-head">
+            <span class="rec-meta"><b>Sat 12</b><span class="sep">/</span><span class="nw">7:00–9:00 PM</span><span class="sep">/</span>120 min</span>
+            <span class="rec-tag">Invite</span>
+          </div>
+          <h3 class="rec-title">Trivia Crew wants to hang out</h3>
+          <div class="rec-who">Bob, Carol, Erin</div>
+          <div class="flake flake-low">
+            <span class="flake-label">Flake score</span>
+            <span class="flake-val">
+              <span class="meter" role="img" aria-label="Flake score 61 of 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></span>
+              <span class="flake-num">61</span>
+              <span class="flake-word">Often thins out</span>
+            </span>
+          </div>
+          <div class="flake-break">Bob <b>92</b> · Carol <b>78</b> · Erin <span class="bad">45</span></div>
+          <div class="rec-actions">
+            <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
+            <button class="btn btn-deny" data-action="deny">Not this time</button>
+          </div>
+        </article>
+
+        <article class="rec" data-date="Fri, Sep 18" data-who="Dave and Erin" data-time="2:00–4:00 PM">
+          <div class="rec-head">
+            <span class="rec-meta"><b>Fri 18</b><span class="sep">/</span><span class="nw">2:00–4:00 PM</span><span class="sep">/</span>120 min</span>
+            <span class="rec-tag is-suggested">Suggested</span>
+          </div>
+          <h3 class="rec-title">You, Dave, and Erin are all free</h3>
+          <div class="rec-who">Dave, Erin</div>
+          <div class="rec-reason">First afternoon this month you're all free.</div>
+          <div class="flake flake-low">
+            <span class="flake-label">Flake score</span>
+            <span class="flake-val">
+              <span class="meter" role="img" aria-label="Flake score 58 of 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></span>
+              <span class="flake-num">58</span>
+              <span class="flake-word">Often thins out</span>
+            </span>
+          </div>
+          <div class="flake-break">Dave <b>71</b> · Erin <span class="bad">45</span></div>
+          <div class="rec-actions">
+            <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
+            <button class="btn btn-deny" data-action="deny">Not this time</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="month" data-month="october">
+      <div class="month-band">
+        <h2>October</h2>
+        <span class="count">01 open</span>
+      </div>
+
+      <div class="recs">
+        <article class="rec" data-date="Thu, Oct 1" data-who="Erin" data-time="12:00–1:00 PM">
+          <div class="rec-head">
+            <span class="rec-meta"><b>Thu 01</b><span class="sep">/</span><span class="nw">12:00–1:00 PM</span><span class="sep">/</span>60 min</span>
+            <span class="rec-tag">Invite</span>
+          </div>
+          <h3 class="rec-title">Erin wants to hang out</h3>
+          <div class="flake flake-low">
+            <span class="flake-label">Flake score</span>
+            <span class="flake-val">
+              <span class="meter" role="img" aria-label="Flake score 45 of 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="flake-num">45</span>
+              <span class="flake-word">Bails often</span>
+            </span>
+          </div>
+          <div class="rec-actions">
+            <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
+            <button class="btn btn-deny" data-action="deny">Not this time</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="upcoming">
+      <div class="section-label">
+        <span>Upcoming — already locked in</span>
+        <span>02</span>
+      </div>
+      <div id="upcoming-list">
+        <div class="upcoming-row">
+          <span class="upcoming-date">Tue Sep 8</span>
+          <span class="upcoming-who">With Dave</span>
+          <span class="upcoming-time">6:00–7:00 PM</span>
+        </div>
+        <div class="upcoming-row">
+          <span class="upcoming-date">Sat Sep 26</span>
+          <span class="upcoming-who">With Trivia Crew</span>
+          <span class="upcoming-time">7:00–9:00 PM</span>
+        </div>
+      </div>
+      <p class="closing-note">That's everything for the next 30 days — one open slot a day, at most.</p>
+    </div>
+  </main>
 </div>
 
-<main>
-  <div class="feed" data-month="september">
-    <div class="month-divider"><div class="field-grain"></div><h2>September</h2></div>
-
-    <div class="feed" data-month="september-cards">
-      <article class="card has-photo" data-date="Sun, Sep 6" data-who="Bob" data-time="5:30–7:00 PM">
-        <div class="card-photo">
-          <svg class="photo-art" viewBox="0 0 320 230" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
-            <g fill="#12100E">
-              <circle cx="120" cy="96" r="30"/>
-              <path d="M94 130 C62 142 62 172 62 230 L178 230 C178 172 178 142 146 130 Z"/>
-              <circle cx="224" cy="82" r="27"/>
-              <path d="M201 113 C172 125 172 155 172 230 L276 230 C276 155 276 125 247 113 Z"/>
-
-            </g>
-          </svg>
-          <div class="photo-scrim"></div>
-          <div class="field-grain"></div>
-          <span class="chip-date"><span class="dow">SUN</span><span class="dom">6</span></span>
-          <div class="photo-foot">
-            <div class="avatars chip-avatars"><span class="avatar">B</span></div>
-            <div>
-              <div class="photo-headline">Bob wants to hang out</div>
-              <div class="card-when on-photo">5:30–7:00 PM <span class="duration-pill">90 MIN</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="card-actions">
-            <button class="btn btn-approve" data-action="approve">
-            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            I'm in
-          </button>
-          <button class="btn btn-deny" data-action="deny">Not this time</button>
-          </div>
-        </div>
-      </article>
-
-      <article class="card system" data-date="Wed, Sep 9" data-who="Carol" data-time="6:00–7:00 PM">
-        <div class="who-row">
-          <div class="date-badge"><span class="dow">WED</span><span class="dom">9</span></div>
-          <div class="avatars"><span class="avatar">C</span></div>
-          <div>
-            <div class="card-headline">You and Carol are both free</div>
-            <div class="card-when">6:00–7:00 PM <span class="duration-pill">60 MIN</span></div>
-          </div>
-        </div>
-        <div class="reason">You haven't hung out in 19 days</div>
-        <div class="card-actions">
-          <button class="btn btn-approve" data-action="approve">
-            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            I'm in
-          </button>
-          <button class="btn btn-deny" data-action="deny">Not this time</button>
-        </div>
-      </article>
-
-      <article class="card has-photo" data-date="Sat, Sep 12" data-who="Trivia Crew" data-time="7:00–9:00 PM">
-        <div class="card-photo">
-          <svg class="photo-art" viewBox="0 0 320 230" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
-            <g fill="#12100E">
-              <circle cx="78" cy="108" r="25"/>
-              <path d="M57 137 C31 149 31 179 31 230 L125 230 C125 179 125 149 99 137 Z"/>
-              <circle cx="166" cy="84" r="29"/>
-              <path d="M141 117 C111 129 111 159 111 230 L221 230 C221 159 221 129 191 117 Z"/>
-              <circle cx="252" cy="104" r="26"/>
-              <path d="M230 134 C203 146 203 176 203 230 L301 230 C301 176 301 146 274 134 Z"/>
-
-            </g>
-          </svg>
-          <div class="photo-scrim"></div>
-          <div class="field-grain"></div>
-          <span class="chip-date"><span class="dow">SAT</span><span class="dom">12</span></span>
-          <div class="photo-foot">
-            <div class="avatars chip-avatars">
-              <span class="avatar">B</span>
-              <span class="avatar">C</span>
-              <span class="avatar">E</span>
-            </div>
-            <div>
-              <div class="photo-headline">Trivia Crew wants to hang out</div>
-              <div class="card-when on-photo">7:00–9:00 PM <span class="duration-pill">120 MIN</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="card-actions">
-            <button class="btn btn-approve" data-action="approve">
-            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            I'm in
-          </button>
-          <button class="btn btn-deny" data-action="deny">Not this time</button>
-          </div>
-        </div>
-      </article>
-
-      <article class="card system" data-date="Fri, Sep 18" data-who="Weekend Crew" data-time="2:00–4:00 PM">
-        <div class="who-row">
-          <div class="date-badge"><span class="dow">FRI</span><span class="dom">18</span></div>
-          <div class="avatars">
-            <span class="avatar">D</span>
-            <span class="avatar">E</span>
-          </div>
-          <div>
-            <div class="card-headline">You, Dave, and Erin are all free</div>
-            <div class="card-when">2:00–4:00 PM <span class="duration-pill">120 MIN</span></div>
-          </div>
-        </div>
-        <div class="reason">First afternoon this month you're all free</div>
-        <div class="card-actions">
-          <button class="btn btn-approve" data-action="approve">
-            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            I'm in
-          </button>
-          <button class="btn btn-deny" data-action="deny">Not this time</button>
-        </div>
-      </article>
-    </div>
-  </div>
-
-  <div class="feed" data-month="october" id="feed-october">
-    <div class="month-divider"><div class="field-grain"></div><h2>October</h2></div>
-    <div class="feed" data-month="october-cards">
-      <article class="card" data-date="Thu, Oct 1" data-who="Erin" data-time="12:00–1:00 PM">
-        <div class="who-row">
-          <div class="date-badge"><span class="dow">THU</span><span class="dom">1</span></div>
-          <div class="avatars"><span class="avatar">E</span></div>
-          <div>
-            <div class="card-headline">Erin wants to hang out</div>
-            <div class="card-when">12:00–1:00 PM <span class="duration-pill">60 MIN</span></div>
-          </div>
-        </div>
-        <div class="card-actions">
-          <button class="btn btn-approve" data-action="approve">
-            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            I'm in
-          </button>
-          <button class="btn btn-deny" data-action="deny">Not this time</button>
-        </div>
-      </article>
-    </div>
-  </div>
-
-  <section class="upcoming">
-    <p class="section-eyebrow">Upcoming — already locked in</p>
-    <div class="upcoming-list" id="upcoming-list">
-      <div class="upcoming-row">
-        <span class="upcoming-date">TUE SEP 8</span>
-        <span class="upcoming-who">With Dave</span>
-        <span class="upcoming-time">6:00–7:00 PM</span>
-        <span class="upcoming-tag">
-          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          On your calendar
-        </span>
-      </div>
-      <div class="upcoming-row">
-        <span class="upcoming-date">SAT SEP 26</span>
-        <span class="upcoming-who">With Trivia Crew</span>
-        <span class="upcoming-time">7:00–9:00 PM</span>
-        <span class="upcoming-tag">
-          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          On your calendar
-        </span>
-      </div>
-    </div>
-  </section>
-
-  <p class="closing-note">That's everything for the next 30 days — one open slot a day, at most.</p>
-</main>
-
-<div class="modal-backdrop" id="modal-backdrop">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <button class="modal-close" id="modal-close" aria-label="Close">
-      <svg viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+<div class="modal-backdrop" id="disclosure">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="disc-title">
+    <div class="modal-eyebrow">How this works</div>
+    <button class="modal-close" id="disc-close" aria-label="Close">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg>
     </button>
-    <p class="modal-eyebrow">How this works</p>
-    <h2 id="modal-title">Hey Alice — here's who's got time for you.</h2>
-    <p>We check your Google Calendar's free/busy status — never what's actually on it — to catch the moments you're both open. Say yes and it's on your calendar instantly; nobody's waiting on the rest of the group.</p>
-    <button class="modal-ok" id="modal-ok">Got it</button>
+    <div class="modal-inner">
+      <h3 id="disc-title">Hey Alice — here's who's got time for you</h3>
+      <p>We check your Google Calendar's free/busy status — never what's actually on it — to catch the moments you're both open. Say yes and it's on your calendar instantly; nobody's waiting on the rest of the group.</p>
+      <p>Flake scores come from how often someone kept a hangout they accepted. Only you see them.</p>
+      <button class="modal-ok" id="disc-ok">Got it</button>
+    </div>
   </div>
 </div>
 
 <script>
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Modal
-  const backdrop = document.getElementById('modal-backdrop');
-  function closeModal() { backdrop.hidden = true; }
-  document.getElementById('modal-close').addEventListener('click', closeModal);
-  document.getElementById('modal-ok').addEventListener('click', closeModal);
-  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
-      closeDropdown(bellMenu, bellBtn);
-      closeDropdown(profileMenu, profileBtn);
-    }
-  });
+  // Disclosure
+  const disclosure = document.getElementById('disclosure');
+  function closeDisclosure() { disclosure.style.display = 'none'; }
+  document.getElementById('disc-ok').addEventListener('click', closeDisclosure);
+  document.getElementById('disc-close').addEventListener('click', closeDisclosure);
+  disclosure.addEventListener('click', (e) => { if (e.target === disclosure) closeDisclosure(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDisclosure(); });
 
   // Dropdowns
   const bellBtn = document.getElementById('bell-btn');
@@ -836,62 +848,51 @@
     closeDropdown(profileMenu, profileBtn);
   });
 
-  // Approve / deny interaction
-  function upcomingDateLabel(dateStr) { return dateStr.replace(',', '').toUpperCase(); }
+  // Approve / deny
+  function upcomingDateLabel(dateStr) { return dateStr.replace(',', ''); }
 
-  function checkEmptyMonth(cardsWrap) {
-    if (cardsWrap.querySelectorAll('.card').length === 0) {
-      const monthGroup = cardsWrap.closest('[data-month]');
-      if (monthGroup) monthGroup.remove();
-    }
+  function refreshCount(section) {
+    const n = section.querySelectorAll('.rec').length;
+    const label = section.querySelector('.month-band .count');
+    if (label) label.textContent = String(n).padStart(2, '0') + ' open';
+    if (n === 0) section.remove();
   }
 
   function checkAllEmpty() {
-    const remaining = document.querySelectorAll('main .card').length;
+    if (document.querySelectorAll('main .rec').length) return;
     const main = document.querySelector('main');
-    if (remaining === 0 && !main.querySelector('.empty-note')) {
-      const note = document.createElement('p');
-      note.className = 'empty-note';
-      note.textContent = "You're all caught up — check back tomorrow.";
-      main.insertBefore(note, main.querySelector('.upcoming'));
-    }
+    if (main.querySelector('.empty-note')) return;
+    const note = document.createElement('p');
+    note.className = 'empty-note';
+    note.textContent = "You're all caught up — check back tomorrow";
+    main.insertBefore(note, main.querySelector('.upcoming'));
   }
 
-  function addUpcomingRow(card) {
+  function addUpcomingRow(rec) {
     const list = document.getElementById('upcoming-list');
     const row = document.createElement('div');
     row.className = 'upcoming-row' + (reduceMotion ? '' : ' entering');
     row.innerHTML = `
-      <span class="upcoming-date">${upcomingDateLabel(card.dataset.date)}</span>
-      <span class="upcoming-who">With ${card.dataset.who}</span>
-      <span class="upcoming-time">${card.dataset.time}</span>
-      <span class="upcoming-tag">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        On your calendar
-      </span>`;
+      <span class="upcoming-date">${upcomingDateLabel(rec.dataset.date)}</span>
+      <span class="upcoming-who">With ${rec.dataset.who}</span>
+      <span class="upcoming-time">${rec.dataset.time}</span>`;
     list.appendChild(row);
+    const total = list.querySelectorAll('.upcoming-row').length;
+    document.querySelector('.upcoming .section-label span:last-child')
+      .textContent = String(total).padStart(2, '0');
   }
 
   document.querySelector('main').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
-    const card = btn.closest('.card');
-    const cardsWrap = card.parentElement;
-    const action = btn.dataset.action;
+    const rec = btn.closest('.rec');
+    const section = rec.closest('.month');
 
-    if (action === 'approve') addUpcomingRow(card);
+    if (btn.dataset.action === 'approve') addUpcomingRow(rec);
 
-    if (reduceMotion) {
-      card.remove();
-      checkEmptyMonth(cardsWrap);
-      checkAllEmpty();
-      return;
-    }
-    card.classList.add('leaving');
-    card.addEventListener('transitionend', () => {
-      card.remove();
-      checkEmptyMonth(cardsWrap);
-      checkAllEmpty();
-    }, { once: true });
+    const finish = () => { rec.remove(); refreshCount(section); checkAllEmpty(); };
+    if (reduceMotion) { finish(); return; }
+    rec.classList.add('leaving');
+    rec.addEventListener('transitionend', finish, { once: true });
   });
 </script>
