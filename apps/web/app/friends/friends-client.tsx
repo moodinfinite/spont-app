@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Link from 'next/link'
 
 type UserSummary = { id: string; name: string; email: string }
 
@@ -65,7 +66,10 @@ export function FriendsClient({
         <h2>Your friends</h2>
         <ul>
           {accepted.map((u) => (
-            <li key={u.id}>{u.name}</li>
+            <li key={u.id}>
+              {u.name}{' '}
+              <Link href={`/friends/${u.id}/schedule`}>View schedule</Link>
+            </li>
           ))}
         </ul>
       </section>

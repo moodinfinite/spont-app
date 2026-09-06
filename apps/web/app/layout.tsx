@@ -19,6 +19,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <Link href="/">Home</Link>
             <Link href="/friends">Friends</Link>
             <Link href="/groups">Groups</Link>
+            <Link href="/schedule">Schedule</Link>
             <Link href="/notifications">Notifications</Link>
             <Link href="/settings">Settings</Link>
           </nav>
