@@ -33,6 +33,27 @@ regardless of who noticed it:
    `docs/knowledge-base/`, not left buried in a phase-dated spec where
    it'll be hard to find later.
 
+## PR retro — feeding back into system memory
+
+Every PR is an opportunity to make the next session smarter. Before
+merging a feature branch, run the `spont-pr-retro` skill. It scans the
+branch diff, spec, and plan, then proposes additions to:
+
+- `docs/knowledge-base/` — architecture decisions, gotchas, patterns,
+  glossary terms that came out of the work
+- `CLAUDE.md` or `CONTRIBUTING.md` — standing rules revealed by
+  recurring issues (e.g., "always use encodeURIComponent on path params")
+- `.claude/memory/<username>/persistent/` — personal context for the
+  contributor who did the work
+
+The skill shows every proposed change before committing. If a PR has no
+learnings worth extracting, say "nothing to add" and move on — not
+every PR produces durable knowledge.
+
+This is how the project's institutional memory grows: not by hoping
+someone remembers to document things, but by making it a natural step
+in the workflow that's already happening.
+
 ## Claude session memory
 
 Each contributor gets their own directory under

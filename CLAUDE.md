@@ -53,7 +53,9 @@ Repo-committed, available to any contributor's session:
 
 - **Skills** (`.claude/skills/`): `spont-onboarding` (detects contributor
   background — read this one first, it changes how the rest of a session
-  should behave), `spont-dev-server`, `spont-db-reset`, `spont-status`.
+  should behave), `spont-dev-server`, `spont-db-reset`, `spont-status`,
+  `spont-pr-retro` (run at PR time — extracts learnings into the
+  knowledge base and process docs so future sessions start smarter).
 - **Agents** (`.claude/agents/`): `spont-reviewer` (code review),
   `spont-product` (product/design review). Roster and rationale in
   `.claude/agents/README.md`.
