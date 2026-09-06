@@ -68,8 +68,8 @@
 
   /* Every red field is "printed": flat digital red reads wrong next to
      the hairline rules, so each one carries its own press texture. */
-  .month-band, .rec-plate { position: relative; }
-  .month-band::after, .rec-plate::after {
+  .rec-plate { position: relative; }
+  .rec-plate::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -78,7 +78,7 @@
     opacity: 0.16;
     pointer-events: none;
   }
-  .month-band > *, .rec-plate > * { position: relative; z-index: 1; }
+  .rec-plate > * { position: relative; z-index: 1; }
 
   /* Shared: wide-tracked caps. The single most load-bearing rule here. */
   .caps {
@@ -101,11 +101,11 @@
 
   /* ---------------- Sheet ---------------- */
   .sheet {
-    max-width: 720px;
+    max-width: 860px;
     margin: 0 auto;
     min-height: 100vh;
   }
-  main { padding: 0 20px 60px; }
+  main { padding: 0 20px 130px; }
 
   /* ---------------- Masthead ---------------- */
   .topbar {
@@ -128,18 +128,6 @@
     padding-right: 4px;
   }
   .topbar-left { display: flex; align-items: center; gap: 30px; }
-  .topnav { display: flex; gap: 22px; }
-  .topnav a {
-    text-decoration: none;
-    color: var(--ink-2);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    padding: 3px 0;
-    border-bottom: 1.5px solid transparent;
-  }
-  .topnav a:hover { color: var(--ink); }
-  .topnav a.active { color: var(--ink); border-bottom-color: var(--red); }
 
   .topbar-right { display: flex; align-items: center; gap: 12px; position: relative; }
   .icon-btn {
@@ -229,36 +217,43 @@
   .profile-menu a:hover { background: var(--paper-2); }
   .profile-menu .divider { height: 1px; background: var(--rule-soft); }
 
-  /* ---------------- Month band ---------------- */
-  .month-band {
-    position: sticky;
-    top: var(--topbar-h);
-    z-index: 20;
-    background: var(--red);
-    color: #fff;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
-    margin: 26px 0 16px;
-    padding: 10px 16px 11px;
+  /* ---------------- Month marker ----------------
+     Lives in a left gutter beside the feed and never interrupts it.
+     The vertical rule sits on the feed column, not the marker, so it
+     runs the full height of the month rather than stopping where the
+     sticky marker does. */
+  .month {
+    display: grid;
+    grid-template-columns: 104px 1fr;
+    margin-top: 24px;
   }
-  .month:first-child .month-band { margin-top: 20px; }
-  .month-band h2 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 400;
-    letter-spacing: 0.30em;
+  .month:first-child { margin-top: 20px; }
+  .month-marker {
+    position: sticky;
+    top: calc(var(--topbar-h) + 22px);
+    align-self: start;
+    text-align: right;
+    padding: 0 20px 0 0;
+  }
+  .month-marker .mm-name {
+    display: block;
+    font-size: 19px;
+    letter-spacing: 0.20em;
     text-transform: uppercase;
     line-height: 1;
   }
-  .month-band .count {
+  .month-marker .mm-count {
+    display: block;
+    margin-top: 7px;
     font-family: 'Space Mono', monospace;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
-    opacity: 0.85;
-    white-space: nowrap;
+    color: var(--ink-3);
+  }
+  .recs {
+    border-left: 1.5px solid var(--rule);
+    padding: 0 0 6px 20px;
+    min-width: 0;
   }
 
   /* ---------------- Record ---------------- */
@@ -313,18 +308,19 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 10px;
-    padding: 14px 0 9px;
+    padding: 15px 0 10px;
     flex-wrap: wrap;
   }
   .rec-meta {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.10em;
+    font-size: 18px;
+    letter-spacing: 0.01em;
     text-transform: uppercase;
-    color: var(--ink-2);
+    color: var(--ink);
+    line-height: 1.25;
   }
   .rec-meta b { font-weight: 700; color: var(--red); }
-  .rec-meta .sep { color: var(--ink-3); padding: 0 4px; }
+  .rec-meta .sep { color: var(--ink-3); padding: 0 7px; font-weight: 400; }
   .rec-meta .nw, .rec-meta b { white-space: nowrap; }
   .rec-tag {
     font-size: 9px;
@@ -462,6 +458,44 @@
   .btn-deny:hover { background: var(--ink); color: var(--paper); }
   .btn:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
+  /* ---------------- Dock ----------------
+     Bottom nav, but squared off rather than the pill-and-circles of the
+     reference -- soft shapes are the one thing this system doesn't do. */
+  .dock {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    z-index: 60;
+    display: flex;
+    gap: 4px;
+    background: #111111;
+    padding: 6px;
+    border: 1.5px solid #111111;
+  }
+  .dock a {
+    width: 62px;
+    padding: 9px 4px 7px;
+    text-decoration: none;
+    background: #232323;
+    color: #B8B4AF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transition: background .12s ease, color .12s ease;
+  }
+  .dock a svg { width: 18px; height: 18px; }
+  .dock a span {
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .dock a:hover { background: #333333; color: #FFFFFF; }
+  .dock a.active { background: #FFFFFF; color: #111111; }
+  .dock a.new { background: var(--red); color: #FFFFFF; }
+  .dock a.new:hover { background: var(--red-deep); }
+
   /* ---------------- Upcoming ---------------- */
   .upcoming { padding: 0; }
   .section-label {
@@ -572,12 +606,29 @@
     .topbar { padding: 0 14px; }
     .topbar-left { gap: 16px; }
     .brand { font-size: 13px; letter-spacing: 0.30em; }
-    .topnav { gap: 14px; }
-    .topnav a { font-size: 10px; letter-spacing: 0.12em; }
-    .month-band { padding: 10px 14px 11px; }
-    .month-band h2 { font-size: 17px; letter-spacing: 0.22em; }
-    main { padding: 0 14px 48px; }
-    .month-band { padding: 9px 13px 10px; }
+    main { padding: 0 14px 120px; }
+    .month {
+      display: block;
+      margin-top: 20px;
+    }
+    .month-marker {
+      top: var(--topbar-h);
+      z-index: 20;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      background: var(--paper-2);
+      text-align: left;
+      padding: 9px 0 8px;
+      border-top: 1.5px solid var(--rule);
+      border-bottom: 1.5px solid var(--rule);
+      margin-bottom: 14px;
+    }
+    .month-marker .mm-name { font-size: 15px; }
+    .month-marker .mm-count { margin-top: 0; }
+    .recs { border-left: none; padding: 0; }
+    .rec-meta { font-size: 15px; }
+    .dock a { width: 56px; }
     .rec { padding: 0 13px; }
     .rec-plate { margin: 0 -13px; height: 150px; }
     .plate-cap { left: 13px; }
@@ -597,11 +648,6 @@
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">Spont</div>
-      <nav class="topnav">
-        <a href="#" class="active">Home</a>
-        <a href="#">Friends</a>
-        <a href="#">Groups</a>
-      </nav>
     </div>
     <div class="topbar-right">
       <button class="icon-btn" id="bell-btn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
@@ -614,25 +660,15 @@
         <a href="#" class="notif-item">New: you and Dave are both free Friday<span class="when">Yesterday</span></a>
         <a href="#" class="dropdown-footer">See all</a>
       </div>
-
-      <button class="profile-btn" id="profile-btn" aria-haspopup="true" aria-expanded="false" aria-label="Your profile">A</button>
-      <div class="dropdown" id="profile-menu" hidden>
-        <div class="profile-menu">
-          <a href="#">Settings</a>
-          <div class="divider"></div>
-          <a href="#">Log out</a>
-        </div>
-      </div>
     </div>
   </div>
 
   <main>
-    <section class="month" data-month="september">
-      <div class="month-band">
-        <h2>September</h2>
-        <span class="count">04 open</span>
+    <section class="month" data-month="sep">
+      <div class="month-marker">
+        <span class="mm-name">Sep</span>
+        <span class="mm-count">02</span>
       </div>
-
       <div class="recs">
         <article class="rec" data-date="Sun, Sep 6" data-who="Bob" data-time="5:30–7:00 PM">
           <div class="rec-plate">
@@ -647,7 +683,7 @@
             <span class="plate-cap">Bob + you, June</span>
           </div>
           <div class="rec-head">
-            <span class="rec-meta"><b>Sun 06</b><span class="sep">/</span><span class="nw">5:30–7:00 PM</span><span class="sep">/</span>90 min</span>
+            <span class="rec-meta"><b>Sun 06</b><span class="sep">/</span><span class="nw">5:30–7:00 PM</span></span>
             <span class="rec-tag">Invite</span>
           </div>
           <h3 class="rec-title">Bob wants to hang out</h3>
@@ -667,7 +703,7 @@
 
         <article class="rec" data-date="Wed, Sep 9" data-who="Carol" data-time="6:00–7:00 PM">
           <div class="rec-head">
-            <span class="rec-meta"><b>Wed 09</b><span class="sep">/</span><span class="nw">6:00–7:00 PM</span><span class="sep">/</span>60 min</span>
+            <span class="rec-meta"><b>Wed 09</b><span class="sep">/</span><span class="nw">6:00–7:00 PM</span></span>
             <span class="rec-tag is-suggested">Suggested</span>
           </div>
           <h3 class="rec-title">You and Carol are both free</h3>
@@ -685,8 +721,16 @@
             <button class="btn btn-deny" data-action="deny">Not this time</button>
           </div>
         </article>
+      </div>
+    </section>
 
-        <article class="rec" data-date="Sat, Sep 12" data-who="Trivia Crew" data-time="7:00–9:00 PM">
+    <section class="month" data-month="oct">
+      <div class="month-marker">
+        <span class="mm-name">Oct</span>
+        <span class="mm-count">01</span>
+      </div>
+      <div class="recs">
+        <article class="rec" data-date="Sat, Oct 3" data-who="Trivia Crew" data-time="7:00–9:00 PM">
           <div class="rec-plate">
             <svg viewBox="0 0 300 178" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
               <g fill="#111111">
@@ -701,7 +745,7 @@
             <span class="plate-cap">Trivia Crew, March</span>
           </div>
           <div class="rec-head">
-            <span class="rec-meta"><b>Sat 12</b><span class="sep">/</span><span class="nw">7:00–9:00 PM</span><span class="sep">/</span>120 min</span>
+            <span class="rec-meta"><b>Sat 03</b><span class="sep">/</span><span class="nw">7:00–9:00 PM</span></span>
             <span class="rec-tag">Invite</span>
           </div>
           <h3 class="rec-title">Trivia Crew wants to hang out</h3>
@@ -715,58 +759,6 @@
             </span>
           </div>
           <div class="flake-break">Bob <b>92</b> · Carol <b>78</b> · Erin <span class="bad">45</span></div>
-          <div class="rec-actions">
-            <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
-            <button class="btn btn-deny" data-action="deny">Not this time</button>
-          </div>
-        </article>
-
-        <article class="rec" data-date="Fri, Sep 18" data-who="Dave and Erin" data-time="2:00–4:00 PM">
-          <div class="rec-head">
-            <span class="rec-meta"><b>Fri 18</b><span class="sep">/</span><span class="nw">2:00–4:00 PM</span><span class="sep">/</span>120 min</span>
-            <span class="rec-tag is-suggested">Suggested</span>
-          </div>
-          <h3 class="rec-title">You, Dave, and Erin are all free</h3>
-          <div class="rec-who">Dave, Erin</div>
-          <div class="rec-reason">First afternoon this month you're all free.</div>
-          <div class="flake flake-low">
-            <span class="flake-label">Flake score</span>
-            <span class="flake-val">
-              <span class="meter" role="img" aria-label="Flake score 58 of 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></span>
-              <span class="flake-num">58</span>
-              <span class="flake-word">Often thins out</span>
-            </span>
-          </div>
-          <div class="flake-break">Dave <b>71</b> · Erin <span class="bad">45</span></div>
-          <div class="rec-actions">
-            <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
-            <button class="btn btn-deny" data-action="deny">Not this time</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="month" data-month="october">
-      <div class="month-band">
-        <h2>October</h2>
-        <span class="count">01 open</span>
-      </div>
-
-      <div class="recs">
-        <article class="rec" data-date="Thu, Oct 1" data-who="Erin" data-time="12:00–1:00 PM">
-          <div class="rec-head">
-            <span class="rec-meta"><b>Thu 01</b><span class="sep">/</span><span class="nw">12:00–1:00 PM</span><span class="sep">/</span>60 min</span>
-            <span class="rec-tag">Invite</span>
-          </div>
-          <h3 class="rec-title">Erin wants to hang out</h3>
-          <div class="flake flake-low">
-            <span class="flake-label">Flake score</span>
-            <span class="flake-val">
-              <span class="meter" role="img" aria-label="Flake score 45 of 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-              <span class="flake-num">45</span>
-              <span class="flake-word">Bails often</span>
-            </span>
-          </div>
           <div class="rec-actions">
             <button class="btn btn-approve" data-action="approve"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>I'm in</button>
             <button class="btn btn-deny" data-action="deny">Not this time</button>
@@ -797,6 +789,29 @@
   </main>
 </div>
 
+<nav class="dock" aria-label="Primary">
+  <a href="#" class="active" aria-current="page">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M3 9.2 10 3.6l7 5.6V16.5H12v-5H8v5H3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="#">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="8" cy="7.2" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M2.6 16.6c0-3 2.4-4.7 5.4-4.7s5.4 1.7 5.4 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M14.2 5.1a3.1 3.1 0 0 1 0 5.4M15.6 12.6c1.4.7 2.2 2 2.2 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span>Friends</span>
+  </a>
+  <a href="#" class="new">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg>
+    <span>New</span>
+  </a>
+  <a href="#">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="6.4" cy="6.8" r="2.6" fill="currentColor"/><circle cx="13.6" cy="6.8" r="2.6" fill="currentColor"/><circle cx="10" cy="13.6" r="2.6" fill="currentColor"/></svg>
+    <span>Groups</span>
+  </a>
+  <a href="#">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.8 17c0-3.3 2.8-5.2 6.2-5.2s6.2 1.9 6.2 5.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span>You</span>
+  </a>
+</nav>
+
 <div class="modal-backdrop" id="disclosure">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="disc-title">
     <div class="modal-eyebrow">How this works</div>
@@ -826,8 +841,6 @@
   // Dropdowns
   const bellBtn = document.getElementById('bell-btn');
   const bellMenu = document.getElementById('bell-menu');
-  const profileBtn = document.getElementById('profile-btn');
-  const profileMenu = document.getElementById('profile-menu');
 
   function openDropdown(menu, btn) { menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
   function closeDropdown(menu, btn) { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
@@ -835,26 +848,17 @@
 
   bellBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    closeDropdown(profileMenu, profileBtn);
     toggleDropdown(bellMenu, bellBtn);
   });
-  profileBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    closeDropdown(bellMenu, bellBtn);
-    toggleDropdown(profileMenu, profileBtn);
-  });
-  document.addEventListener('click', () => {
-    closeDropdown(bellMenu, bellBtn);
-    closeDropdown(profileMenu, profileBtn);
-  });
+  document.addEventListener('click', () => closeDropdown(bellMenu, bellBtn));
 
   // Approve / deny
   function upcomingDateLabel(dateStr) { return dateStr.replace(',', ''); }
 
   function refreshCount(section) {
     const n = section.querySelectorAll('.rec').length;
-    const label = section.querySelector('.month-band .count');
-    if (label) label.textContent = String(n).padStart(2, '0') + ' open';
+    const label = section.querySelector('.mm-count');
+    if (label) label.textContent = String(n).padStart(2, '0');
     if (n === 0) section.remove();
   }
 

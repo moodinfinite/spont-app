@@ -59,14 +59,16 @@ specs have a concrete shape to build toward.
   calendar immediately. No threshold, no waiting on the rest of a group.
   Matches the foundation spec's Phase 4 wording exactly.
 - **Time horizon — one month, capped at one proposal per day.** Caps the
-  feed at roughly 30 cards max, realistically far fewer. Grouped under
-  month headers (mostly "this month," occasionally rolling into next).
+  feed at roughly 30 cards max, realistically far fewer. Grouped by month
+  via a marker in the left gutter (see "Month marker" below).
 - **Filtering — none in v1.** YAGNI; revisit once real usage shows what
   people actually want to narrow down.
-- **Card contents** — who, when, duration, and (system cards only) a short
-  reason line ("You haven't hung out in 19 days"). Explicitly **no**
-  category/activity type and **no** location — neither exists in the
-  current data model and both were cut in brainstorming.
+- **Card contents** — who, when, a flake score, and (system cards only) a
+  short reason line ("You haven't hung out in 19 days"). **Duration was
+  cut 2026-09-06** — it is derivable from the time range shown, and it
+  was competing with the date/time for the same attention. Explicitly
+  **no** category/activity type and **no** location — neither exists in
+  the current data model and both were cut in brainstorming.
 - **Post-decision state** — approving moves the card out of the pending
   feed and into a persistent "Upcoming" section lower on the page (not a
   vanish-and-forget). Declining just removes the card, no residue.
@@ -78,11 +80,20 @@ specs have a concrete shape to build toward.
 
 ## Navigation
 
-Trimmed to **Home / Friends / Groups** only. Notifications moved to a
-bell icon (with unread dot) that opens a dropdown preview + "See all"
-link. Settings moved into a profile-avatar dropdown alongside Log out.
-Reason: reduce top-level nav surface area so the feed itself (and its
-approve/deny buttons) stays the visual focus.
+**Moved to a bottom dock (2026-09-06).** Home / Friends / Groups now sit
+in a fixed dock at the bottom of the viewport, alongside a red **New**
+action and a **You** item that absorbs the old profile-avatar dropdown
+(Settings, Log out). The top bar is reduced to the wordmark and the
+notifications bell.
+
+The dock is **squared off, not the pill-and-circles** of the reference
+that prompted it. Rounded shapes are the one thing this visual system
+doesn't do — a soft dock would have been the only radius on the page.
+Same placement and behaviour, hard edges.
+
+Reason for the move is unchanged from the original nav trim: keep
+top-level navigation off the feed so the proposals and their
+approve/deny buttons stay the visual focus.
 
 ## Visual hierarchy
 
@@ -143,6 +154,26 @@ caps, hairline rules, one red on white, press grain, hard edges.
   Cards are 1.5px black rectangles on off-white.
 - **Press grain** at 3.5% over the page and 16% multiply over every red
   field. Flat digital red looked wrong next to the hairlines.
+
+### Month marker
+
+Month grouping went through three treatments. A quiet mono label was too
+easy to miss; a full-bleed red band read as too heavy and spent the hue
+on something structural. It now lives as a **sticky marker in a left
+gutter** beside the feed — month abbreviation in tracked caps with an
+open-proposal count beneath — so it never interrupts the reading column.
+
+The vertical rule belongs to the feed column, not the marker, so it runs
+the full height of the month rather than stopping where the sticky
+element does. Under 640px the gutter collapses to a sticky ruled strip
+above each month.
+
+### Date and time
+
+The date/time line is the loudest thing on a card after the headline:
+mono at 18px, the date in red, the time in ink, separated by a slash.
+This is deliberate — the whole decision is "am I free then," so the when
+should not be metadata-sized.
 
 ### Flake score
 
