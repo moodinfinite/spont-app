@@ -1,33 +1,37 @@
 # Home Feed — Design Notes (in progress)
 
-Status: **Paused mid-brainstorm, not yet approved as a spec.** This is a
-design target for future phases — nothing here is built yet, and none of
-it blocks Phase 1 (foundation), which is being built separately/in
-parallel. Treat this as input for whoever writes the Phase 3 (scheduling
+Status: **Design in progress, not yet approved as a spec.** This is a
+design target for future phases — it exists only as a mockup, no
+application code is built against it, and none of it blocks Phase 1
+(foundation), which is being built separately/in parallel. Treat this as input for whoever writes the Phase 3 (scheduling
 engine) and Phase 4 (accept/decline + write-back) specs later, per
 `docs/superpowers/specs/2026-09-05-spont-app-foundation-design.md`.
 
-## ⏸ Resume point (paused 2026-09-05)
+## ✅ Resume point (updated 2026-09-05)
 
-**Last agreed step, not yet built:** photo-forward card treatment. The
-user confirmed the plan in the "In progress — photo-forward cards"
-section below (photo scope = decorative cover photo only, direction =
-blend photo-forward cards with calm existing chrome, palette/type
-unchanged, only borrow floating-pill chips + a signature shape mark).
-**Nothing in the mockup file reflects this yet** — the published/local
-mockup still has the pre-photo-card version (nav trim + hierarchy fixes
-applied, photo cards not applied).
+**Photo-forward cards are now built and published.** The two-state card
+described under "Planned card structure" below exists in
+`docs/superpowers/mockups/2026-09-05-home-feed-mockup.html`: Bob's 1:1
+card and the Trivia Crew group card use the photo state; the other three
+stay in the default layout. The signature quarter-circle notch (tinted
+coral for friend-initiated, slate-blue for system-suggested) is applied
+to **every** card, photo or not.
 
-To resume: build the two-state card (default vs. photo-band) described
-under "Planned card structure" below into
-`docs/superpowers/mockups/2026-09-05-home-feed-mockup.html`, apply it to
-Bob's 1:1 card and the Trivia Crew group card, then republish the
-artifact (same file path — republishing keeps the same URL:
-https://claude.ai/code/artifact/045f709f-2218-4cfb-9ed8-fccb9bc709b8).
-No open questions are blocking this — it was ready to build when paused.
+Cover art in the mockup is inline SVG scenery, not real photographs —
+placeholder standing in for a user-attached or auto-suggested photo. It
+keeps the mockup self-contained (no external image loads) and shows the
+layout without implying a specific photo source.
 
-Live mockup (latest published): https://claude.ai/code/artifact/045f709f-2218-4cfb-9ed8-fccb9bc709b8
+Live mockup (republished 2026-09-05):
+https://claude.ai/code/artifact/25bc9f84-48a4-4c96-a5e9-6ea4ebd80e29
 Local copy: `docs/superpowers/mockups/2026-09-05-home-feed-mockup.html`
+
+Note: the previously listed artifact URL (045f709f-…) no longer resolves
+and has been replaced by the one above.
+
+**Next open design question:** whether the corner notch earns its place.
+On the photo cards it currently reads as a colored blob over the artwork
+rather than a brand device — worth a look before this goes further.
 
 ## Why this exists
 
@@ -107,7 +111,7 @@ for attention). Fixes applied:
 - **Copy voice** — buttons say "I'm in" / "Not this time," not
   "Approve"/"Deny" — reads like a friend, not a workflow tool.
 
-## In progress — photo-forward cards
+## Photo-forward cards
 
 Prompted by two reference images the user liked:
 1. An event-discovery app where the photo *is* the card, with floating
@@ -132,7 +136,7 @@ Decisions made on how much to pull in:
   recurring signature shape mark (a quarter-circle notch, tinted per card
   type) in one consistent corner of every card, photo or not.
 
-Planned card structure (not yet built into the mockup file):
+Card structure (built into the mockup file):
 - **No photo (default/fallback)**: unchanged from the current mockup —
   date badge, avatar, headline, time, reason, full-width buttons.
 - **With a cover photo**: photo fills the top ~55% of the card as a
@@ -146,8 +150,8 @@ Planned card structure (not yet built into the mockup file):
   card) were chosen to demonstrate the photo state; the other three stay
   in the default layout, so both states are visible at once.
 
-**Not yet implemented in the published mockup** — next step is to build
-this into the HTML and republish.
+**Implemented and published** — see the resume point at the top for the
+current artifact URL.
 
 ## Open threads for whoever picks this up next
 

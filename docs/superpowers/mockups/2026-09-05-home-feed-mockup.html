@@ -266,6 +266,9 @@
 
   /* Card */
   .card {
+    position: relative;
+    overflow: hidden;
+    --notch: var(--accent);
     background: var(--surface);
     border: 1px solid var(--line);
     border-left: 4px solid var(--accent);
@@ -277,7 +280,19 @@
     gap: 12px;
     transition: opacity .35s ease, transform .35s ease, max-height .35s ease, margin .35s ease, padding .35s ease;
   }
-  .card.system { border-left-style: dashed; border-left-color: var(--system); }
+  .card.system { border-left-style: dashed; border-left-color: var(--system); --notch: var(--system); }
+
+  /* Signature shape mark: quarter-circle notch, one consistent corner, tinted per card type */
+  .card::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 28px; height: 28px;
+    background: var(--notch);
+    border-bottom-left-radius: 100%;
+    pointer-events: none;
+    z-index: 3;
+  }
 
   .card.leaving {
     opacity: 0;
@@ -382,6 +397,95 @@
   .btn-deny:hover { border-color: var(--deny); color: var(--deny); }
   .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  /* ---- Photo-forward card state ---- */
+  .card.has-photo { padding: 0; gap: 0; }
+
+  .card-photo {
+    position: relative;
+    aspect-ratio: 2.8 / 1;
+    min-height: 168px;
+    max-height: 250px;
+    overflow: hidden;
+    background: var(--surface-muted);
+    display: flex;
+    align-items: flex-end;
+  }
+  .photo-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .photo-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+      rgba(8,10,14,0.84) 0%,
+      rgba(8,10,14,0.46) 40%,
+      rgba(8,10,14,0.00) 72%);
+  }
+
+  /* Floating pill chips on the photo */
+  .chip-date {
+    position: absolute;
+    top: 12px; left: 12px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.90);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+    font-family: 'Space Mono', monospace;
+    color: #1D222B;
+  }
+  .chip-date .dow { font-size: 9.5px; letter-spacing: 0.06em; color: #5C6570; }
+  .chip-date .dom { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .photo-foot {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 16px 18px;
+  }
+  .avatars.chip-avatars {
+    padding: 3px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.90);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+  }
+  .chip-avatars .avatar { width: 26px; height: 26px; font-size: 11px; border-color: #fff; }
+  .chip-avatars .avatar + .avatar { margin-left: -8px; }
+
+  .photo-headline {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 23px;
+    line-height: 1.14;
+    color: #fff;
+    text-wrap: balance;
+    text-shadow: 0 1px 14px rgba(0,0,0,0.45);
+  }
+  .card-when.on-photo { color: rgba(255,255,255,0.86); margin-top: 2px; }
+  .card-when.on-photo .duration-pill { color: rgba(255,255,255,0.68); }
+
+  /* Footer strip: same buttons, same weight, as every other card */
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 18px 16px;
+    background: var(--surface);
+  }
+  .card.has-photo .reason { padding-left: 0; margin-top: 0; }
+
   /* Upcoming */
   .upcoming { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; }
   .upcoming-list { display: flex; flex-direction: column; gap: 2px; }
@@ -472,6 +576,10 @@
     main { padding: 18px 14px 56px; }
     .month-divider { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
     .reason { padding-left: 0; }
+    .card-photo { min-height: 148px; }
+    .photo-foot { padding: 13px 14px; }
+    .photo-headline { font-size: 20px; }
+    .card-body { padding: 13px 14px 14px; }
   }
 </style>
 
@@ -514,21 +622,54 @@
     <div class="month-divider"><h2>September</h2></div>
 
     <div class="feed" data-month="september-cards">
-      <article class="card" data-date="Sun, Sep 6" data-who="Bob" data-time="5:30–7:00 PM">
-        <div class="who-row">
-          <div class="date-badge"><span class="dow">SUN</span><span class="dom">6</span></div>
-          <div class="avatars"><span class="avatar" style="background:var(--av-bob)">B</span></div>
-          <div>
-            <div class="card-headline">Bob wants to hang out</div>
-            <div class="card-when">5:30–7:00 PM <span class="duration-pill">90 MIN</span></div>
+      <article class="card has-photo" data-date="Sun, Sep 6" data-who="Bob" data-time="5:30–7:00 PM">
+        <div class="card-photo">
+          <svg class="photo-art" viewBox="0 0 640 230" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="skyA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFC98F"/>
+                <stop offset="46%" stop-color="#F4886A"/>
+                <stop offset="100%" stop-color="#8A4A6E"/>
+              </linearGradient>
+              <linearGradient id="ridgeA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7E4166"/>
+                <stop offset="100%" stop-color="#5A3157"/>
+              </linearGradient>
+            </defs>
+            <rect width="640" height="230" fill="url(#skyA)"/>
+            <circle cx="452" cy="92" r="40" fill="#FFEDCC" opacity="0.9"/>
+            <circle cx="452" cy="92" r="62" fill="#FFE2B4" opacity="0.22"/>
+            <path d="M0 148 C 96 116, 176 150, 258 138 C 344 124, 414 156, 502 140 C 572 128, 612 140, 640 133 L640 230 L0 230 Z" fill="url(#ridgeA)" opacity="0.88"/>
+            <path d="M0 176 C 124 158, 214 190, 324 178 C 436 166, 534 194, 640 179 L640 230 L0 230 Z" fill="#3A2340"/>
+            <g fill="#2A182F">
+              <circle cx="436" cy="158" r="7"/>
+              <path d="M436 166c-8 0-12 6-13 14l-1 14h28l-1-14c-1-8-5-14-13-14z"/>
+              <circle cx="470" cy="156" r="7"/>
+              <path d="M470 164c-8 0-12 6-13 14l-1 15h28l-1-15c-1-8-5-14-13-14z"/>
+            </g>
+            <g fill="#331E38" opacity="0.9">
+              <path d="M92 186c-2-24 4-42 10-52 6 10 12 28 10 52z"/>
+              <rect x="100" y="182" width="4" height="14"/>
+            </g>
+          </svg>
+          <div class="photo-scrim"></div>
+          <span class="chip-date"><span class="dow">SUN</span><span class="dom">6</span></span>
+          <div class="photo-foot">
+            <div class="avatars chip-avatars"><span class="avatar" style="background:var(--av-bob)">B</span></div>
+            <div>
+              <div class="photo-headline">Bob wants to hang out</div>
+              <div class="card-when on-photo">5:30–7:00 PM <span class="duration-pill">90 MIN</span></div>
+            </div>
           </div>
         </div>
-        <div class="card-actions">
-          <button class="btn btn-approve" data-action="approve">
+        <div class="card-body">
+          <div class="card-actions">
+            <button class="btn btn-approve" data-action="approve">
             <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             I'm in
           </button>
           <button class="btn btn-deny" data-action="deny">Not this time</button>
+          </div>
         </div>
       </article>
 
@@ -551,25 +692,68 @@
         </div>
       </article>
 
-      <article class="card" data-date="Sat, Sep 12" data-who="Trivia Crew" data-time="7:00–9:00 PM">
-        <div class="who-row">
-          <div class="date-badge"><span class="dow">SAT</span><span class="dom">12</span></div>
-          <div class="avatars">
-            <span class="avatar" style="background:var(--av-bob)">B</span>
-            <span class="avatar" style="background:var(--av-carol)">C</span>
-            <span class="avatar" style="background:var(--av-erin)">E</span>
-          </div>
-          <div>
-            <div class="card-headline">Trivia Crew wants to hang out</div>
-            <div class="card-when">7:00–9:00 PM <span class="duration-pill">120 MIN</span></div>
+      <article class="card has-photo" data-date="Sat, Sep 12" data-who="Trivia Crew" data-time="7:00–9:00 PM">
+        <div class="card-photo">
+          <svg class="photo-art" viewBox="0 0 640 230" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="roomB" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2E3466"/>
+                <stop offset="55%" stop-color="#4A3A6E"/>
+                <stop offset="100%" stop-color="#1C1B33"/>
+              </linearGradient>
+              <radialGradient id="glowB" cx="0.5" cy="0.42" r="0.62">
+                <stop offset="0%" stop-color="#FFC777" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="#FFC777" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="640" height="230" fill="url(#roomB)"/>
+            <rect width="640" height="230" fill="url(#glowB)"/>
+            <path d="M0 34 Q 80 74 160 40 Q 240 8 320 44 Q 400 78 480 42 Q 560 10 640 46" fill="none" stroke="#6A5E8C" stroke-width="1.6"/>
+            <g fill="#FFD79A">
+              <circle cx="80" cy="58" r="4.5"/><circle cx="160" cy="41" r="4.5"/>
+              <circle cx="240" cy="24" r="4.5"/><circle cx="320" cy="45" r="4.5"/>
+              <circle cx="400" cy="62" r="4.5"/><circle cx="480" cy="43" r="4.5"/>
+              <circle cx="560" cy="25" r="4.5"/>
+            </g>
+            <g fill="#FFD79A" opacity="0.22">
+              <circle cx="80" cy="58" r="12"/><circle cx="160" cy="41" r="12"/>
+              <circle cx="240" cy="24" r="12"/><circle cx="320" cy="45" r="12"/>
+              <circle cx="400" cy="62" r="12"/><circle cx="480" cy="43" r="12"/>
+              <circle cx="560" cy="25" r="12"/>
+            </g>
+            <g fill="#191A30">
+              <circle cx="238" cy="128" r="20"/>
+              <path d="M238 152c-24 0-38 18-41 42l-3 36h88l-3-36c-3-24-17-42-41-42z"/>
+              <circle cx="330" cy="118" r="22"/>
+              <path d="M330 144c-26 0-41 19-44 45l-3 39h94l-3-39c-3-26-18-45-44-45z"/>
+              <circle cx="424" cy="130" r="20"/>
+              <path d="M424 154c-24 0-38 18-41 42l-3 34h88l-3-34c-3-24-17-42-41-42z"/>
+            </g>
+            <rect x="0" y="196" width="640" height="34" fill="#12121F"/>
+            <rect x="286" y="186" width="90" height="12" rx="3" fill="#2A2A45"/>
+          </svg>
+          <div class="photo-scrim"></div>
+          <span class="chip-date"><span class="dow">SAT</span><span class="dom">12</span></span>
+          <div class="photo-foot">
+            <div class="avatars chip-avatars">
+              <span class="avatar" style="background:var(--av-bob)">B</span>
+              <span class="avatar" style="background:var(--av-carol)">C</span>
+              <span class="avatar" style="background:var(--av-erin)">E</span>
+            </div>
+            <div>
+              <div class="photo-headline">Trivia Crew wants to hang out</div>
+              <div class="card-when on-photo">7:00–9:00 PM <span class="duration-pill">120 MIN</span></div>
+            </div>
           </div>
         </div>
-        <div class="card-actions">
-          <button class="btn btn-approve" data-action="approve">
+        <div class="card-body">
+          <div class="card-actions">
+            <button class="btn btn-approve" data-action="approve">
             <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             I'm in
           </button>
           <button class="btn btn-deny" data-action="deny">Not this time</button>
+          </div>
         </div>
       </article>
 
