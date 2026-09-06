@@ -18,25 +18,40 @@ export function FriendsClient({
 }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function sendRequest(toUserId: string) {
     setPending(true)
-    await fetch('/api/friends', {
+    setError(null)
+    const res = await fetch('/api/friends', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ toUserId }),
     })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      setError(body?.error?.message ?? 'Something went wrong')
+      setPending(false)
+      return
+    }
     setPending(false)
     router.refresh()
   }
 
   async function respond(friendshipId: string, accept: boolean) {
     setPending(true)
-    await fetch(`/api/friends/${friendshipId}`, {
+    setError(null)
+    const res = await fetch(`/api/friends/${friendshipId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ accept }),
     })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      setError(body?.error?.message ?? 'Something went wrong')
+      setPending(false)
+      return
+    }
     setPending(false)
     router.refresh()
   }
@@ -44,6 +59,7 @@ export function FriendsClient({
   return (
     <main>
       <h1>Friends</h1>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
 
       <section>
         <h2>Your friends</h2>

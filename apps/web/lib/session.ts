@@ -2,7 +2,14 @@ import { cookies } from 'next/headers'
 import crypto from 'node:crypto'
 
 const COOKIE_NAME = 'spont_session'
-const SECRET = process.env.SESSION_SECRET ?? 'dev-secret-change-me'
+const SECRET =
+  process.env.SESSION_SECRET ??
+  (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SESSION_SECRET must be set in production')
+    }
+    return 'dev-secret-change-me'
+  })()
 
 function sign(userId: string): string {
   const hmac = crypto.createHmac('sha256', SECRET).update(userId).digest('hex')

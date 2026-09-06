@@ -23,14 +23,22 @@ export function GroupDetailClient({
 }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function invite(userId: string) {
     setPending(true)
-    await fetch(`/api/groups/${groupId}/members`, {
+    setError(null)
+    const res = await fetch(`/api/groups/${groupId}/members`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId }),
     })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      setError(body?.error?.message ?? 'Something went wrong')
+      setPending(false)
+      return
+    }
     setPending(false)
     router.refresh()
   }
@@ -38,6 +46,7 @@ export function GroupDetailClient({
   return (
     <main>
       <h1>{groupName}</h1>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <h2>Members</h2>
       <ul>
         {members.map((m) => (
