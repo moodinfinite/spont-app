@@ -1,82 +1,57 @@
 <title>Spont Home Feed</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Public+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Public+Sans:wght@400;600&family=Space+Mono&display=swap');
 
   :root {
-    --bg: #F2F4F6;
-    --surface: #FFFFFF;
-    --surface-muted: #E9ECEF;
-    --ink: #1D222B;
-    --ink-soft: #5C6570;
-    --ink-faint: #8A93A0;
-    --line: #DCE1E6;
-    --accent: #FF6B47;
-    --accent-ink: #B8391A;
-    --accent-soft: #FFE4DA;
-    --system: #4A7290;
-    --system-soft: #E4EBF0;
-    --approve: #2E9E6E;
-    --approve-ink: #1F7350;
-    --deny: #B75048;
-    --deny-soft: #F6E6E4;
-    --av-bob: #3E8FA0;
-    --av-carol: #C98A2B;
-    --av-dave: #8B5FBF;
-    --av-erin: #C9527A;
+    --bg: #EBE4D6;
+    --surface: #F7F3EA;
+    --surface-muted: #E0D7C6;
+    --ink: #17120F;
+    --ink-soft: #5B5148;
+    --ink-faint: #8C8175;
+    --line: #D5CAB6;
+    --accent: #7B1E2B;
+    --accent-ink: #6B1624;
+    --accent-soft: #E7D7D2;
+    --bone: #F6F1E6;
     --topbar-h: 58px;
-    --shadow: 0 1px 2px rgba(29,34,43,0.04), 0 6px 16px rgba(29,34,43,0.05);
-    --shadow-pop: 0 8px 24px rgba(29,34,43,0.14), 0 2px 8px rgba(29,34,43,0.08);
+    --shadow: none;
+    --shadow-pop: 0 10px 28px rgba(23,18,15,0.18);
+    /* Riso-style grain, laid over every flooded field */
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #14171B;
-      --surface: #1B1F24;
-      --surface-muted: #23282E;
-      --ink: #EDEFF1;
-      --ink-soft: #9AA3AD;
-      --ink-faint: #6B7480;
-      --line: #2B3138;
-      --accent: #FF8465;
-      --accent-ink: #FFB49C;
-      --accent-soft: #3A241E;
-      --system: #8FB4CC;
-      --system-soft: #202A30;
-      --approve: #4CC38A;
-      --approve-ink: #8FE0BB;
-      --deny: #E2857B;
-      --deny-soft: #33211F;
-      --av-bob: #63B0C2;
-      --av-carol: #E0A94C;
-      --av-dave: #A886D9;
-      --av-erin: #E081A8;
-      --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.28);
-      --shadow-pop: 0 10px 30px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.3);
+      --bg: #141110;
+      --surface: #1E1A17;
+      --surface-muted: #292320;
+      --ink: #F2EDE3;
+      --ink-soft: #A79C90;
+      --ink-faint: #7A7066;
+      --line: #332C27;
+      --accent: #B23C4B;
+      --accent-ink: #E39098;
+      --accent-soft: #3A1A1F;
+      --bone: #F6F1E6;
+      --shadow: none;
+      --shadow-pop: 0 12px 32px rgba(0,0,0,0.5);
     }
   }
   :root[data-theme="dark"] {
-    --bg: #14171B;
-    --surface: #1B1F24;
-    --surface-muted: #23282E;
-    --ink: #EDEFF1;
-    --ink-soft: #9AA3AD;
-    --ink-faint: #6B7480;
-    --line: #2B3138;
-    --accent: #FF8465;
-    --accent-ink: #FFB49C;
-    --accent-soft: #3A241E;
-    --system: #8FB4CC;
-    --system-soft: #202A30;
-    --approve: #4CC38A;
-    --approve-ink: #8FE0BB;
-    --deny: #E2857B;
-    --deny-soft: #33211F;
-    --av-bob: #63B0C2;
-    --av-carol: #E0A94C;
-    --av-dave: #A886D9;
-    --av-erin: #E081A8;
-    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.28);
-    --shadow-pop: 0 10px 30px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.3);
+    --bg: #141110;
+    --surface: #1E1A17;
+    --surface-muted: #292320;
+    --ink: #F2EDE3;
+    --ink-soft: #A79C90;
+    --ink-faint: #7A7066;
+    --line: #332C27;
+    --accent: #B23C4B;
+    --accent-ink: #E39098;
+    --accent-soft: #3A1A1F;
+    --bone: #F6F1E6;
+    --shadow: none;
+    --shadow-pop: 0 12px 32px rgba(0,0,0,0.5);
   }
 
   * { box-sizing: border-box; }
@@ -86,6 +61,25 @@
     color: var(--ink);
     font-family: 'Public Sans', system-ui, sans-serif;
     line-height: 1.5;
+  }
+  /* Paper tooth over the whole page */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: var(--grain);
+    opacity: 0.055;
+    pointer-events: none;
+    z-index: 200;
+  }
+  /* Ink-on-press grain for flooded wine fields */
+  .field-grain {
+    position: absolute;
+    inset: 0;
+    background-image: var(--grain);
+    mix-blend-mode: overlay;
+    opacity: 0.30;
+    pointer-events: none;
   }
 
   .status-strip {
@@ -117,12 +111,12 @@
   .topbar-left { display: flex; align-items: center; gap: 30px; }
 
   .brand {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-style: italic;
-    font-size: 20px;
-    color: var(--accent-ink);
-    letter-spacing: -0.01em;
+    font-family: 'Space Mono', monospace;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
   }
 
   .topnav { display: flex; gap: 20px; }
@@ -130,7 +124,7 @@
     color: var(--ink-soft);
     text-decoration: none;
     font-size: 14.5px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 4px 2px;
     border-bottom: 2px solid transparent;
   }
@@ -160,12 +154,12 @@
 
   .profile-btn {
     width: 34px; height: 34px; border-radius: 50%;
-    background: var(--accent-soft);
-    color: var(--accent-ink);
+    background: var(--accent);
+    color: var(--bone);
     border: none;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Space Mono', monospace;
-    font-size: 12px; font-weight: 700;
+    font-size: 12px; font-weight: 400;
     cursor: pointer;
   }
   .icon-btn:focus-visible, .profile-btn:focus-visible, .topnav a:focus-visible {
@@ -180,7 +174,7 @@
     width: 260px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 4px;
     box-shadow: var(--shadow-pop);
     z-index: 40;
     overflow: hidden;
@@ -248,17 +242,21 @@
     position: sticky;
     top: var(--topbar-h);
     z-index: 20;
-    background: var(--ink);
-    color: var(--bg);
+    background: var(--accent);
+    overflow: hidden;
     margin: 0 -20px 18px;
-    padding: 13px 20px;
+    padding: 12px 20px 14px;
   }
-  .month-divider:not(:first-child) { margin-top: 26px; }
+  .month-divider:not(:first-child) { margin-top: 32px; }
   .month-divider h2 {
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: 21px;
-    letter-spacing: 0.01em;
+    position: relative;
+    font-family: 'Fredoka', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bone);
     margin: 0;
   }
 
@@ -268,11 +266,10 @@
   .card {
     position: relative;
     overflow: hidden;
-    --notch: var(--accent);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-left: 4px solid var(--accent);
-    border-radius: 12px;
+    border-left: 5px solid var(--accent);
+    border-radius: 3px;
     padding: 16px 18px;
     box-shadow: var(--shadow);
     display: flex;
@@ -280,19 +277,7 @@
     gap: 12px;
     transition: opacity .35s ease, transform .35s ease, max-height .35s ease, margin .35s ease, padding .35s ease;
   }
-  .card.system { border-left-style: dashed; border-left-color: var(--system); --notch: var(--system); }
-
-  /* Signature shape mark: quarter-circle notch, one consistent corner, tinted per card type */
-  .card::after {
-    content: "";
-    position: absolute;
-    top: 0; right: 0;
-    width: 28px; height: 28px;
-    background: var(--notch);
-    border-bottom-left-radius: 100%;
-    pointer-events: none;
-    z-index: 3;
-  }
+  .card.system { border-left-style: dashed; border-left-color: var(--ink-faint); }
 
   .card.leaving {
     opacity: 0;
@@ -313,7 +298,7 @@
     width: 40px;
     text-align: center;
     background: var(--surface-muted);
-    border-radius: 8px;
+    border-radius: 3px;
     padding: 5px 0 6px;
   }
   .date-badge .dow {
@@ -325,7 +310,8 @@
   }
   .date-badge .dom {
     display: block;
-    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    font-weight: 400;
     font-size: 15px;
     font-variant-numeric: tabular-nums;
     color: var(--ink-soft);
@@ -336,14 +322,22 @@
     width: 30px; height: 30px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Space Mono', monospace;
-    font-weight: 700;
+    font-weight: 400;
     font-size: 12px;
-    color: #fff;
+    background: var(--ink);
+    color: var(--bone);
     border: 2px solid var(--surface);
   }
   .avatars .avatar + .avatar { margin-left: -9px; }
 
-  .card-headline { font-weight: 600; font-size: 15px; color: var(--ink); }
+  .card-headline {
+    font-family: 'Fredoka', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.15;
+    letter-spacing: 0;
+    color: var(--ink);
+  }
   .card-when {
     font-size: 12.5px;
     color: var(--ink-faint);
@@ -361,7 +355,6 @@
 
   .reason {
     font-size: 12px;
-    font-style: italic;
     color: var(--ink-faint);
     padding-left: 51px;
     margin-top: -6px;
@@ -371,30 +364,30 @@
   .btn {
     flex: 1;
     font-family: 'Public Sans', sans-serif;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14.5px;
     padding: 12px 18px;
-    border-radius: 10px;
+    border-radius: 3px;
     border: 1.5px solid transparent;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
+    white-space: nowrap;
   }
   .btn svg { width: 15px; height: 15px; }
   .btn-approve {
-    background: var(--approve);
-    color: #fff;
-    box-shadow: 0 3px 10px rgba(46,158,110,0.28);
+    background: var(--accent);
+    color: var(--bone);
   }
-  .btn-approve:hover { filter: brightness(1.06); }
+  .btn-approve:hover { opacity: 0.88; }
   .btn-deny {
     background: transparent;
-    border-color: var(--line);
+    border-color: var(--ink-faint);
     color: var(--ink-soft);
   }
-  .btn-deny:hover { border-color: var(--deny); color: var(--deny); }
+  .btn-deny:hover { border-color: var(--ink); color: var(--ink); }
   .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---- Photo-forward card state ---- */
@@ -402,86 +395,85 @@
 
   .card-photo {
     position: relative;
-    aspect-ratio: 2.8 / 1;
-    min-height: 168px;
-    max-height: 250px;
+    min-height: 186px;
     overflow: hidden;
-    background: var(--surface-muted);
+    background: var(--accent);
     display: flex;
     align-items: flex-end;
   }
+  /* Black figure printed over the wine field, anchored right like the poster */
   .photo-art {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    right: 0; bottom: 0;
+    height: 88%;
+    width: 46%;
     display: block;
   }
   .photo-scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top,
-      rgba(8,10,14,0.84) 0%,
-      rgba(8,10,14,0.46) 40%,
-      rgba(8,10,14,0.00) 72%);
+    background: linear-gradient(to right,
+      rgba(90,17,32,0.62) 0%,
+      rgba(90,17,32,0.24) 52%,
+      rgba(90,17,32,0.00) 78%);
   }
 
   /* Floating pill chips on the photo */
   .chip-date {
     position: absolute;
-    top: 12px; left: 12px;
-    z-index: 2;
+    top: 13px; left: 15px;
+    z-index: 3;
     display: inline-flex;
     align-items: baseline;
     gap: 6px;
-    padding: 5px 11px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.90);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+    padding: 4px 10px;
+    border-radius: 2px;
+    background: var(--bone);
     font-family: 'Space Mono', monospace;
-    color: #1D222B;
+    color: #17120F;
   }
-  .chip-date .dow { font-size: 9.5px; letter-spacing: 0.06em; color: #5C6570; }
-  .chip-date .dom { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .chip-date .dow { font-size: 9.5px; letter-spacing: 0.08em; color: #5B5148; }
+  .chip-date .dom { font-size: 13px; font-weight: 400; font-variant-numeric: tabular-nums; }
 
   .photo-foot {
     position: relative;
     z-index: 2;
-    width: 100%;
+    width: 70%;
     display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 16px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 52px 15px 17px;
   }
-  .avatars.chip-avatars {
-    padding: 3px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.90);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+  .avatars.chip-avatars { padding: 0; }
+  .chip-avatars .avatar {
+    width: 25px; height: 25px;
+    font-size: 10.5px;
+    background: var(--bone);
+    color: #17120F;
+    border: 2px solid var(--accent);
   }
-  .chip-avatars .avatar { width: 26px; height: 26px; font-size: 11px; border-color: #fff; }
   .chip-avatars .avatar + .avatar { margin-left: -8px; }
 
   .photo-headline {
-    font-family: 'Fraunces', serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-weight: 600;
-    font-size: 23px;
-    line-height: 1.14;
-    color: #fff;
+    font-size: 31px;
+    line-height: 0.94;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    color: var(--bone);
     text-wrap: balance;
-    text-shadow: 0 1px 14px rgba(0,0,0,0.45);
   }
-  .card-when.on-photo { color: rgba(255,255,255,0.86); margin-top: 2px; }
-  .card-when.on-photo .duration-pill { color: rgba(255,255,255,0.68); }
+  .card-when.on-photo { color: var(--bone); opacity: 0.82; margin-top: -2px; }
+  .card-when.on-photo .duration-pill { color: var(--bone); opacity: 0.7; }
 
   /* Footer strip: same buttons, same weight, as every other card */
   .card-body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 14px 18px 16px;
+    padding: 14px 15px 15px;
     background: var(--surface);
   }
   .card.has-photo .reason { padding-left: 0; margin-top: 0; }
@@ -505,12 +497,12 @@
   }
   @media (prefers-reduced-motion: reduce) { .upcoming-row.entering { animation: none; } }
   .upcoming-date { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ink-faint); width: 74px; flex: 0 0 auto; }
-  .upcoming-who { flex: 1 1 auto; font-size: 14px; font-weight: 500; }
+  .upcoming-who { flex: 1 1 auto; font-size: 14px; font-weight: 400; }
   .upcoming-time { font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
-  .upcoming-tag { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--approve-ink); }
+  .upcoming-tag { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 400; color: var(--ink-faint); }
   .upcoming-tag svg { width: 13px; height: 13px; }
 
-  .empty-note { color: var(--ink-faint); font-size: 14px; font-style: italic; padding: 18px 4px; }
+  .empty-note { color: var(--ink-faint); font-size: 14px; padding: 18px 4px; }
   .closing-note { margin-top: 30px; color: var(--ink-faint); font-size: 13px; text-align: center; }
 
   /* Modal */
@@ -524,7 +516,7 @@
   .modal-backdrop[hidden] { display: none; }
   .modal {
     background: var(--surface);
-    border-radius: 16px;
+    border-radius: 4px;
     max-width: 420px;
     width: 100%;
     padding: 26px 26px 22px;
@@ -543,13 +535,14 @@
   .modal-eyebrow {
     font-family: 'Space Mono', monospace;
     font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--accent-ink); margin: 0 0 10px;
+    color: var(--ink-faint); margin: 0 0 10px;
   }
   .modal h2 {
-    font-family: 'Fraunces', serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-weight: 600;
-    font-size: 22px;
-    line-height: 1.2;
+    font-size: 25px;
+    line-height: 1.08;
+    letter-spacing: 0;
     margin: 0 0 12px;
     text-wrap: balance;
     padding-right: 14px;
@@ -558,15 +551,15 @@
   .modal-ok {
     width: 100%;
     background: var(--accent);
-    color: #fff;
+    color: var(--bone);
     border: none;
-    border-radius: 10px;
+    border-radius: 3px;
     padding: 12px;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14.5px;
     cursor: pointer;
   }
-  .modal-ok:hover { filter: brightness(1.05); }
+  .modal-ok:hover { opacity: 0.88; }
   .modal-ok:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
   @media (max-width: 520px) {
@@ -576,10 +569,12 @@
     main { padding: 18px 14px 56px; }
     .month-divider { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
     .reason { padding-left: 0; }
-    .card-photo { min-height: 148px; }
-    .photo-foot { padding: 13px 14px; }
-    .photo-headline { font-size: 20px; }
-    .card-body { padding: 13px 14px 14px; }
+    .card-photo { min-height: 164px; }
+    .photo-foot { padding: 48px 13px 15px; width: 74%; }
+    .photo-headline { font-size: 25px; }
+    .btn { font-size: 13.5px; padding: 12px 10px; }
+    .card-body { padding: 13px 13px 14px; }
+    .month-divider h2 { font-size: 25px; }
   }
 </style>
 
@@ -619,43 +614,25 @@
 
 <main>
   <div class="feed" data-month="september">
-    <div class="month-divider"><h2>September</h2></div>
+    <div class="month-divider"><div class="field-grain"></div><h2>September</h2></div>
 
     <div class="feed" data-month="september-cards">
       <article class="card has-photo" data-date="Sun, Sep 6" data-who="Bob" data-time="5:30–7:00 PM">
         <div class="card-photo">
-          <svg class="photo-art" viewBox="0 0 640 230" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-            <defs>
-              <linearGradient id="skyA" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#FFC98F"/>
-                <stop offset="46%" stop-color="#F4886A"/>
-                <stop offset="100%" stop-color="#8A4A6E"/>
-              </linearGradient>
-              <linearGradient id="ridgeA" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#7E4166"/>
-                <stop offset="100%" stop-color="#5A3157"/>
-              </linearGradient>
-            </defs>
-            <rect width="640" height="230" fill="url(#skyA)"/>
-            <circle cx="452" cy="92" r="40" fill="#FFEDCC" opacity="0.9"/>
-            <circle cx="452" cy="92" r="62" fill="#FFE2B4" opacity="0.22"/>
-            <path d="M0 148 C 96 116, 176 150, 258 138 C 344 124, 414 156, 502 140 C 572 128, 612 140, 640 133 L640 230 L0 230 Z" fill="url(#ridgeA)" opacity="0.88"/>
-            <path d="M0 176 C 124 158, 214 190, 324 178 C 436 166, 534 194, 640 179 L640 230 L0 230 Z" fill="#3A2340"/>
-            <g fill="#2A182F">
-              <circle cx="436" cy="158" r="7"/>
-              <path d="M436 166c-8 0-12 6-13 14l-1 14h28l-1-14c-1-8-5-14-13-14z"/>
-              <circle cx="470" cy="156" r="7"/>
-              <path d="M470 164c-8 0-12 6-13 14l-1 15h28l-1-15c-1-8-5-14-13-14z"/>
-            </g>
-            <g fill="#331E38" opacity="0.9">
-              <path d="M92 186c-2-24 4-42 10-52 6 10 12 28 10 52z"/>
-              <rect x="100" y="182" width="4" height="14"/>
+          <svg class="photo-art" viewBox="0 0 320 230" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+            <g fill="#12100E">
+              <circle cx="120" cy="96" r="30"/>
+              <path d="M94 130 C62 142 62 172 62 230 L178 230 C178 172 178 142 146 130 Z"/>
+              <circle cx="224" cy="82" r="27"/>
+              <path d="M201 113 C172 125 172 155 172 230 L276 230 C276 155 276 125 247 113 Z"/>
+
             </g>
           </svg>
           <div class="photo-scrim"></div>
+          <div class="field-grain"></div>
           <span class="chip-date"><span class="dow">SUN</span><span class="dom">6</span></span>
           <div class="photo-foot">
-            <div class="avatars chip-avatars"><span class="avatar" style="background:var(--av-bob)">B</span></div>
+            <div class="avatars chip-avatars"><span class="avatar">B</span></div>
             <div>
               <div class="photo-headline">Bob wants to hang out</div>
               <div class="card-when on-photo">5:30–7:00 PM <span class="duration-pill">90 MIN</span></div>
@@ -676,7 +653,7 @@
       <article class="card system" data-date="Wed, Sep 9" data-who="Carol" data-time="6:00–7:00 PM">
         <div class="who-row">
           <div class="date-badge"><span class="dow">WED</span><span class="dom">9</span></div>
-          <div class="avatars"><span class="avatar" style="background:var(--av-carol)">C</span></div>
+          <div class="avatars"><span class="avatar">C</span></div>
           <div>
             <div class="card-headline">You and Carol are both free</div>
             <div class="card-when">6:00–7:00 PM <span class="duration-pill">60 MIN</span></div>
@@ -694,51 +671,25 @@
 
       <article class="card has-photo" data-date="Sat, Sep 12" data-who="Trivia Crew" data-time="7:00–9:00 PM">
         <div class="card-photo">
-          <svg class="photo-art" viewBox="0 0 640 230" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-            <defs>
-              <linearGradient id="roomB" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#2E3466"/>
-                <stop offset="55%" stop-color="#4A3A6E"/>
-                <stop offset="100%" stop-color="#1C1B33"/>
-              </linearGradient>
-              <radialGradient id="glowB" cx="0.5" cy="0.42" r="0.62">
-                <stop offset="0%" stop-color="#FFC777" stop-opacity="0.55"/>
-                <stop offset="100%" stop-color="#FFC777" stop-opacity="0"/>
-              </radialGradient>
-            </defs>
-            <rect width="640" height="230" fill="url(#roomB)"/>
-            <rect width="640" height="230" fill="url(#glowB)"/>
-            <path d="M0 34 Q 80 74 160 40 Q 240 8 320 44 Q 400 78 480 42 Q 560 10 640 46" fill="none" stroke="#6A5E8C" stroke-width="1.6"/>
-            <g fill="#FFD79A">
-              <circle cx="80" cy="58" r="4.5"/><circle cx="160" cy="41" r="4.5"/>
-              <circle cx="240" cy="24" r="4.5"/><circle cx="320" cy="45" r="4.5"/>
-              <circle cx="400" cy="62" r="4.5"/><circle cx="480" cy="43" r="4.5"/>
-              <circle cx="560" cy="25" r="4.5"/>
+          <svg class="photo-art" viewBox="0 0 320 230" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+            <g fill="#12100E">
+              <circle cx="78" cy="108" r="25"/>
+              <path d="M57 137 C31 149 31 179 31 230 L125 230 C125 179 125 149 99 137 Z"/>
+              <circle cx="166" cy="84" r="29"/>
+              <path d="M141 117 C111 129 111 159 111 230 L221 230 C221 159 221 129 191 117 Z"/>
+              <circle cx="252" cy="104" r="26"/>
+              <path d="M230 134 C203 146 203 176 203 230 L301 230 C301 176 301 146 274 134 Z"/>
+
             </g>
-            <g fill="#FFD79A" opacity="0.22">
-              <circle cx="80" cy="58" r="12"/><circle cx="160" cy="41" r="12"/>
-              <circle cx="240" cy="24" r="12"/><circle cx="320" cy="45" r="12"/>
-              <circle cx="400" cy="62" r="12"/><circle cx="480" cy="43" r="12"/>
-              <circle cx="560" cy="25" r="12"/>
-            </g>
-            <g fill="#191A30">
-              <circle cx="238" cy="128" r="20"/>
-              <path d="M238 152c-24 0-38 18-41 42l-3 36h88l-3-36c-3-24-17-42-41-42z"/>
-              <circle cx="330" cy="118" r="22"/>
-              <path d="M330 144c-26 0-41 19-44 45l-3 39h94l-3-39c-3-26-18-45-44-45z"/>
-              <circle cx="424" cy="130" r="20"/>
-              <path d="M424 154c-24 0-38 18-41 42l-3 34h88l-3-34c-3-24-17-42-41-42z"/>
-            </g>
-            <rect x="0" y="196" width="640" height="34" fill="#12121F"/>
-            <rect x="286" y="186" width="90" height="12" rx="3" fill="#2A2A45"/>
           </svg>
           <div class="photo-scrim"></div>
+          <div class="field-grain"></div>
           <span class="chip-date"><span class="dow">SAT</span><span class="dom">12</span></span>
           <div class="photo-foot">
             <div class="avatars chip-avatars">
-              <span class="avatar" style="background:var(--av-bob)">B</span>
-              <span class="avatar" style="background:var(--av-carol)">C</span>
-              <span class="avatar" style="background:var(--av-erin)">E</span>
+              <span class="avatar">B</span>
+              <span class="avatar">C</span>
+              <span class="avatar">E</span>
             </div>
             <div>
               <div class="photo-headline">Trivia Crew wants to hang out</div>
@@ -761,8 +712,8 @@
         <div class="who-row">
           <div class="date-badge"><span class="dow">FRI</span><span class="dom">18</span></div>
           <div class="avatars">
-            <span class="avatar" style="background:var(--av-dave)">D</span>
-            <span class="avatar" style="background:var(--av-erin)">E</span>
+            <span class="avatar">D</span>
+            <span class="avatar">E</span>
           </div>
           <div>
             <div class="card-headline">You, Dave, and Erin are all free</div>
@@ -782,12 +733,12 @@
   </div>
 
   <div class="feed" data-month="october" id="feed-october">
-    <div class="month-divider"><h2>October</h2></div>
+    <div class="month-divider"><div class="field-grain"></div><h2>October</h2></div>
     <div class="feed" data-month="october-cards">
       <article class="card" data-date="Thu, Oct 1" data-who="Erin" data-time="12:00–1:00 PM">
         <div class="who-row">
           <div class="date-badge"><span class="dow">THU</span><span class="dom">1</span></div>
-          <div class="avatars"><span class="avatar" style="background:var(--av-erin)">E</span></div>
+          <div class="avatars"><span class="avatar">E</span></div>
           <div>
             <div class="card-headline">Erin wants to hang out</div>
             <div class="card-when">12:00–1:00 PM <span class="duration-pill">60 MIN</span></div>

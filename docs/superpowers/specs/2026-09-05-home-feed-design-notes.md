@@ -29,9 +29,14 @@ Local copy: `docs/superpowers/mockups/2026-09-05-home-feed-mockup.html`
 Note: the previously listed artifact URL (045f709f-…) no longer resolves
 and has been replaced by the one above.
 
-**Next open design question:** whether the corner notch earns its place.
-On the photo cards it currently reads as a colored blob over the artwork
-rather than a brand device — worth a look before this goes further.
+**Since then (2026-09-06):** the visual system was rebuilt around wine
+red and a poster/riso sensibility — see "Visual system" below. The
+corner notch was dropped. Copy voice is unchanged: buttons still say
+"I'm in" / "Not this time," not "Approve"/"Deny."
+
+**Next open design question:** edge and empty states. With a
+one-proposal-per-day cap, an empty or near-empty feed is a state people
+hit constantly, and nothing covers it yet.
 
 ## Why this exists
 
@@ -95,21 +100,64 @@ for attention). Fixes applied:
   visual weight from the buttons. Structural prominence, not competing
   hue.
 
-## Visual system
+## Visual system (revised 2026-09-06 — wine red / poster direction)
 
-- **Palette** — cool grey-blue background (deliberately not the
-  cream+terracotta combo that reads as generic/AI-templated). Warm coral
-  = human-initiated (brand, friend-invite border, buttons). Cool
-  slate-blue = system-generated (suggestion border, reason box).
-  Approve/deny get their own green/muted-clay colors, separate from the
-  brand accent — deny is muted clay, not alarm red, since declining is a
-  normal low-stakes action, not an error.
-- **Type** — three faces, one job each: Fraunces (display: wordmark,
-  headlines, month divider), Public Sans (UI/body), Space Mono (data:
-  date badges, duration pills, upcoming-list dates). Deliberately avoided
-  Inter/Space Grotesk as the "safe default" combo.
-- **Copy voice** — buttons say "I'm in" / "Not this time," not
-  "Approve"/"Deny" — reads like a friend, not a workflow tool.
+Superseded the earlier cool-grey + coral system. Driven by an AMBUSH
+poster reference: a flooded red field, oversized soft display type in
+bone, a high-contrast black figure printed over the color, riso grain,
+hard edges, and a small letterspaced mono wordmark.
+
+Three decisions were made explicitly before the reference arrived, and
+all three still hold:
+
+- **Typefaces — sans + mono, plus one display face.** Public Sans (UI and
+  body) and Space Mono (data: dates, durations, wordmark, eyebrows).
+  Fraunces was cut. The reference then forced a third face back in:
+  **Fredoka 600** as the display voice, and only that — oversized
+  headlines, month bands, and the modal headline. Its whole identity is
+  the display type, so applying the reference without a display face
+  wasn't possible. Each face has exactly one job.
+- **Weights — two.** 400 and 600, nothing else. Fredoka and Space Mono
+  are each loaded at a single weight. Hierarchy comes from size, the
+  wine field, and space — not from weight.
+- **Color — one hue.** Wine red `#7B1E2B` is the only chromatic color in
+  the app. Green/approve, clay/deny, slate/system, and the four avatar
+  hues were all removed. Ink and bone carry everything else.
+
+How the palette works:
+
+- **Wine floods, it doesn't accent.** Month dividers are full-bleed wine
+  bands. Photo cards are a wine field, not a photograph. The primary
+  button is a solid wine block. Wine is the app's voice, at three
+  different scales.
+- **Bone `#F6F1E6` is what prints on wine**; near-black ink `#17120F` is
+  what prints on paper. Page ground is a warm paper `#EBE4D6`, cards a
+  lighter `#F7F3EA`.
+- **Grain everywhere.** A fine SVG turbulence layer sits over the whole
+  page at 5.5% and over every wine field at 30% in `overlay` blend, for
+  the riso/newsprint texture the reference has.
+- **Hard edges.** Card and button radii dropped from 12px/10px to 3px,
+  and card shadows removed entirely. Printed, not floating.
+- **Type/decline distinction survives without a second hue.** Friend
+  cards keep a solid wine left border; system-suggested cards get a
+  dashed near-neutral one, which reads as a perforated ticket edge and
+  suits the print theme. Decline is a plain outline button.
+
+Known constraint: **Fredoka's uppercase I and V fuse at tight tracking**
+— "TRIVIA" read as "TRMIA". Display headlines carry `letter-spacing:
+0.055em` and month bands `0.06em` to separate them, which also matches
+the reference's own letterspaced caps. Do not tighten these below ~0.05em.
+
+The corner-notch signature mark was **removed**. It came from the earlier
+poster reference and read as a colored blob dropped on the artwork; the
+flooded wine field is now the signature device instead.
+
+Photo cards follow the reference's composition directly: black figure
+cutouts anchored right, oversized bone display type occupying the left
+70%, a wine-deep gradient behind the type for contrast, and a floating
+bone date chip. The figures are illustrated silhouettes standing in for
+a real user-attached photo — a real photo would need the same
+high-contrast monochrome treatment to sit on the wine field.
 
 ## Photo-forward cards
 
