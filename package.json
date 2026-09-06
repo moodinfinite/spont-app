@@ -1,0 +1,17 @@
+{
+  "name": "spont-app",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "dotenv -e .env -- npm run dev --workspace apps/web",
+    "build": "dotenv -e .env -- npm run build --workspace apps/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "dotenv -e .env -- npm run test --workspaces --if-present",
+    "db:migrate": "dotenv -e .env -- npm run migrate --workspace packages/db",
+    "db:seed": "dotenv -e .env -- npm run seed --workspace packages/db"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "dotenv-cli": "^7.4.0"
+  }
+}
