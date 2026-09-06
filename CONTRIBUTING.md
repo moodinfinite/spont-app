@@ -8,6 +8,31 @@
    tests in `packages/core` and `packages/db` for the pattern.
 4. Commit frequently with focused commits.
 
+## Iteration loop across contributor backgrounds
+
+This repo has both technical and non-technical contributors. Here's how
+an idea gets from "someone noticed something" to "actually built,"
+regardless of who noticed it:
+
+1. Anyone has an idea or notices something worth changing.
+2. If you're non-technical: describe it to your Claude session. It'll
+   write it up in `docs/knowledge-base/proposals/` for you and save it —
+   see `docs/knowledge-base/proposals/README.md`. Optionally, ask for a
+   quick sanity check against existing decisions first (the
+   `spont-product` agent).
+3. A technical contributor checks `docs/knowledge-base/proposals/` for
+   open ideas before starting new feature work, and picks one up as
+   input the next time they run the `superpowers:brainstorming` skill —
+   a proposal is an input to the normal design process, not a separate
+   one.
+4. The resulting spec/plan/implementation goes through the usual review
+   (`spont-reviewer` for code, `spont-product` again for anything
+   product/UI-facing before it ships).
+5. Anything durable that comes out of the cycle — a new term, a new
+   design rule, an architecture decision — goes into
+   `docs/knowledge-base/`, not left buried in a phase-dated spec where
+   it'll be hard to find later.
+
 ## Claude session memory
 
 Each contributor gets their own directory under
