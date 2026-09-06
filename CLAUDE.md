@@ -1,5 +1,17 @@
 # Spont App
 
+## New here? Start by picking a path
+
+- **Non-technical / product contributor** — you have opinions on what
+  Spont should do or look like, but don't need to touch code. Start at
+  [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md), and
+  drop ideas in
+  [`docs/knowledge-base/proposals/`](docs/knowledge-base/proposals/README.md).
+  Just tell your Claude session what you're here to do — it'll ask your
+  background once and remember it (see `spont-onboarding` below).
+- **Technical contributor** — you're writing code, running the app, or
+  reviewing a diff. Continue below for setup and structure.
+
 See `README.md` for setup and `CONTRIBUTING.md` for the full contributor
 workflow.
 
@@ -10,6 +22,41 @@ npm run dev       # http://localhost:3000
 npm test          # Vitest across packages/db and packages/core
 npm run db:seed   # reset + reseed 5 fake users
 ```
+
+(Or use the `spont-dev-server` / `spont-db-reset` skills, which do the
+same thing with a safety check that plain commands don't — see Skills
+and agents below.)
+
+## Codebase structure
+
+```
+spont_app/
+  apps/web/          # Next.js app — pages, API routes, login. The only
+                      # piece that knows about HTTP/cookies/pages.
+  packages/core/      # Business rules (Friends, Groups, CalendarProvider
+                      # interface) — no knowledge of the web layer.
+  packages/db/        # Prisma schema, client, seed data.
+  docs/superpowers/   # Phase-by-phase specs and implementation plans —
+                      # point-in-time, becomes history once a phase ships.
+  docs/knowledge-base/ # Durable context — architecture, glossary, design
+                      # principles, references, proposals. Doesn't expire.
+  .claude/skills/     # Shared skills any contributor's session can use.
+  .claude/agents/     # Shared subagents (code review, product review).
+  .claude/memory/     # Per-contributor session memory (see below).
+```
+
+See `docs/knowledge-base/architecture.md` for *why* it's shaped this way.
+
+## Skills and agents
+
+Repo-committed, available to any contributor's session:
+
+- **Skills** (`.claude/skills/`): `spont-onboarding` (detects contributor
+  background — read this one first, it changes how the rest of a session
+  should behave), `spont-dev-server`, `spont-db-reset`, `spont-status`.
+- **Agents** (`.claude/agents/`): `spont-reviewer` (code review),
+  `spont-product` (product/design review). Roster and rationale in
+  `.claude/agents/README.md`.
 
 ## Multi-user contributor memory
 
@@ -29,7 +76,9 @@ At the start of a session:
 
 **Memory design:** `persistent/` is committed and PR-reviewed — decisions,
 gotchas, anything worth surviving past the task that produced it.
-`ephemeral/` is gitignored scratch space, discard freely.
+`ephemeral/` is gitignored scratch space, discard freely. A contributor's
+declared technical/non-technical role also lives in
+`persistent/role.md` — see the `spont-onboarding` skill.
 
 **Gotcha:** the repo-root `.gitignore`'s `.claude/` rule is anchored to
 `/.claude/` (repo root only) *on purpose* — this is what lets
