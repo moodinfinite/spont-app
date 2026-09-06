@@ -71,6 +71,18 @@ fields) keeps flat digital color from looking too flat next to the
 hairline rules — this was a deliberate fix, not an incidental style
 choice, so don't drop it without replacing what it was solving.
 
+**Known unresolved exception:** the already-built "Photo-forward cards"
+feature (see
+`docs/superpowers/specs/2026-09-05-home-feed-design-notes.md`'s
+"Photo-forward cards" section) uses a rounded photo band and pill-shaped
+date/avatar chips, and sets its headline in a serif face — both in
+tension with the no-rounded-corners rule above and the two-typeface rule
+below. This was flagged by a `spont-product` review (2026-09-06) and has
+not yet been resolved either way (deliberate scoped exception vs.
+mockup revision) — check the home-feed notes' "Open threads" section
+before treating either this document or that mockup as settled on this
+specific point.
+
 ## Product-decision patterns worth generalizing
 
 A few decisions made for the home feed reflect a pattern worth applying

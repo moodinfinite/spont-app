@@ -52,6 +52,21 @@ traversal before the nested negation is ever considered. Fix: anchor the
 root pattern to `/.claude/` (repository root only) if a nested directory
 of the same name needs its own, different rules.
 
+## A workspace-scoped `npm test --workspace <pkg>` bypasses the root
+## script's `dotenv` wrapper, losing `DATABASE_URL`
+
+The root `package.json`'s `test` script is
+`dotenv -e .env -- npm run test --workspaces --if-present`, which loads
+`.env` before running every workspace's tests. Running
+`npm test --workspace packages/db` (or `packages/core`) directly, as a
+shortcut to test just one package, does *not* go through that root
+script — npm resolves straight to `packages/db/package.json`'s own
+`test` script (`vitest run`), with no `.env` loaded, so it fails with
+`Environment variable not found: DATABASE_URL`. Fix: wrap the
+workspace-scoped call the same way the root script does —
+`npx dotenv -e .env -- npm test --workspace packages/db` — instead of
+calling it plain.
+
 ## `gh` CLI's own OAuth token can silently override what you'd expect
 ## to authenticate a `git push`
 

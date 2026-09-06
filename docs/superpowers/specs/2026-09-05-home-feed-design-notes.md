@@ -243,6 +243,18 @@ current artifact URL.
 
 ## Open threads for whoever picks this up next
 
+- **Photo-forward cards use rounded corners and a serif headline, which
+  conflict with the visual system documented in
+  `docs/knowledge-base/design-principles.md`** (no-shadows/no-rounded-
+  corners rule, and the two-typeface — Jost/Space Mono, no serif — rule).
+  Flagged by a `spont-product` review (2026-09-06); not yet resolved.
+  This needs an explicit decision, not a silent fix in either direction:
+  either treat the rounded photo band/pill chips and serif headline as a
+  deliberate, scoped exception (and add it to design-principles.md the
+  way the flake score's accent-color use is already a documented
+  exception), or revise the mockup to match the standing rules (hard-
+  edged photo crop, hairline-bordered date/avatar treatments instead of
+  pills, headline set in Jost or Space Mono).
 - The friend-decline-vanishes vs. group-decline-persists asymmetry
   (noted in the foundation plan) will eventually surface here too —
   worth deciding if declined proposals should ever be revisitable.

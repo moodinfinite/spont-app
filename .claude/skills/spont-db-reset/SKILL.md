@@ -28,6 +28,11 @@ environment, use whatever locally-running Postgres instance matches
 `DATABASE_URL` in `.env` instead of the `docker compose` commands — see
 `docs/knowledge-base/references.md`.
 
-After running, confirm it worked: `npm test --workspace packages/db`
+After running, confirm it worked: `npx dotenv -e .env -- npm test --workspace packages/db`
 should pass (it creates and reads back real rows), and the app's login
-picker (`/login`) should list all 5 seeded users.
+picker (`/login`) should list all 5 seeded users. (Plain
+`npm test --workspace packages/db`, without the `dotenv -e .env --`
+wrapper, fails with `Environment variable not found: DATABASE_URL` —
+that wrapper is what the root `npm test` script normally supplies, and
+a workspace-scoped invocation bypasses it. See
+`docs/knowledge-base/references.md`.)
