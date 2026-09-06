@@ -123,6 +123,34 @@ git commit -m "docs: PR retro — update knowledge base and process docs"
 
 Push to the branch so it's included in the PR.
 
+## Step 6: Update the PR body
+
+After pushing, update the PR description to reflect the full branch
+contents. The PR summary should always describe the complete branch,
+not just its state at creation time.
+
+1. Re-derive the summary from the current branch:
+   ```bash
+   git log --oneline $(git merge-base main HEAD)..HEAD
+   git diff $(git merge-base main HEAD)...HEAD --stat
+   ```
+2. Update the PR body with `gh pr edit`:
+   ```bash
+   gh pr edit --body "$(cat <<'EOF'
+   ## Summary
+   [bullet points covering the full branch]
+
+   ## Test plan
+   [updated checklist]
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   EOF
+   )"
+   ```
+
+This ensures reviewers always see an accurate description, not a stale
+snapshot from when the PR was first opened.
+
 ## What this skill does NOT do
 
 - Auto-commit without review — every proposed change is shown first

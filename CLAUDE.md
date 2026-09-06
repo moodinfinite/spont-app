@@ -94,5 +94,13 @@ that root pattern back to a bare `.claude/` silently breaks the whole
 contributor-memory convention (a bare `git add` on any persistent file
 would start failing repo-wide).
 
+## PR hygiene
+
+When pushing new commits to a branch that has an open PR, update the PR
+body to reflect the full branch contents using `gh pr edit --body "..."`.
+The PR summary should always describe the complete branch, not just the
+state at PR creation time. Re-derive the summary from the current diff
+(`git diff main...HEAD --stat` and `git log --oneline main..HEAD`).
+
 Current phase: see `docs/superpowers/specs/` for the latest design and
 `docs/superpowers/plans/` for the active implementation plan.
