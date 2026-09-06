@@ -50,6 +50,7 @@ This phase builds:
 spont_app/
   .claude/
     skills/
+      spont-onboarding/SKILL.md
       spont-dev-server/SKILL.md
       spont-db-reset/SKILL.md
       spont-status/SKILL.md
@@ -89,6 +90,37 @@ still-open design questions after the phase ships.
 
 Each is a real, immediately useful fix for something that already caused
 friction in this repo, not speculative tooling.
+
+- **`spont-onboarding`** — an interactive, auto-triggering skill that
+  determines contributor background and adjusts git-workflow verbosity
+  for the rest of the session. Modeled directly on how
+  `superpowers:using-superpowers` triggers itself at the start of any
+  conversation (its description says "use when starting any conversation");
+  this skill's description does the same, scoped to this repo, so a
+  session doesn't need the contributor to know it exists or invoke it by
+  name.
+
+  Behavior:
+  1. Check the contributor's `.claude/memory/<username>/persistent/`
+     directory for a previously recorded role. If found, apply it
+     silently — don't re-ask every session.
+  2. If not found, ask one plain question early in the session: "Quick
+     one before we start — are you writing code in this repo, or working
+     on product/design/ideas without touching code?" Two answers, no
+     jargon, no follow-up questions about tooling or experience level.
+  3. Record the answer in `.claude/memory/<username>/persistent/role.md`
+     (one line) so it's never asked again for that contributor.
+  4. Apply it for the rest of the session:
+     - **Technical**: no behavior change — normal git detail, normal
+       command visibility, assume fluency.
+     - **Non-technical**: git mechanics (staging, committing, and — if
+       the contributor asks to "save" or "share" something like a
+       proposal — committing it) are performed directly, without walking
+       through commands, flags, or diffs unless specifically asked. A
+       one-line confirmation is enough ("Saved your idea to the repo —
+       the team will see it next time someone picks up new proposals.").
+       Never hand a non-technical contributor a git command to run
+       themselves as the primary path; do it for them and confirm.
 
 - **`spont-dev-server`** — starts the Next.js dev server correctly
   (backgrounded, confirms it's up via a health check, tells the invoker
@@ -174,6 +206,10 @@ including `name`, `description`, and tool/model scoping as needed).
   that makes the contributor loop iterative across backgrounds — an idea
   from a non-technical contributor has a real, versioned path into what
   gets built, instead of living only in a chat that no one else sees.
+  For a non-technical contributor, saving a proposal is conversational —
+  they describe the idea, and (per `spont-onboarding`'s role handling)
+  the session writes the file and commits it on their behalf, confirming
+  in one line. They never need to know `git add`/`git commit` exist.
 
 ## Role-aware entry point
 
