@@ -224,57 +224,6 @@
 
   .recs { display: flex; flex-direction: column; gap: 8px; }
 
-  /* ---------------- Card spacing options (review control) ---------------- */
-  .recs[data-gap="loose"] { gap: 14px; }
-  .recs[data-gap="snug"]  { gap: 8px; }
-  .recs[data-gap="tight"] { gap: 3px; }
-
-  /* fused: one continuous surface, cards divided by a hairline */
-  .recs[data-gap="fused"] {
-    gap: 0;
-    border-radius: 26px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-  .recs[data-gap="fused"] .card { border-radius: 0; box-shadow: none; }
-  .recs[data-gap="fused"] .card + .card { border-top: 1.5px solid var(--hairline); }
-  .recs[data-gap="fused"] .card.suggested + .card,
-  .recs[data-gap="fused"] .card + .card.suggested { border-top: none; }
-  .recs[data-gap="fused"] .empty-note { border-radius: 0; box-shadow: none; }
-
-  .gap-control {
-    position: fixed;
-    top: 16px;
-    left: max(14px, calc(50vw - 240px + 14px));
-    z-index: 30;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--card);
-    box-shadow: var(--shadow-soft);
-    border-radius: 999px;
-    padding: 5px 8px 5px 12px;
-  }
-  .gap-control .label {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    margin-right: 2px;
-  }
-  .gap-control button {
-    border: none;
-    background: transparent;
-    border-radius: 999px;
-    padding: 6px 10px;
-    font-family: 'Manrope', sans-serif;
-    font-weight: 700;
-    font-size: 11.5px;
-    color: var(--ink-2);
-    cursor: pointer;
-  }
-  .gap-control button[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); }
 
   /* ---------------- Cards ---------------- */
   .card {
@@ -547,7 +496,7 @@
         <svg viewBox="0 0 20 20" fill="none"><path d="M10 3a5 5 0 00-5 5v2.6c0 .5-.16 1-.46 1.4L3.6 13.6c-.6.8 0 1.9 1 1.9h10.8c1 0 1.6-1.1 1-1.9l-.94-1.6a2.4 2.4 0 01-.46-1.4V8a5 5 0 00-5-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 17a2 2 0 004 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         <span class="badge-dot"></span>
       </button>
-      <div class="avatar">A</div>
+      <div class="avatar">R</div>
     </div>
   </header>
 
@@ -557,15 +506,7 @@
     <button class="filter" type="button" data-range="month" aria-pressed="true">This month <span class="count">3</span></button>
   </div>
 
-  <div class="gap-control" role="group" aria-label="Card spacing">
-    <span class="label">Gap</span>
-    <button type="button" data-gap="loose" aria-pressed="false">Loose</button>
-    <button type="button" data-gap="snug" aria-pressed="true">Snug</button>
-    <button type="button" data-gap="tight" aria-pressed="false">Tight</button>
-    <button type="button" data-gap="fused" aria-pressed="false">Fused</button>
-  </div>
-
-  <div class="recs" id="feed" data-gap="snug">
+  <div class="recs" id="feed">
     <!-- Bob: friend invite -->
     <article class="card" data-range="today">
       <div class="card-top">
@@ -725,17 +666,6 @@
     f.addEventListener('click', function () { applyFilter(f.getAttribute('data-range')); });
   });
   applyFilter('month');
-
-  // Card spacing — review control, not app UI.
-  var feed = document.getElementById('feed');
-  document.querySelectorAll('.gap-control button').forEach(function (b) {
-    b.addEventListener('click', function () {
-      feed.setAttribute('data-gap', b.getAttribute('data-gap'));
-      document.querySelectorAll('.gap-control button').forEach(function (o) {
-        o.setAttribute('aria-pressed', String(o === b));
-      });
-    });
-  });
 
   var root = document.documentElement;
   var btn = document.getElementById('theme-toggle');
