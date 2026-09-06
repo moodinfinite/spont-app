@@ -1,0 +1,353 @@
+<title>Spont Text Motion Study</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  /* Six ways the connect-screen taglines could move. Same copy, same type,
+     same ground as the real screen — only the motion differs. */
+  :root {
+    --ground: #C6FF4E;
+    --ink: #15150F;
+    --ink-2: rgba(21, 21, 15, 0.66);
+    --ink-3: rgba(21, 21, 15, 0.42);
+    --rule: rgba(21, 21, 15, 0.16);
+    --panel: rgba(255, 255, 255, 0.30);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #96C927;
+      --ink: #10160A;
+      --ink-2: rgba(16, 22, 10, 0.72);
+      --ink-3: rgba(16, 22, 10, 0.48);
+      --rule: rgba(16, 22, 10, 0.18);
+      --panel: rgba(255, 255, 255, 0.20);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #96C927;
+    --ink: #10160A;
+    --ink-2: rgba(16, 22, 10, 0.72);
+    --ink-3: rgba(16, 22, 10, 0.48);
+    --rule: rgba(16, 22, 10, 0.18);
+    --panel: rgba(255, 255, 255, 0.20);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 34px 22px 60px; }
+
+  header.head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .sub {
+    margin: 10px 0 30px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 54ch;
+  }
+  .head-actions { display: flex; gap: 8px; flex: none; }
+  .ghost-btn {
+    border: none;
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 12.5px;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+  .icon-only { width: 38px; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .icon-only svg { width: 17px; height: 17px; }
+  .icon-only .moon { display: none; }
+  :root[data-theme="dark"] .icon-only .sun { display: none; }
+  :root[data-theme="dark"] .icon-only .moon { display: block; }
+
+  .grid { display: grid; gap: 14px; }
+  @media (min-width: 660px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .panel {
+    border: 1.5px solid var(--rule);
+    border-radius: 22px;
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--panel);
+  }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .panel-name {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .panel-tag {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .panel-note { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); margin: 0; }
+
+  .stage {
+    height: 92px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  .anim {
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 21px;
+    line-height: 1.26;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* 1 — Rise & fade (what's on the screen now) */
+  .mode-rise.in { animation: riseIn 480ms cubic-bezier(.2,.8,.25,1) both; }
+  .mode-rise.out { animation: fadeOut 260ms ease both; }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeOut { to { opacity: 0; } }
+
+  /* 2 — Word by word */
+  .mode-words span { display: inline-block; opacity: 0; }
+  .mode-words.in span { animation: wordIn 420ms cubic-bezier(.2,.8,.25,1) both; }
+  .mode-words.out { animation: fadeOut 240ms ease both; }
+  @keyframes wordIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+
+  /* 3 — Blur focus */
+  .mode-blur.in { animation: blurIn 620ms cubic-bezier(.2,.8,.25,1) both; }
+  .mode-blur.out { animation: blurOut 300ms ease both; }
+  @keyframes blurIn {
+    from { opacity: 0; filter: blur(9px); transform: scale(1.04); }
+    to { opacity: 1; filter: blur(0); transform: none; }
+  }
+  @keyframes blurOut { to { opacity: 0; filter: blur(6px); } }
+
+  /* 4 — Slot roll */
+  .mode-roll.in { animation: rollIn 460ms cubic-bezier(.2,.85,.25,1) both; }
+  .mode-roll.out { animation: rollOut 340ms cubic-bezier(.5,0,.75,0) both; }
+  @keyframes rollIn { from { opacity: 0; transform: translateY(64px); } to { opacity: 1; transform: none; } }
+  @keyframes rollOut { to { opacity: 0; transform: translateY(-64px); } }
+
+  /* 5 — Wipe reveal */
+  .mode-wipe.in { animation: wipeIn 620ms cubic-bezier(.4,0,.2,1) both; }
+  .mode-wipe.out { animation: wipeOut 340ms cubic-bezier(.4,0,.2,1) both; }
+  @keyframes wipeIn {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+  @keyframes wipeOut {
+    from { clip-path: inset(0 0 0 0); }
+    to { clip-path: inset(0 0 0 100%); }
+  }
+
+  /* 6 — Typed */
+  .mode-type .caret {
+    display: inline-block;
+    width: 2px;
+    height: 0.95em;
+    background: var(--ink);
+    margin-left: 3px;
+    transform: translateY(2px);
+    animation: blink 1s steps(1) infinite;
+  }
+  .mode-type.out { animation: fadeOut 240ms ease both; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  footer.note {
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 1.5px solid var(--rule);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  footer.note b { color: var(--ink); }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anim, .anim span { animation: none !important; opacity: 1 !important; filter: none !important; clip-path: none !important; transform: none !important; }
+    .mode-type .caret { animation: none !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <h1>Six ways the lines could move.</h1>
+    </div>
+    <div class="head-actions">
+      <button class="ghost-btn" id="restart">Replay all</button>
+      <button class="ghost-btn icon-only" id="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <p class="sub">Same copy, same typeface, same green as the real connect screen — only the motion changes. Each panel loops two of the five taglines so you can judge the hand-off between lines, not just the entrance.</p>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Rise &amp; fade</span><span class="panel-tag">Current</span></div>
+      <div class="stage"><p class="anim mode-rise" data-mode="rise"></p></div>
+      <p class="panel-note">Quiet and safe. Reads as an app doing a job — which is fine, but it's the one nobody will remember.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Word by word</span><span class="panel-tag">Option</span></div>
+      <div class="stage"><p class="anim mode-words" data-mode="words"></p></div>
+      <p class="panel-note">Lands like a thought forming. Best fit for lines with a turn in them — &ldquo;Less <em>this</em>. More <em>that</em>.&rdquo; Costs ~300ms more per line.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Blur focus</span><span class="panel-tag">Option</span></div>
+      <div class="stage"><p class="anim mode-blur" data-mode="blur"></p></div>
+      <p class="panel-note">Soft, filmic, expensive-feeling. Suits &ldquo;hiding in your calendar&rdquo; — something resolving into view. Watch it on cheap Android; blur can stutter.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Slot roll</span><span class="panel-tag">Option</span></div>
+      <div class="stage"><p class="anim mode-roll" data-mode="roll"></p></div>
+      <p class="panel-note">Departure-board energy. The one that most feels like a machine <em>searching</em> — which is literally what's happening while it connects.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Wipe reveal</span><span class="panel-tag">Option</span></div>
+      <div class="stage"><p class="anim mode-wipe" data-mode="wipe"></p></div>
+      <p class="panel-note">Graphic and confident, closest to a title card. Strongest with short lines; long ones take a beat too many to uncover.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Typed</span><span class="panel-tag">Option</span></div>
+      <div class="stage"><p class="anim mode-type" data-mode="type"></p></div>
+      <p class="panel-note">Most human, most overused. Slow by nature — you'd get through two lines, not five. Fits if the voice is meant to feel like a friend texting.</p>
+    </section>
+  </div>
+
+  <footer class="note">
+    <b>The timing question underneath all of these:</b> a real calendar connect takes about a second, and five lines at ~2.3s each is eleven. Either the screen holds deliberately longer than the work needs, or you show one or two lines and cut to the success state. Whichever motion you pick, that's the call that decides how many of the five anyone actually reads.
+  </footer>
+</div>
+
+<script>
+  var LINES = [
+    '“Sometime” is looking like Thursday.',
+    'Less “when are you free?” More “see you there.”',
+    'Your next hangout is hiding in your calendar.',
+    'Make room for your favorite people.',
+    'Good friends. Complicated calendars. We can help.'
+  ];
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var panels = [];
+
+  function Panel(el, mode, offset) {
+    this.el = el;
+    this.mode = mode;
+    this.i = offset % LINES.length;
+    this.timers = [];
+  }
+
+  Panel.prototype.clear = function () {
+    this.timers.forEach(clearTimeout);
+    this.timers = [];
+  };
+  Panel.prototype.later = function (fn, ms) { this.timers.push(setTimeout(fn, ms)); };
+
+  Panel.prototype.paint = function (text) {
+    var el = this.el;
+    el.classList.remove('in', 'out');
+    if (this.mode === 'words') {
+      el.innerHTML = text.split(' ').map(function (w, i) {
+        return '<span style="animation-delay:' + (i * 65) + 'ms">' + w + '</span>';
+      }).join(' ');
+    } else if (this.mode === 'type') {
+      el.innerHTML = '<span class="typed"></span><span class="caret"></span>';
+    } else {
+      el.textContent = text;
+    }
+    void el.offsetWidth; // restart the animation
+    el.classList.add('in');
+    if (this.mode === 'type') this.type(text);
+  };
+
+  Panel.prototype.type = function (text) {
+    var target = this.el.querySelector('.typed');
+    var n = 0;
+    var self = this;
+    (function tick() {
+      target.textContent = text.slice(0, n);
+      if (n++ <= text.length) self.later(tick, 26);
+    })();
+  };
+
+  Panel.prototype.run = function () {
+    this.clear();
+    var self = this;
+    var text = LINES[this.i];
+    this.paint(text);
+
+    // typed lines need longer on screen — they're still arriving
+    var hold = this.mode === 'type' ? 1400 + text.length * 26 : 1750;
+
+    this.later(function () {
+      self.el.classList.remove('in');
+      self.el.classList.add('out');
+    }, hold);
+
+    this.later(function () {
+      self.i = (self.i + 1) % LINES.length;
+      self.run();
+    }, hold + 420);
+  };
+
+  document.querySelectorAll('.anim').forEach(function (el, i) {
+    var p = new Panel(el, el.getAttribute('data-mode'), i);
+    panels.push(p);
+    if (reduce) {
+      el.textContent = LINES[i % LINES.length];
+    } else {
+      setTimeout(function () { p.run(); }, i * 160);
+    }
+  });
+
+  document.getElementById('restart').addEventListener('click', function () {
+    if (reduce) return;
+    panels.forEach(function (p, i) {
+      p.clear();
+      p.i = i % LINES.length;
+      setTimeout(function () { p.run(); }, i * 160);
+    });
+  });
+
+  var root = document.documentElement;
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+</script>

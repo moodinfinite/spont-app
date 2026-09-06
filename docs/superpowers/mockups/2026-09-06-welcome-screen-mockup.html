@@ -1,0 +1,408 @@
+<title>Spont Welcome Screen</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Manrope:wght@400;500;700&display=swap');
+
+  /* First-run flow: welcome → connecting → connected.
+     The accent green is the ground for the whole flow — this is the one
+     place in the app it gets to be the entire surface. Night keeps the
+     green identity but drops it a few stops so it isn't a flashlight. */
+  :root {
+    --ground: #C6FF4E;
+    --ink: #15150F;
+    --ink-2: rgba(21, 21, 15, 0.66);
+    --ink-3: rgba(21, 21, 15, 0.45);
+    --track: rgba(21, 21, 15, 0.16);
+    --btn-bg: #15150F;
+    --btn-ink: #F7FBEC;
+    --mark: rgba(21, 21, 15, 0.85);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #96C927;
+      --ink: #10160A;
+      --ink-2: rgba(16, 22, 10, 0.72);
+      --ink-3: rgba(16, 22, 10, 0.5);
+      --track: rgba(16, 22, 10, 0.18);
+      --btn-bg: #10160A;
+      --btn-ink: #EDF6D8;
+      --mark: rgba(16, 22, 10, 0.85);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #96C927;
+    --ink: #10160A;
+    --ink-2: rgba(16, 22, 10, 0.72);
+    --ink-3: rgba(16, 22, 10, 0.5);
+    --track: rgba(16, 22, 10, 0.18);
+    --btn-bg: #10160A;
+    --btn-ink: #EDF6D8;
+    --mark: rgba(16, 22, 10, 0.85);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .screen {
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 30px 26px 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+  .brand svg { width: 22px; height: 22px; color: var(--mark); }
+
+  .theme-toggle {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .theme-toggle svg { width: 18px; height: 18px; }
+  .theme-toggle .moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+
+  /* ---------------- Welcome ---------------- */
+  .copy {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+    padding: 8px 0;
+  }
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .copy p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.52;
+    color: var(--ink-2);
+    max-width: 30ch;
+  }
+
+  .foot { display: flex; flex-direction: column; gap: 14px; }
+  .cta {
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    background: var(--btn-bg);
+    color: var(--btn-ink);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 18px 24px;
+    cursor: pointer;
+  }
+  .fine {
+    margin: 0;
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-3);
+  }
+
+  /* ---------------- Connecting ---------------- */
+  .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 34px;
+    text-align: center;
+  }
+
+  .mark { width: 86px; height: 86px; color: var(--mark); }
+  .mark circle.orbit { transition: transform 700ms cubic-bezier(.2,.8,.25,1); }
+  .mark .left { transform: translateX(-4px); }
+  .mark .right { transform: translateX(4px); }
+  .is-done .mark .left,
+  .is-done .mark .right { transform: translateX(0); }
+  .mark .check {
+    stroke-dasharray: 22;
+    stroke-dashoffset: 22;
+    opacity: 0;
+  }
+  .is-done .mark .check {
+    opacity: 1;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 480ms ease 420ms, opacity 120ms linear 420ms;
+  }
+  .mark.pulsing { animation: breathe 2.4s ease-in-out infinite; }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.035); }
+  }
+
+  .lines {
+    position: relative;
+    width: 100%;
+    min-height: 108px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .line {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 25px;
+    line-height: 1.24;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    text-wrap: balance;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 420ms ease, transform 420ms cubic-bezier(.2,.8,.25,1);
+    pointer-events: none;
+  }
+  .line.is-on { opacity: 1; transform: translateY(0); }
+
+  .status { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .status-main {
+    margin: 0;
+    font-family: 'Sora', sans-serif;
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 420ms ease 700ms, transform 420ms cubic-bezier(.2,.8,.25,1) 700ms;
+  }
+  .status-sub {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink-2);
+    opacity: 0;
+    transition: opacity 420ms ease 1000ms;
+  }
+  .is-done .status-main { opacity: 1; transform: translateY(0); }
+  .is-done .status-sub { opacity: 1; }
+
+  .track {
+    height: 3px;
+    width: 100%;
+    background: var(--track);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .track i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--ink);
+    border-radius: 999px;
+    transition: width 400ms linear;
+  }
+  .is-done .track { opacity: 0; transition: opacity 400ms ease; }
+
+  .replay {
+    align-self: center;
+    background: none;
+    border: none;
+    padding: 6px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-3);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 400ms ease 1200ms;
+  }
+  .is-done .replay { opacity: 1; pointer-events: auto; }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  @media (max-width: 380px) {
+    h1 { font-size: 35px; }
+    .copy p { font-size: 16.5px; }
+    .line, .status-main { font-size: 21px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .line, .status-main, .status-sub, .mark circle.orbit, .mark .check, .track i {
+      transition: none !important;
+    }
+    .mark.pulsing { animation: none !important; }
+  }
+</style>
+
+<!-- ---------------- Screen 1: welcome ---------------- -->
+<div class="screen" id="view-welcome">
+  <div class="top">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="9.5" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="14.5" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>Spont</span>
+    </div>
+    <button class="theme-toggle" data-toggle-theme aria-label="Toggle dark mode">
+      <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="copy">
+    <h1>See your friends more.</h1>
+    <p>Spont finds when you and your friends are free, turning &ldquo;we should hang out sometime&rdquo; into an actual hangout.</p>
+    <p>Our goal is simple: less time on the app, more time with your friends.</p>
+  </div>
+
+  <div class="foot">
+    <button class="cta" type="button" id="connect-btn">Connect your calendar</button>
+    <p class="fine">We only ever see free or busy — never what's actually on your calendar.</p>
+  </div>
+</div>
+
+<!-- ---------------- Screen 2: connecting → connected ---------------- -->
+<div class="screen" id="view-connecting" hidden>
+  <div class="top">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="9.5" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="14.5" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>Spont</span>
+    </div>
+    <button class="theme-toggle" data-toggle-theme aria-label="Toggle dark mode">
+      <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="center">
+    <svg class="mark pulsing" id="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <circle class="orbit left" cx="19" cy="24" r="12.5" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      <circle class="orbit right" cx="29" cy="24" r="12.5" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      <path class="check" d="M19.5 24.5l3.2 3.2 6-6.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <div class="lines" id="lines" aria-live="polite">
+      <p class="line">&ldquo;Sometime&rdquo; is looking like Thursday.</p>
+      <p class="line">Less &ldquo;when are you free?&rdquo; More &ldquo;see you there.&rdquo;</p>
+      <p class="line">Your next hangout is hiding in your calendar.</p>
+      <p class="line">Make room for your favorite people.</p>
+      <p class="line">Good friends. Complicated calendars. We can help.</p>
+    </div>
+
+    <div class="status">
+      <p class="status-main">Calendar connected.</p>
+      <p class="status-sub">Finding your first hangouts…</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="track"><i id="track-fill"></i></div>
+    <button class="replay" type="button" id="replay-btn">Watch it again</button>
+  </div>
+</div>
+
+<script>
+  var root = document.documentElement;
+  document.querySelectorAll('[data-toggle-theme]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var current = root.getAttribute('data-theme');
+      var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    });
+  });
+
+  var welcome = document.getElementById('view-welcome');
+  var connecting = document.getElementById('view-connecting');
+  var lines = Array.prototype.slice.call(document.querySelectorAll('.line'));
+  var mark = document.getElementById('mark');
+  var fill = document.getElementById('track-fill');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var HOLD = 1900;   // how long each line sits on screen
+  var GAP = 380;     // crossfade between lines
+  var timers = [];
+
+  function clearTimers() {
+    timers.forEach(clearTimeout);
+    timers = [];
+  }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+
+  function runSequence() {
+    clearTimers();
+    connecting.classList.remove('is-done');
+    mark.classList.add('pulsing');
+    lines.forEach(function (l) { l.classList.remove('is-on'); });
+    fill.style.width = '0%';
+
+    if (reduce) {
+      lines[0].classList.add('is-on');
+      fill.style.width = '100%';
+      later(finish, 1200);
+      return;
+    }
+
+    var t = 120;
+    lines.forEach(function (line, i) {
+      later(function () {
+        line.classList.add('is-on');
+        fill.style.width = Math.round(((i + 1) / lines.length) * 100) + '%';
+      }, t);
+      later(function () { line.classList.remove('is-on'); }, t + HOLD);
+      t += HOLD + GAP;
+    });
+    later(finish, t + 120);
+  }
+
+  function finish() {
+    lines.forEach(function (l) { l.classList.remove('is-on'); });
+    mark.classList.remove('pulsing');
+    connecting.classList.add('is-done');
+  }
+
+  document.getElementById('connect-btn').addEventListener('click', function () {
+    welcome.hidden = true;
+    connecting.hidden = false;
+    runSequence();
+  });
+  document.getElementById('replay-btn').addEventListener('click', runSequence);
+</script>
