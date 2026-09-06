@@ -21,4 +21,29 @@ describe('seedDatabase', () => {
       expect(user.calendarAccounts[0].events).toHaveLength(5)
     }
   })
+
+  it('creates 7 categories', async () => {
+    await seedDatabase(prisma)
+    const categories = await prisma.category.findMany({ orderBy: { displayOrder: 'asc' } })
+    expect(categories).toHaveLength(7)
+    expect(categories.map((c) => c.name)).toEqual([
+      'Work', 'Personal', 'Social', 'Health/Fitness', 'Family', 'Errands', 'Other',
+    ])
+  })
+
+  it('creates label mappings for each user', async () => {
+    await seedDatabase(prisma)
+    const mappings = await prisma.labelMapping.findMany()
+    // 5 users * 5 labels = 25 mappings
+    expect(mappings).toHaveLength(25)
+    expect(mappings.every((m) => m.source === 'RULE')).toBe(true)
+  })
+
+  it('creates default category visibility for each user', async () => {
+    await seedDatabase(prisma)
+    const visibilities = await prisma.categoryVisibility.findMany()
+    // 5 users * 7 categories = 35 visibility rows
+    expect(visibilities).toHaveLength(35)
+    expect(visibilities.every((v) => v.displayMode === 'CATEGORY_NAME')).toBe(true)
+  })
 })

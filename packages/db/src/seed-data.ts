@@ -23,7 +23,30 @@ const EVENT_TEMPLATES = [
   { dayOffset: 7, startHour: 10, endHour: 12, rawLabel: 'Errands' },
 ]
 
+const CATEGORIES = [
+  { name: 'Work', displayOrder: 1 },
+  { name: 'Personal', displayOrder: 2 },
+  { name: 'Social', displayOrder: 3 },
+  { name: 'Health/Fitness', displayOrder: 4 },
+  { name: 'Family', displayOrder: 5 },
+  { name: 'Errands', displayOrder: 6 },
+  { name: 'Other', displayOrder: 7 },
+]
+
+const LABEL_TO_CATEGORY: Record<string, string> = {
+  'Gym': 'Health/Fitness',
+  'Client Call': 'Work',
+  'Date Night': 'Personal',
+  'Family Dinner': 'Family',
+  'Errands': 'Errands',
+}
+
 export async function seedDatabase(prisma: PrismaClient): Promise<void> {
+  const categories = await Promise.all(
+    CATEGORIES.map((c) => prisma.category.create({ data: c })),
+  )
+  const categoryByName = new Map(categories.map((c) => [c.name, c]))
+
   for (const seedUser of SEED_USERS) {
     const user = await prisma.user.create({ data: seedUser })
     const account = await prisma.calendarAccount.create({
@@ -39,5 +62,30 @@ export async function seedDatabase(prisma: PrismaClient): Promise<void> {
         isBusy: true,
       })),
     })
+
+    for (const tmpl of EVENT_TEMPLATES) {
+      const categoryName = LABEL_TO_CATEGORY[tmpl.rawLabel]
+      if (categoryName) {
+        const category = categoryByName.get(categoryName)!
+        await prisma.labelMapping.create({
+          data: {
+            userId: user.id,
+            rawLabel: tmpl.rawLabel,
+            categoryId: category.id,
+            source: 'RULE',
+          },
+        })
+      }
+    }
+
+    for (const category of categories) {
+      await prisma.categoryVisibility.create({
+        data: {
+          userId: user.id,
+          categoryId: category.id,
+          displayMode: 'CATEGORY_NAME',
+        },
+      })
+    }
   }
 }

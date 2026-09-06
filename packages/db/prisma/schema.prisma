@@ -20,6 +20,8 @@ model User {
   ownedGroups          Group[]
   groupMemberships     GroupMembership[]
   notifications        Notification[]
+  labelMappings        LabelMapping[]
+  categoryVisibilities CategoryVisibility[]
 }
 
 model CalendarAccount {
@@ -109,4 +111,53 @@ model Notification {
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  displayOrder Int
+
+  labelMappings        LabelMapping[]
+  categoryVisibilities CategoryVisibility[]
+}
+
+enum MappingSource {
+  RULE
+  MANUAL
+}
+
+model LabelMapping {
+  id         String        @id @default(cuid())
+  userId     String
+  rawLabel   String
+  categoryId String
+  source     MappingSource @default(RULE)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([userId, rawLabel])
+}
+
+enum DisplayMode {
+  CATEGORY_NAME
+  BUSY_ONLY
+  HIDDEN
+}
+
+model CategoryVisibility {
+  id          String      @id @default(cuid())
+  userId      String
+  categoryId  String
+  displayMode DisplayMode @default(CATEGORY_NAME)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([userId, categoryId])
 }
