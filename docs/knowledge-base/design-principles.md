@@ -38,8 +38,8 @@ Four roles. Everything on screen takes one of them.
 
 | Role | Light | Dark |
 | --- | --- | --- |
-| Ground | `#EDEEE9` | `#121210` |
-| Card | `#FFFFFF` | `#1C1C17` |
+| Ground | `#EDEEE9` | `#0D0D0B` |
+| Card | `#FFFFFF` | `#1F1F1A` |
 | Ink | `#15150F` | `#F2F2EA` |
 | Accent (green) | `#C6FF4E` | `#D2FF66` |
 
