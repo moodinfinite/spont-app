@@ -81,7 +81,15 @@
   :root[data-theme="dark"] .theme-toggle .sun { display: none; }
   :root[data-theme="dark"] .theme-toggle .moon { display: block; }
 
-  header.head { padding: 0 4px 22px; }
+  header.head { padding: 0 4px 22px; display: flex; align-items: center; gap: 14px; }
+  .back {
+    width: 40px; height: 40px; border-radius: 999px; flex: none;
+    background: var(--card); box-shadow: var(--shadow-soft);
+    border: none; color: var(--ink); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+  }
+  .back svg { width: 17px; height: 17px; }
   header.head h1 { font-size: 34px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.02; }
 
   .section-label {
@@ -111,6 +119,39 @@
   }
   .weight[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); }
   .signal.is-off .signal-name, .signal.is-off .signal-desc { opacity: 0.55; }
+
+  /* --- time buckets --- */
+  .bucket-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--ink-3);
+    margin: 16px 0 8px;
+  }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .preset {
+    border: 1.5px solid var(--hairline); background: none; color: var(--ink-2);
+    border-radius: 999px; padding: 8px 13px; cursor: pointer;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12px;
+  }
+  .preset[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
+
+  .buckets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bucket {
+    border: none; border-radius: 999px; padding: 9px 14px; cursor: pointer;
+    background: var(--chip); color: var(--ink-2);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+  }
+  /* 1 = up for it */
+  .bucket[data-state="1"] { background: var(--btn-bg); color: var(--btn-ink); }
+  /* 2 = never — the input that does the most work, so it gets its own look */
+  .bucket[data-state="2"] {
+    background: transparent;
+    color: var(--ink-3);
+    box-shadow: inset 0 0 0 1.5px var(--hairline);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+  .bucket-hint { font-size: 12px; color: var(--ink-3); margin: 14px 0 0; line-height: 1.5; }
+  .bucket-hint b { color: var(--ink-2); font-weight: 700; }
 
   .pending {
     display: inline-block; font-size: 10.5px; font-weight: 700;
@@ -203,7 +244,12 @@
 </button>
 
 <div class="page">
-  <header class="head"><h1>Settings.</h1></header>
+  <header class="head">
+    <a class="back" href="https://claude.ai/code/artifact/3eeb03bb-9eb7-47bd-a454-a368e8868b22" target="_top" aria-label="Back">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <h1>Settings.</h1>
+  </header>
 
   <div class="section-label">How Spont picks</div>
   <p class="section-note">Four signals, weighted evenly unless you say otherwise. Turn one off and Spont stops considering it.</p>
@@ -220,13 +266,37 @@
     </div>
 
     <div class="signal">
-      <div class="signal-top"><span class="signal-name">When you usually say yes</span></div>
-      <p class="signal-desc">Learns the hours you actually accept and stops offering the ones you never do.</p>
-      <div class="weights" role="group" aria-label="When you usually say yes">
-        <button class="weight" aria-pressed="false">Off</button>
-        <button class="weight" aria-pressed="false">Normal</button>
-        <button class="weight" aria-pressed="true">More</button>
+      <div class="signal-top"><span class="signal-name">When you're up for it</span></div>
+      <p class="signal-desc">Not when you're free — your calendar handles that. When you'd actually
+        want to see someone. Weekdays and weekends are split, because they are.</p>
+
+      <p class="bucket-label">Start from</p>
+      <div class="presets" id="presets">
+        <button class="preset" type="button" data-preset="weeknights">Weeknights person</button>
+        <button class="preset" type="button" data-preset="weekend">Weekend daytime</button>
+        <button class="preset" type="button" data-preset="lunch">Lunch breaks</button>
+        <button class="preset" type="button" data-preset="early">Early riser</button>
       </div>
+
+      <p class="bucket-label">Weekdays</p>
+      <div class="buckets" data-set="weekday">
+        <button class="bucket" type="button" data-state="0" data-key="wd-before">Before work</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-lunch">Lunch</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-after">Straight after work</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-evening">Evening</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-late">Late</button>
+      </div>
+
+      <p class="bucket-label">Weekends</p>
+      <div class="buckets" data-set="weekend">
+        <button class="bucket" type="button" data-state="0" data-key="we-morning">Morning</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-midday">Midday</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-afternoon">Afternoon</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-evening">Evening</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-late">Late</button>
+      </div>
+
+      <p class="bucket-hint">Tap once for <b>yes</b>, twice for <b>never</b>. Anything left plain is fair game.</p>
     </div>
 
     <div class="signal">
@@ -336,17 +406,13 @@
 
 <div class="dock-wrap">
   <nav class="dock" aria-label="Primary">
-    <a href="#">
+    <a href="https://claude.ai/code/artifact/3eeb03bb-9eb7-47bd-a454-a368e8868b22" target="_top">
       <svg viewBox="0 0 20 20" fill="none"><path d="M3 9.2 10 3.6l7 5.6V16.5H12v-5H8v5H3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
       <span>Home</span>
     </a>
-    <a href="#">
+    <a href="https://claude.ai/code/artifact/57f4a873-6e36-4732-80da-02b1521ff6a1" target="_top">
       <svg viewBox="0 0 20 20" fill="none"><circle cx="8" cy="7.2" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M2.6 16.6c0-3 2.4-4.7 5.4-4.7s5.4 1.7 5.4 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M14.2 5.1a3.1 3.1 0 0 1 0 5.4M15.6 12.6c1.4.7 2.2 2 2.2 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <span>People</span>
-    </a>
-    <a href="#" class="active" aria-current="page">
-      <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.8 17c0-3.3 2.8-5.2 6.2-5.2s6.2 1.9 6.2 5.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <span>You</span>
     </a>
   </nav>
   <button class="fab" aria-label="New">
@@ -370,6 +436,36 @@
       group.querySelectorAll('button').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
       var signal = group.closest('.signal');
       if (signal) signal.classList.toggle('is-off', b.textContent.trim() === 'Off');
+    });
+  });
+
+  // Time buckets cycle: plain → up for it → never.
+  document.querySelectorAll('.bucket').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var next = (parseInt(b.getAttribute('data-state'), 10) + 1) % 3;
+      b.setAttribute('data-state', String(next));
+      document.querySelectorAll('.preset').forEach(function (p) {
+        p.setAttribute('aria-pressed', 'false');
+      });
+    });
+  });
+
+  // Presets fill the buckets in; you can correct them afterwards.
+  var PRESETS = {
+    weeknights: { 'wd-after': 1, 'wd-evening': 1, 'wd-before': 2 },
+    weekend:    { 'we-morning': 1, 'we-midday': 1, 'we-afternoon': 1, 'we-late': 2 },
+    lunch:      { 'wd-lunch': 1, 'we-midday': 1 },
+    early:      { 'wd-before': 1, 'we-morning': 1, 'wd-late': 2, 'we-late': 2 }
+  };
+  document.querySelectorAll('.preset').forEach(function (p) {
+    p.addEventListener('click', function () {
+      var map = PRESETS[p.getAttribute('data-preset')] || {};
+      document.querySelectorAll('.bucket').forEach(function (b) {
+        b.setAttribute('data-state', String(map[b.getAttribute('data-key')] || 0));
+      });
+      document.querySelectorAll('.preset').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o === p));
+      });
     });
   });
 

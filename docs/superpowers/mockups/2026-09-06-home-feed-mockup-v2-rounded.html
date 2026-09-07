@@ -172,6 +172,7 @@
     border: 1.5px solid var(--card);
   }
   .avatar {
+    text-decoration: none;
     width: 40px;
     height: 40px;
     border-radius: 999px;
@@ -227,10 +228,111 @@
 
   /* ---------------- Cards ---------------- */
   .card {
+    position: relative;
     background: var(--card);
     border-radius: 26px;
     box-shadow: var(--shadow);
     overflow: hidden;
+  }
+
+  /* accept: the card turns over into a confirmation, then leaves for Upcoming */
+  .confirm {
+    position: absolute;
+    inset: 0;
+    background: var(--btn-bg);
+    color: var(--btn-ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 240ms ease;
+    z-index: 2;
+  }
+  .confirm.on { opacity: 1; }
+
+  /* the undo window, drawn as a ring draining around the mark */
+  .confirm-ring { position: relative; width: 62px; height: 62px; margin-bottom: 12px; }
+  .confirm-ring .ring { position: absolute; inset: 0; width: 62px; height: 62px; }
+  .ring .track { stroke: currentColor; opacity: 0.22; }
+  .ring .drain {
+    stroke: currentColor;
+    stroke-dasharray: 182.2;
+    stroke-dashoffset: 0;
+    transform: rotate(-90deg);
+    transform-origin: 31px 31px;
+  }
+  .confirm.on .ring .drain { animation: drain 5000ms linear forwards; }
+  @keyframes drain { to { stroke-dashoffset: 182.2; } }
+
+  .confirm-mark {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 38px; height: 38px;
+  }
+  .confirm-mark .c-left,
+  .confirm-mark .c-right { transition: transform 520ms cubic-bezier(.2,.8,.25,1); }
+  .confirm-mark .c-left { transform: translateX(-7px); }
+  .confirm-mark .c-right { transform: translateX(7px); }
+  .confirm.on .c-left,
+  .confirm.on .c-right { transform: translateX(0); }
+  .confirm-mark .tick {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    opacity: 0;
+  }
+  .confirm.on .confirm-mark .tick {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transition: stroke-dashoffset 420ms ease 380ms, opacity 100ms linear 380ms;
+  }
+  .confirm-head {
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .confirm-sub { font-size: 13px; margin: 0; opacity: 0.75; }
+  .undo-btn {
+    margin-top: 14px;
+    border: none;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--card);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 12.5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  :root[data-theme="dark"] .undo-btn { background: #15150F; color: #F2F2EA; }
+
+  /* leaving: collapse the space the card was holding */
+  .card.is-leaving {
+    transition: height 380ms cubic-bezier(.4,0,.2,1),
+                opacity 260ms ease,
+                margin 380ms cubic-bezier(.4,0,.2,1),
+                transform 380ms cubic-bezier(.4,0,.2,1);
+    overflow: hidden;
+  }
+  .card.is-gone {
+    height: 0 !important;
+    opacity: 0;
+    margin-top: -8px;
+    transform: scale(0.97);
+  }
+
+  /* the Upcoming row that just landed */
+  .upcoming-row.just-added { animation: landed 620ms cubic-bezier(.2,.8,.25,1) both; }
+  @keyframes landed {
+    0% { opacity: 0; transform: translateY(-8px); background: var(--btn-bg); }
+    60% { opacity: 1; transform: none; }
+    100% { background: transparent; }
   }
   .card-top { padding: 18px 18px 0; }
   .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -506,7 +608,7 @@
         <svg viewBox="0 0 20 20" fill="none"><path d="M10 3a5 5 0 00-5 5v2.6c0 .5-.16 1-.46 1.4L3.6 13.6c-.6.8 0 1.9 1 1.9h10.8c1 0 1.6-1.1 1-1.9l-.94-1.6a2.4 2.4 0 01-.46-1.4V8a5 5 0 00-5-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 17a2 2 0 004 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         <span class="badge-dot"></span>
       </button>
-      <div class="avatar">R</div>
+      <a class="avatar" href="https://claude.ai/code/artifact/4b6b1687-a2f4-47ec-a9cd-6b2fc2ca8083" target="_top" aria-label="You">R</a>
     </div>
   </header>
 
@@ -518,7 +620,7 @@
 
   <div class="recs" id="feed">
     <!-- Bob: friend invite -->
-    <article class="card" data-range="today">
+    <article class="card" data-range="today" data-who="Jeff" data-date="Sun Sep 6" data-time="5:30–7:00 PM">
       <div class="card-top">
         <div class="who">
           <div class="who-avatar">J</div>
@@ -550,7 +652,7 @@
     </article>
 
     <!-- Carol: system-suggested, inverted card -->
-    <article class="card suggested" data-range="week">
+    <article class="card suggested" data-range="week" data-who="Edward" data-date="Wed Sep 9" data-time="6:00–7:00 PM">
       <div class="sug-top">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.4"/>
@@ -572,7 +674,7 @@
     </article>
 
     <!-- The Softest Lads: group invite -->
-    <article class="card" data-range="month">
+    <article class="card" data-range="month" data-who="The Softest Lads" data-date="Sat Sep 27" data-time="7:00–9:00 PM">
       <div class="card-top">
         <div class="who">
           <div class="who-stack">
@@ -610,13 +712,13 @@
     </article>
 
     <div class="empty-note" id="empty-note">
-      <p class="empty-head">Nothing to decide.</p>
-      <p class="empty-sub">That's the idea. We'll shout when a window opens.</p>
+      <p class="empty-head">You're set.</p>
+      <p class="empty-sub" id="empty-sub">Nothing else needs you right now.</p>
     </div>
   </div>
 
-  <div class="section-label"><span>Upcoming — already locked in</span><span>2</span></div>
-  <div class="upcoming-card">
+  <div class="section-label"><span>Upcoming — already locked in</span><span id="upcoming-count">2</span></div>
+  <div class="upcoming-card" id="upcoming-list">
     <div class="upcoming-row">
       <div class="upcoming-check"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <span class="upcoming-who">With Ming</span>
@@ -639,15 +741,7 @@
     </a>
     <a href="https://claude.ai/code/artifact/57f4a873-6e36-4732-80da-02b1521ff6a1" target="_top">
       <svg viewBox="0 0 20 20" fill="none"><circle cx="8" cy="7.2" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M2.6 16.6c0-3 2.4-4.7 5.4-4.7s5.4 1.7 5.4 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M14.2 5.1a3.1 3.1 0 0 1 0 5.4M15.6 12.6c1.4.7 2.2 2 2.2 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <span>Friends</span>
-    </a>
-    <a href="#">
-      <svg viewBox="0 0 20 20" fill="none"><circle cx="6.4" cy="6.8" r="2.6" fill="currentColor"/><circle cx="13.6" cy="6.8" r="2.6" fill="currentColor"/><circle cx="10" cy="13.6" r="2.6" fill="currentColor"/></svg>
-      <span>Groups</span>
-    </a>
-    <a href="#">
-      <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.8 17c0-3.3 2.8-5.2 6.2-5.2s6.2 1.9 6.2 5.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <span>You</span>
+      <span>People</span>
     </a>
   </nav>
   <button class="fab" aria-label="New">
@@ -659,25 +753,127 @@
   // Time filters — ranges are cumulative: today ⊂ this week ⊂ this month.
   var scope = { today: ['today'], week: ['today', 'week'], month: ['today', 'week', 'month'] };
   var filters = document.querySelectorAll('.filter');
-  var cards = document.querySelectorAll('#feed .card');
+  var feed = document.getElementById('feed');
   var emptyNote = document.getElementById('empty-note');
+  var emptySub = document.getElementById('empty-sub');
+  var upcomingList = document.getElementById('upcoming-list');
+  var upcomingCount = document.getElementById('upcoming-count');
+  var current = 'month';
+
+  function liveCards() {
+    return Array.prototype.slice.call(feed.querySelectorAll('.card:not(.is-gone)'));
+  }
 
   function applyFilter(range) {
+    current = range;
     var visible = scope[range];
     var shown = 0;
-    cards.forEach(function (card) {
+    liveCards().forEach(function (card) {
       var match = visible.indexOf(card.getAttribute('data-range')) !== -1;
       card.hidden = !match;
       if (match) shown++;
     });
-    emptyNote.style.display = shown === 0 ? 'block' : 'none';
+
+    // counts on the pills reflect what's actually left to decide
     filters.forEach(function (f) {
-      f.setAttribute('aria-pressed', String(f.getAttribute('data-range') === range));
+      var key = f.getAttribute('data-range');
+      var n = liveCards().filter(function (c) {
+        return scope[key].indexOf(c.getAttribute('data-range')) !== -1;
+      }).length;
+      f.querySelector('.count').textContent = n;
+      f.setAttribute('aria-pressed', String(key === range));
     });
+
+    var locked = upcomingList.querySelectorAll('.upcoming-row').length;
+    emptySub.textContent = locked === 1
+      ? '1 thing on your calendar. Nothing else needs you.'
+      : locked + ' things on your calendar. Nothing else needs you.';
+    emptyNote.style.display = shown === 0 ? 'block' : 'none';
   }
+
   filters.forEach(function (f) {
     f.addEventListener('click', function () { applyFilter(f.getAttribute('data-range')); });
   });
+
+  // ---- accepting: confirm on the card, then it moves to Upcoming ----
+  var CHECK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function confirmLayer(card) {
+    var el = document.createElement('div');
+    el.className = 'confirm';
+    el.innerHTML =
+      '<div class="confirm-ring">' +
+        '<svg class="ring" viewBox="0 0 62 62" fill="none" aria-hidden="true">' +
+          '<circle class="track" cx="31" cy="31" r="29" stroke-width="2.5"/>' +
+          '<circle class="drain" cx="31" cy="31" r="29" stroke-width="2.5" stroke-linecap="round"/>' +
+        '</svg>' +
+        '<svg class="confirm-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">' +
+          '<circle class="c-left" cx="19" cy="24" r="12" fill="none" stroke="currentColor" stroke-width="2"/>' +
+          '<circle class="c-right" cx="29" cy="24" r="12" fill="none" stroke="currentColor" stroke-width="2"/>' +
+          '<path class="tick" d="M19.5 24.5l3.2 3.2 6-6.4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+      '</div>' +
+      '<p class="confirm-head">You\'re in.</p>' +
+      '<p class="confirm-sub">' + card.getAttribute('data-date') + ', ' +
+        card.getAttribute('data-time') + '</p>' +
+      '<button class="undo-btn" type="button">Undo</button>';
+    return el;
+  }
+
+  function addToUpcoming(card) {
+    var row = document.createElement('div');
+    row.className = 'upcoming-row just-added';
+    row.innerHTML =
+      '<div class="upcoming-check">' + CHECK + '</div>' +
+      '<span class="upcoming-who">With ' + card.getAttribute('data-who') + '</span>' +
+      '<span class="upcoming-when">' + card.getAttribute('data-date') + '<br>' +
+        card.getAttribute('data-time') + '</span>';
+    upcomingList.insertBefore(row, upcomingList.firstChild);
+    upcomingCount.textContent = upcomingList.querySelectorAll('.upcoming-row').length;
+  }
+
+  function leave(card, after) {
+    card.style.height = card.offsetHeight + 'px';
+    void card.offsetHeight;
+    card.classList.add('is-leaving');
+    void card.offsetHeight;
+    card.classList.add('is-gone');
+    setTimeout(function () {
+      card.hidden = true;
+      if (after) after();
+      applyFilter(current);
+    }, 400);
+  }
+
+  feed.querySelectorAll('.card').forEach(function (card) {
+    var yes = card.querySelector('.btn-yes');
+    var no = card.querySelector('.btn-no');
+
+    // Accepting holds for the undo window before anything reaches the
+    // calendar — inside it, taking it back leaves no trace and tells nobody.
+    var UNDO_WINDOW = 5000;
+    var timer = null;
+
+    yes.addEventListener('click', function () {
+      var layer = confirmLayer(card);
+      card.appendChild(layer);
+      void layer.offsetHeight;
+      layer.classList.add('on');
+
+      layer.querySelector('.undo-btn').addEventListener('click', function () {
+        clearTimeout(timer);
+        layer.classList.remove('on');
+        setTimeout(function () { layer.remove(); }, 260);
+      });
+
+      timer = setTimeout(function () {
+        leave(card, function () { addToUpcoming(card); });
+      }, UNDO_WINDOW);
+    });
+
+    no.addEventListener('click', function () { leave(card); });
+  });
+
   applyFilter('month');
 
   var root = document.documentElement;
