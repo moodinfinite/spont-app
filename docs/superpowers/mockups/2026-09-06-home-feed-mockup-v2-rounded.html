@@ -36,7 +36,7 @@
     :root:not([data-theme="light"]) {
       /* dark: neutral dark ground, the suggested card inverts to neon */
       --page: #0D0D0B;
-      --card: #1F1F1A;
+      --card: #292921;
       --ink: #F2F2EA;
       --ink-2: #A3A398;
       --ink-3: #6E6E63;
@@ -50,20 +50,20 @@
       --sug-ink-2: rgba(22, 36, 10, 0.72);
       --sug-btn-bg: #15150F;
       --sug-btn-ink: #EFF3E6;
-      --photo-bg: #262C1E;
-      --photo-fg: #39422C;
-      --dock: #0B0B08;
-      --dock-2: #222819;
+      --photo-bg: #33372C;
+      --photo-fg: #474D3B;
+      --dock: #1A1A14;
+      --dock-2: #363630;
       --dock-ink: #EFF3E6;
       --dock-ink-muted: rgba(239, 243, 230, 0.42);
-      --hairline: rgba(239, 243, 230, 0.08);
-      --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.07);
-      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.06);
+      --hairline: rgba(239, 243, 230, 0.13);
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.10);
+      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
     }
   }
   :root[data-theme="dark"] {
     --page: #0D0D0B;
-    --card: #1F1F1A;
+    --card: #292921;
     --ink: #F2F2EA;
     --ink-2: #A3A398;
     --ink-3: #6E6E63;
@@ -77,15 +77,15 @@
     --sug-ink-2: rgba(22, 36, 10, 0.72);
     --sug-btn-bg: #15150F;
     --sug-btn-ink: #EFF3E6;
-    --photo-bg: #262C1E;
-    --photo-fg: #39422C;
-    --dock: #0B0B08;
-    --dock-2: #222819;
+    --photo-bg: #33372C;
+    --photo-fg: #474D3B;
+    --dock: #1A1A14;
+    --dock-2: #363630;
     --dock-ink: #EFF3E6;
     --dock-ink-muted: rgba(239, 243, 230, 0.42);
-    --hairline: rgba(239, 243, 230, 0.08);
-    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.07);
-    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.06);
+    --hairline: rgba(239, 243, 230, 0.13);
+    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.10);
+    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
   }
 
   * { box-sizing: border-box; }
@@ -533,6 +533,93 @@
     line-height: 1.5;
   }
 
+  /* ---------------- Cancel sheet ---------------- */
+  .upcoming-row {
+    width: 100%;
+    background: none;
+    border: none;
+    font-family: 'Manrope', sans-serif;
+    text-align: left;
+    cursor: pointer;
+  }
+  .upcoming-row .chev { color: var(--ink-3); flex: none; display: flex; }
+  .upcoming-row .chev svg { width: 15px; height: 15px; }
+
+  .sheet-scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(21, 21, 15, 0.42);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+  :root[data-theme="dark"] .sheet-scrim { background: rgba(0, 0, 0, 0.6); }
+  .sheet-scrim.on { opacity: 1; }
+
+  .sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -12px 40px rgba(20, 20, 12, 0.2);
+    padding: 10px 20px 26px;
+    z-index: 41;
+    transform: translateY(100%);
+    transition: transform 320ms cubic-bezier(.2,.8,.25,1);
+  }
+  :root[data-theme="dark"] .sheet {
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(242, 242, 234, 0.10);
+  }
+  .sheet.on { transform: translateY(0); }
+  .sheet .grabber {
+    width: 42px; height: 4px; border-radius: 999px;
+    background: var(--hairline); margin: 0 auto 18px;
+  }
+  .sheet h3 {
+    font-size: 22px; font-weight: 400; letter-spacing: -0.018em;
+    line-height: 1.2; margin-bottom: 6px; color: var(--ink);
+  }
+  .sheet .when { font-size: 13.5px; color: var(--ink-2); margin: 0 0 20px; }
+  .sheet-step { display: none; }
+  .sheet-step.on { display: block; }
+
+  .sheet .btn {
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    padding: 15px;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .btn-solid { background: var(--btn-bg); color: var(--btn-ink); }
+  .btn-quiet {
+    background: transparent;
+    color: var(--ink-2);
+    box-shadow: inset 0 0 0 1.5px var(--hairline);
+  }
+  .btn-text {
+    background: transparent;
+    color: var(--ink-3);
+    font-weight: 600;
+    box-shadow: none;
+  }
+  .sheet .nudge {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--photo-bg);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .sheet .nudge svg { width: 18px; height: 18px; flex: none; color: var(--ink); }
+  .sheet .nudge p { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  .sheet .nudge b { color: var(--ink); font-weight: 700; }
+
   /* ---------------- Dock ---------------- */
   .dock-wrap {
     position: fixed;
@@ -724,18 +811,43 @@
 
   <div class="section-label"><span>Upcoming — already locked in</span><span id="upcoming-count">2</span></div>
   <div class="upcoming-card" id="upcoming-list">
-    <div class="upcoming-row">
+    <button class="upcoming-row" type="button" data-who="Ming" data-when="Tue Sep 8, 6:00–7:00 PM">
       <div class="upcoming-check"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <span class="upcoming-who">With Ming</span>
       <span class="upcoming-when">Tue Sep 8<br>6:00–7:00 PM</span>
-    </div>
-    <div class="upcoming-row">
+      <span class="chev"><svg viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <button class="upcoming-row" type="button" data-who="The Softest Lads" data-when="Sat Sep 26, 7:00–9:00 PM">
       <div class="upcoming-check"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <span class="upcoming-who">With The Softest Lads</span>
       <span class="upcoming-when">Sat Sep 26<br>7:00–9:00 PM</span>
-    </div>
+      <span class="chev"><svg viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
   </div>
   <p class="closing-note">That's everything for the next 30 days — two open slots a day, at most.</p>
+</div>
+
+<div class="sheet-scrim" id="sheet-scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="grabber"></div>
+
+  <div class="sheet-step on" id="sheet-ask">
+    <h3 id="sheet-title">With Ming</h3>
+    <p class="when" id="sheet-when">Tue Sep 8, 6:00–7:00 PM</p>
+    <button class="btn btn-quiet" id="cant-make-it">Can't make it</button>
+    <button class="btn btn-text" id="sheet-close">Never mind</button>
+  </div>
+
+  <div class="sheet-step" id="sheet-done">
+    <h3>Taken off your calendar.</h3>
+    <p class="when" id="sheet-back">The time goes back to Ming — they can keep it open or let it go.</p>
+    <div class="nudge">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M3 5.5A1.5 1.5 0 014.5 4h11A1.5 1.5 0 0117 5.5v7a1.5 1.5 0 01-1.5 1.5H8l-4 3v-3H4.5A1.5 1.5 0 013 12.5v-7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <p>Spont won't explain why. <b id="nudge-name">Ming</b> will take it better from you.</p>
+    </div>
+    <button class="btn btn-solid" id="text-them">Text Ming</button>
+    <button class="btn btn-text" id="sheet-done-close">Done</button>
+  </div>
 </div>
 
 <div class="dock-wrap">
@@ -826,13 +938,18 @@
   }
 
   function addToUpcoming(card) {
-    var row = document.createElement('div');
+    var row = document.createElement('button');
+    row.type = 'button';
     row.className = 'upcoming-row just-added';
+    row.setAttribute('data-who', card.getAttribute('data-who'));
+    row.setAttribute('data-when', card.getAttribute('data-date') + ', ' + card.getAttribute('data-time'));
     row.innerHTML =
       '<div class="upcoming-check">' + CHECK + '</div>' +
       '<span class="upcoming-who">With ' + card.getAttribute('data-who') + '</span>' +
       '<span class="upcoming-when">' + card.getAttribute('data-date') + '<br>' +
-        card.getAttribute('data-time') + '</span>';
+        card.getAttribute('data-time') + '</span>' +
+      '<span class="chev"><svg viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+    row.addEventListener('click', function () { openSheet(row); });
     upcomingList.insertBefore(row, upcomingList.firstChild);
     upcomingCount.textContent = upcomingList.querySelectorAll('.upcoming-row').length;
   }

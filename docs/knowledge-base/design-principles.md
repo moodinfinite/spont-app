@@ -39,7 +39,7 @@ Four roles. Everything on screen takes one of them.
 | Role | Light | Dark |
 | --- | --- | --- |
 | Ground | `#EDEEE9` | `#0D0D0B` |
-| Card | `#FFFFFF` | `#1F1F1A` |
+| Card | `#FFFFFF` | `#292921` |
 | Ink | `#15150F` | `#F2F2EA` |
 | Accent (green) | `#C6FF4E` | `#D2FF66` |
 
@@ -74,8 +74,10 @@ viewer has chosen a theme or left it on system.
 - **Dark mode needs an edge, not a shadow.** A drop shadow does nothing
   against a dark ground, so in dark themes cards carry a 1px inset
   light edge alongside the shadow, and the ground/card pair is held far
-  enough apart (`#0D0D0B` against `#1F1F1A`) that surfaces don't
-  dissolve into the page.
+  enough apart (`#0D0D0B` against `#292921`) that surfaces don't
+  dissolve into the page. Every surface that sits *on* a card — chips,
+  photo placeholders, the dock — has to clear it in turn, so lifting the
+  card means lifting those too.
 - **No borders as separators between cards** — elevation does that work.
   Hairlines (1.5px at ~8% ink) are only used *inside* a surface, to
   divide rows of a list.
@@ -151,6 +153,19 @@ survive being small, not for making large text louder. Use
   committing are different acts. A decline costs nothing; only
   accept-then-no-show should ever affect reliability. This is why the
   decline button says "Not this time" and not "Flake."
+- **Undo and cancel are different acts, separated by time.** Accepting
+  holds for a five-second undo window before anything reaches the
+  calendar — inside it, taking it back leaves no trace and notifies
+  nobody. Past it, the only route is "Can't make it" from Upcoming,
+  which does tell them. Undo is free because nothing happened; cancel
+  isn't, because it did.
+- **The app can't repair the social part, so it should point at it.**
+  Cancelling ends on a nudge to text the person directly — Spont won't
+  explain why, and they'll take it better from you. Automating the
+  apology would be worse than not offering one.
+- **A cancelled slot goes back, it doesn't vanish.** The time returns to
+  whoever you were meeting so they can keep it open or let it go, rather
+  than the plan silently disappearing from one side.
 
 ## Product-decision patterns
 
