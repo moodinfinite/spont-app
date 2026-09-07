@@ -362,12 +362,22 @@
   .empty-note {
     display: none;
     text-align: center;
-    font-size: 13.5px;
-    color: var(--ink-2);
     background: var(--card);
     border-radius: 24px;
     box-shadow: var(--shadow-soft);
-    padding: 30px 24px;
+    padding: 34px 24px;
+  }
+  .empty-head {
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 21px;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .empty-sub {
+    font-size: 13.5px;
+    color: var(--ink-2);
     line-height: 1.55;
     margin: 0;
   }
@@ -599,7 +609,10 @@
       </div>
     </article>
 
-    <p class="empty-note" id="empty-note">Nothing open in this stretch yet. Spont will drop something in when it finds a window.</p>
+    <div class="empty-note" id="empty-note">
+      <p class="empty-head">Nothing to decide.</p>
+      <p class="empty-sub">That's the idea. We'll shout when a window opens.</p>
+    </div>
   </div>
 
   <div class="section-label"><span>Upcoming — already locked in</span><span>2</span></div>
@@ -615,7 +628,7 @@
       <span class="upcoming-when">Sat Sep 26<br>7:00–9:00 PM</span>
     </div>
   </div>
-  <p class="closing-note">That's everything for the next 30 days — one open slot a day, at most.</p>
+  <p class="closing-note">That's everything for the next 30 days — two open slots a day, at most.</p>
 </div>
 
 <div class="dock-wrap">
