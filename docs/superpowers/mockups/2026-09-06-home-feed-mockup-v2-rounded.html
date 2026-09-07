@@ -35,8 +35,8 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       /* dark: neutral dark ground, the suggested card inverts to neon */
-      --page: #121210;
-      --card: #1C1C17;
+      --page: #0D0D0B;
+      --card: #1F1F1A;
       --ink: #F2F2EA;
       --ink-2: #A3A398;
       --ink-3: #6E6E63;
@@ -57,13 +57,13 @@
       --dock-ink: #EFF3E6;
       --dock-ink-muted: rgba(239, 243, 230, 0.42);
       --hairline: rgba(239, 243, 230, 0.08);
-      --shadow: 0 14px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
-      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.3);
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.07);
+      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.06);
     }
   }
   :root[data-theme="dark"] {
-    --page: #121210;
-    --card: #1C1C17;
+    --page: #0D0D0B;
+    --card: #1F1F1A;
     --ink: #F2F2EA;
     --ink-2: #A3A398;
     --ink-3: #6E6E63;
@@ -84,8 +84,8 @@
     --dock-ink: #EFF3E6;
     --dock-ink-muted: rgba(239, 243, 230, 0.42);
     --hairline: rgba(239, 243, 230, 0.08);
-    --shadow: 0 14px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.3);
+    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.07);
+    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.06);
   }
 
   * { box-sizing: border-box; }
@@ -227,10 +227,41 @@
 
 
   /* ---------------- Cards ---------------- */
+  .recs { --card-r: 26px; --photo-r: 18px; }
+  .recs[data-radius="sharp"]   { --card-r: 8px;  --photo-r: 5px; }
+  .recs[data-radius="soft"]    { --card-r: 16px; --photo-r: 11px; }
+  .recs[data-radius="rounded"] { --card-r: 26px; --photo-r: 18px; }
+  .recs[data-radius="pill"]    { --card-r: 36px; --photo-r: 26px; }
+
+  .radius-control {
+    position: fixed;
+    top: 16px;
+    left: max(14px, calc(50vw - 240px + 14px));
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    box-shadow: var(--shadow-soft);
+    border-radius: 999px;
+    padding: 5px 8px 5px 12px;
+  }
+  .radius-control .label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-3); margin-right: 2px;
+  }
+  .radius-control button {
+    border: none; background: transparent; border-radius: 999px;
+    padding: 6px 10px; cursor: pointer;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 11.5px;
+    color: var(--ink-2);
+  }
+  .radius-control button[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); }
+
   .card {
     position: relative;
     background: var(--card);
-    border-radius: 26px;
+    border-radius: var(--card-r);
     box-shadow: var(--shadow);
     overflow: hidden;
   }
@@ -299,7 +330,10 @@
   }
   .confirm-sub { font-size: 13px; margin: 0; opacity: 0.75; }
   .undo-btn {
-    margin-top: 14px;
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
     border: none;
     border-radius: 999px;
     background: var(--ink);
@@ -388,7 +422,7 @@
 
   .card-photo {
     margin: 0 14px;
-    border-radius: 18px;
+    border-radius: var(--photo-r);
     overflow: hidden;
     height: 150px;
     background: var(--photo-bg);
@@ -618,7 +652,15 @@
     <button class="filter" type="button" data-range="month" aria-pressed="true">This month <span class="count">3</span></button>
   </div>
 
-  <div class="recs" id="feed">
+  <div class="radius-control" role="group" aria-label="Card corner radius">
+    <span class="label">Corners</span>
+    <button type="button" data-radius="sharp" aria-pressed="false">8</button>
+    <button type="button" data-radius="soft" aria-pressed="false">16</button>
+    <button type="button" data-radius="rounded" aria-pressed="true">26</button>
+    <button type="button" data-radius="pill" aria-pressed="false">36</button>
+  </div>
+
+  <div class="recs" id="feed" data-radius="rounded">
     <!-- Bob: friend invite -->
     <article class="card" data-range="today" data-who="Jeff" data-date="Sun Sep 6" data-time="5:30–7:00 PM">
       <div class="card-top">
@@ -875,6 +917,16 @@
   });
 
   applyFilter('month');
+
+  // Corner radius — review control, not app UI.
+  document.querySelectorAll('.radius-control button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      feed.setAttribute('data-radius', b.getAttribute('data-radius'));
+      document.querySelectorAll('.radius-control button').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o === b));
+      });
+    });
+  });
 
   var root = document.documentElement;
   var btn = document.getElementById('theme-toggle');

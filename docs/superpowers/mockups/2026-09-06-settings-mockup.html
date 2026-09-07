@@ -24,8 +24,8 @@
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --page: #121210;
-      --card: #1C1C17;
+      --page: #0D0D0B;
+      --card: #1F1F1A;
       --ink: #F2F2EA;
       --ink-2: #A3A398;
       --ink-3: #6E6E63;
@@ -40,13 +40,13 @@
       --dock-2: #222819;
       --dock-ink: #EFF3E6;
       --dock-ink-muted: rgba(239, 243, 230, 0.42);
-      --shadow: 0 14px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
-      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.3);
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.07);
+      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.06);
     }
   }
   :root[data-theme="dark"] {
-    --page: #121210;
-    --card: #1C1C17;
+    --page: #0D0D0B;
+    --card: #1F1F1A;
     --ink: #F2F2EA;
     --ink-2: #A3A398;
     --ink-3: #6E6E63;
@@ -61,8 +61,8 @@
     --dock-2: #222819;
     --dock-ink: #EFF3E6;
     --dock-ink-muted: rgba(239, 243, 230, 0.42);
-    --shadow: 0 14px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.3);
+    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.07);
+    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.06);
   }
 
   * { box-sizing: border-box; }
@@ -126,13 +126,6 @@
     text-transform: uppercase; color: var(--ink-3);
     margin: 16px 0 8px;
   }
-  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
-  .preset {
-    border: 1.5px solid var(--hairline); background: none; color: var(--ink-2);
-    border-radius: 999px; padding: 8px 13px; cursor: pointer;
-    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12px;
-  }
-  .preset[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
 
   .buckets { display: flex; flex-wrap: wrap; gap: 6px; }
   .bucket {
@@ -150,7 +143,25 @@
     text-decoration: line-through;
     text-decoration-thickness: 1.5px;
   }
-  .bucket-hint { font-size: 12px; color: var(--ink-3); margin: 14px 0 0; line-height: 1.5; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 14px 0 6px; }
+  .legend-item {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 600; color: var(--ink-2);
+  }
+  .legend-chip {
+    width: 22px; height: 14px; border-radius: 999px; flex: none;
+    background: var(--chip);
+  }
+  .legend-chip[data-state="1"] { background: var(--btn-bg); }
+  .legend-chip[data-state="2"] {
+    background: transparent; box-shadow: inset 0 0 0 1.5px var(--hairline);
+    position: relative;
+  }
+  .legend-chip[data-state="2"]::after {
+    content: ""; position: absolute; left: 3px; right: 3px; top: 50%;
+    height: 1.5px; background: var(--ink-3);
+  }
+  .bucket-hint { font-size: 12px; color: var(--ink-3); margin: 0 0 4px; line-height: 1.5; }
   .bucket-hint b { color: var(--ink-2); font-weight: 700; }
 
   .pending {
@@ -267,16 +278,16 @@
 
     <div class="signal">
       <div class="signal-top"><span class="signal-name">When you're up for it</span></div>
-      <p class="signal-desc">Not when you're free — your calendar handles that. When you'd actually
-        want to see someone. Weekdays and weekends are split, because they are.</p>
+      <p class="signal-desc">Your calendar already knows when you're <i>free</i>. This is when you'd
+        actually <i>want</i> to see someone — 6pm Tuesday and 6pm Saturday are different questions,
+        so they're asked separately.</p>
 
-      <p class="bucket-label">Start from</p>
-      <div class="presets" id="presets">
-        <button class="preset" type="button" data-preset="weeknights">Weeknights person</button>
-        <button class="preset" type="button" data-preset="weekend">Weekend daytime</button>
-        <button class="preset" type="button" data-preset="lunch">Lunch breaks</button>
-        <button class="preset" type="button" data-preset="early">Early riser</button>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-chip" data-state="0"></span>No preference</span>
+        <span class="legend-item"><span class="legend-chip" data-state="1"></span>Up for it</span>
+        <span class="legend-item"><span class="legend-chip" data-state="2"></span>Never</span>
       </div>
+      <p class="bucket-hint">Tap a time to cycle through the three.</p>
 
       <p class="bucket-label">Weekdays</p>
       <div class="buckets" data-set="weekday">
@@ -296,16 +307,17 @@
         <button class="bucket" type="button" data-state="0" data-key="we-late">Late</button>
       </div>
 
-      <p class="bucket-hint">Tap once for <b>yes</b>, twice for <b>never</b>. Anything left plain is fair game.</p>
     </div>
 
     <div class="signal">
       <div class="signal-top"><span class="signal-name">Room around your day</span></div>
-      <p class="signal-desc">Keeps a buffer either side of what's already booked, so nothing lands hard against a meeting.</p>
+      <p class="signal-desc">How much breathing space to leave either side of whatever's already
+        booked, so nothing lands hard against a meeting.</p>
       <div class="weights" role="group" aria-label="Room around your day">
-        <button class="weight" aria-pressed="false">Off</button>
-        <button class="weight" aria-pressed="true">Normal</button>
-        <button class="weight" aria-pressed="false">More</button>
+        <button class="weight" aria-pressed="false">None</button>
+        <button class="weight" aria-pressed="true">30 min</button>
+        <button class="weight" aria-pressed="false">60 min</button>
+        <button class="weight" aria-pressed="false">90 min</button>
       </div>
     </div>
 
@@ -435,7 +447,10 @@
       if (!b || b.disabled) return;
       group.querySelectorAll('button').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
       var signal = group.closest('.signal');
-      if (signal) signal.classList.toggle('is-off', b.textContent.trim() === 'Off');
+      if (signal) {
+        var t = b.textContent.trim();
+        signal.classList.toggle('is-off', t === 'Off' || t === 'None');
+      }
     });
   });
 
@@ -444,28 +459,6 @@
     b.addEventListener('click', function () {
       var next = (parseInt(b.getAttribute('data-state'), 10) + 1) % 3;
       b.setAttribute('data-state', String(next));
-      document.querySelectorAll('.preset').forEach(function (p) {
-        p.setAttribute('aria-pressed', 'false');
-      });
-    });
-  });
-
-  // Presets fill the buckets in; you can correct them afterwards.
-  var PRESETS = {
-    weeknights: { 'wd-after': 1, 'wd-evening': 1, 'wd-before': 2 },
-    weekend:    { 'we-morning': 1, 'we-midday': 1, 'we-afternoon': 1, 'we-late': 2 },
-    lunch:      { 'wd-lunch': 1, 'we-midday': 1 },
-    early:      { 'wd-before': 1, 'we-morning': 1, 'wd-late': 2, 'we-late': 2 }
-  };
-  document.querySelectorAll('.preset').forEach(function (p) {
-    p.addEventListener('click', function () {
-      var map = PRESETS[p.getAttribute('data-preset')] || {};
-      document.querySelectorAll('.bucket').forEach(function (b) {
-        b.setAttribute('data-state', String(map[b.getAttribute('data-key')] || 0));
-      });
-      document.querySelectorAll('.preset').forEach(function (o) {
-        o.setAttribute('aria-pressed', String(o === p));
-      });
     });
   });
 
