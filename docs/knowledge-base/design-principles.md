@@ -65,9 +65,17 @@ viewer has chosen a theme or left it on system.
 
 ## Shape and surface
 
-- **Soft, rounded, shadowed.** Cards are 26px radius with a soft
-  two-layer shadow; buttons, chips, avatars and the nav dock are full
-  pills (999px). Lists are 22px.
+- **Soft, rounded, shadowed.** Cards and panels are 16px radius with a
+  soft two-layer shadow; inner crops (a card's photo) sit at 11px;
+  buttons, chips, avatars and the nav dock are full pills (999px).
+  16px was chosen against 8, 26 and 36: 8 fought the pill buttons and
+  round dock, 36 read as a toy, and 26 made cards feel like lozenges
+  rather than objects.
+- **Dark mode needs an edge, not a shadow.** A drop shadow does nothing
+  against a dark ground, so in dark themes cards carry a 1px inset
+  light edge alongside the shadow, and the ground/card pair is held far
+  enough apart (`#0D0D0B` against `#1F1F1A`) that surfaces don't
+  dissolve into the page.
 - **No borders as separators between cards** — elevation does that work.
   Hairlines (1.5px at ~8% ink) are only used *inside* a surface, to
   divide rows of a list.
