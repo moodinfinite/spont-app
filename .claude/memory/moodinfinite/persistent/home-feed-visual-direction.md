@@ -44,13 +44,29 @@ was replaced wholesale rather than blended:
   on the page ground, one weight, one color, not bold.
 - **Flake score removed from cards entirely** (see
   [[reliability-ranking-direction]] for where it went instead).
+- **Corner radius is 16px**, settled by comparing 8/16/26/36 live: 8
+  fought the pill buttons and round dock, 36 read as a toy, 26 made
+  cards feel like lozenges rather than objects.
+- **Dark mode needs an edge, not a shadow.** Cards carry a 1px inset
+  light edge, and ground/card are held far apart (`#0D0D0B` against
+  `#292921`). This took two passes — the first lift wasn't enough, and
+  the second had to bring chips, photo placeholders and the dock up too,
+  since every surface sitting on a card has to keep clearing it.
+- **The dock lost "You"** — a single-person icon beside People's
+  two-person one, duplicating the header avatar. The avatar now persists
+  on every screen and is the route into Settings.
+- **Proposals cap raised to two a day**, and an emptied feed lands on
+  "You're set" rather than reading as a failure to find anything.
+
+See [[where-the-design-stands]] for the current state of every screen
+and the list of what's still open.
 
 ## Mockups
 
 Living in `docs/superpowers/mockups/`, all published as Artifacts:
 
-- `2026-09-06-home-feed-mockup-v2-rounded.html` — the feed. Carries a
-  Gap control (loose/snug/tight/fused) as a review affordance, not app UI.
+- `2026-09-06-home-feed-mockup-v2-rounded.html` — the feed. Interactive:
+  filters, accept with an undo window, decline, and cancel from Upcoming.
 - `2026-09-06-people-screen-mockup.html` — Friends/Groups.
 - `2026-09-06-welcome-screen-mockup.html` — first-run flow.
 - Three motion studies: `2026-09-06-connect-text-motion-study.html`,
@@ -63,12 +79,18 @@ Carol and Dave are retired — don't reintroduce them in new mockups.
 
 ## Status
 
-**Not yet reconciled with `docs/knowledge-base/design-principles.md`,
-deliberately.** That document still describes the white/red hairline
-system, and this direction contradicts it on shape, color and type. The
-session was run with principles explicitly held open ("we don't know
-what will stick yet"), so the mockups are ahead of the docs on purpose.
-Whoever takes this to a real spec needs to either rewrite
-design-principles.md around this direction or decide the pivot was an
-experiment. Note this also supersedes the previously flagged
-photo-card exception — rounded corners are now the rule, not a violation.
+**Reconciled.** `docs/knowledge-base/design-principles.md` was rewritten
+later the same day around this direction, and is now the source of truth
+for the visual system — this note holds the reasoning behind the pivot,
+not the spec. The rewrite keeps a closing section recording what the old
+white/red system solved and how the new one solves it differently, so
+reverting stays possible if the pivot turns out to have been an
+experiment. It also supersedes the previously flagged photo-card
+exception: rounded corners are the rule now, not a violation.
+
+**Still stale:**
+`docs/superpowers/specs/2026-09-05-home-feed-design-notes.md` predates
+all of this and still describes the white/red system and per-card flake
+scores. It hasn't been touched — it's point-in-time design history by
+the repo's own convention, but anyone reading it cold will be misled.
+Worth annotating as superseded.
