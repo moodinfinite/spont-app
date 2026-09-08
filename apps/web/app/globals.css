@@ -202,6 +202,21 @@ a {
   color: var(--dark-ink-2);
 }
 
+/* In dark mode this card inverts to the accent, so an accent-coloured button
+   inside it disappears. The action takes the card surface instead — it still
+   reads as the one thing to press, because it's the only pale shape there. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .card-dark .btn-yes {
+    background: var(--card);
+    color: var(--ink);
+  }
+}
+
+:root[data-theme='dark'] .card-dark .btn-yes {
+  background: var(--card);
+  color: var(--ink);
+}
+
 .row {
   display: flex;
   align-items: center;
