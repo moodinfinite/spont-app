@@ -300,6 +300,39 @@ a {
   color: var(--btn-ink);
 }
 
+/* A whole row that is itself the control — used for the one action in a
+   settings panel, so it keeps the row's shape instead of looking like a
+   button dropped into a list. */
+.row-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 15px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: left;
+}
+
+.row-action svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  opacity: 0.7;
+}
+
+/* Semantic, not the accent — the accent means "do this", red means "this
+   one is different". */
+.danger {
+  color: var(--warn);
+}
+
 /* ---------------- Dock ---------------- */
 
 .dock-wrap {

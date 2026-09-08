@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
 import { googleConfig } from '@/lib/google'
 
@@ -64,12 +63,6 @@ export default function WelcomePage({ searchParams }: { searchParams: { error?: 
           <p className="welcome-fine">
             We only ever see free or busy — never what&rsquo;s actually on your calendar.
           </p>
-
-          {process.env.NODE_ENV !== 'production' && (
-            <p className="welcome-fine">
-              <Link href="/login">Dev: sign in as a seeded user</Link>
-            </p>
-          )}
         </div>
       </div>
     </main>

@@ -3,15 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 /**
  * Reachable without a session. The Google routes have to be here or sign-up
  * is impossible — you can't authenticate your way to the thing that
- * authenticates you. `/login` stays for the dev-only seeded-user picker.
+ * authenticates you.
  */
-const PUBLIC_PATHS = [
-  '/welcome',
-  '/api/auth/google',
-  '/login',
-  '/api/auth/login',
-  '/api/users',
-]
+const PUBLIC_PATHS = ['/welcome', '/api/auth/google']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

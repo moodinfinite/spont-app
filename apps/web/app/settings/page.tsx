@@ -87,9 +87,7 @@ export default async function SettingsPage() {
         <span>Account</span>
       </div>
       <div className="panel">
-        <div className="row">
-          <LogoutButton />
-        </div>
+        <LogoutButton />
       </div>
 
       <p className="note">
