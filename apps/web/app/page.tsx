@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
 import { prisma } from '@spont/db'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { WaitingHeadline } from '@/components/waiting-headline'
 
 /**
  * The feed. There are no proposals yet — the matcher exists but nothing
@@ -36,6 +38,7 @@ export default async function HomePage() {
           {user.name.split(' ')[0]}.
         </h1>
         <div className="head-actions">
+          <ThemeToggle />
           <Link href="/notifications" className="icon-btn" aria-label="Notifications">
             <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path
@@ -66,12 +69,10 @@ function NobodyYet() {
   return (
     <>
       <div className="card-dark">
-        <h3 style={{ fontSize: 22, fontWeight: 400, letterSpacing: '-0.015em', marginBottom: 8 }}>
-          You&rsquo;re half of a match.
-        </h3>
+        <WaitingHeadline />
         <p style={{ margin: '0 0 16px', fontSize: 13.5, lineHeight: 1.55 }}>
-          Spont needs someone to match you with. Once a friend joins and connects their calendar,
-          it starts looking for where your gaps line up.
+          Your calendar is in. Spont needs one more person&rsquo;s before it can find where your
+          gaps line up.
         </p>
         <Link
           href="/friends"
@@ -82,8 +83,7 @@ function NobodyYet() {
         </Link>
       </div>
       <p className="note">
-        We&rsquo;ll let you know the moment there&rsquo;s something to say yes to. Nothing to check
-        in the meantime.
+        We look every morning. If there&rsquo;s a window in the next 30 days, it&rsquo;ll be here.
       </p>
     </>
   )

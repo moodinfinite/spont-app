@@ -8,6 +8,9 @@ export default async function FriendsPage() {
   const userId = getCurrentUserId()
   if (!userId) redirect('/welcome')
 
+  const me = await prisma.user.findUnique({ where: { id: userId } })
+  if (!me) redirect('/welcome')
+
   const [accepted, incoming, outgoing, allUsers] = await Promise.all([
     listFriends(prisma, userId),
     listIncomingRequests(prisma, userId),
@@ -28,6 +31,7 @@ export default async function FriendsPage() {
       incoming={incoming.map((f) => ({ id: f.id, from: f.userA }))}
       outgoing={outgoing.map((f) => ({ id: f.id, to: f.userB }))}
       directory={directory}
+      you={me.name.trim().charAt(0).toUpperCase()}
     />
   )
 }

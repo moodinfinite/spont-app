@@ -2,6 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Link from 'next/link'
+import { ThemeToggle } from '@/components/theme-toggle'
+
+const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
 type UserSummary = { id: string; name: string; email: string }
 
@@ -10,11 +14,13 @@ export function FriendsClient({
   incoming,
   outgoing,
   directory,
+  you,
 }: {
   accepted: UserSummary[]
   incoming: { id: string; from: UserSummary }[]
   outgoing: { id: string; to: UserSummary }[]
   directory: UserSummary[]
+  you: string
 }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -57,58 +63,135 @@ export function FriendsClient({
   }
 
   return (
-    <main>
-      <h1>Friends</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <main className="page">
+      <header className="page-head">
+        <h1>People.</h1>
+        <div className="head-actions">
+          <ThemeToggle />
+          <Link href="/settings" className="avatar" aria-label="You">
+            {you}
+          </Link>
+        </div>
+      </header>
 
-      <section>
-        <h2>Your friends</h2>
-        <ul>
+      {error && (
+        <p className="note" style={{ color: 'var(--warn)' }}>
+          {error}
+        </p>
+      )}
+
+      {incoming.length > 0 && (
+        <>
+          <div className="section-label">
+            <span>Waiting on you</span>
+            <span>{incoming.length}</span>
+          </div>
+          <div className="panel">
+            {incoming.map((r) => (
+              <div className="row" key={r.id}>
+                <span className="person-avatar">{initial(r.from.name)}</span>
+                <span className="person-name">{r.from.name}</span>
+                <button
+                  className="btn btn-yes"
+                  style={{ flex: 'none', padding: '10px 16px' }}
+                  disabled={pending}
+                  onClick={() => respond(r.id, true)}
+                >
+                  Accept
+                </button>
+                <button
+                  className="btn btn-no"
+                  style={{ padding: '10px 14px' }}
+                  disabled={pending}
+                  onClick={() => respond(r.id, false)}
+                >
+                  No
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className="section-label">
+        <span>Your people</span>
+        <span>{accepted.length}</span>
+      </div>
+      {accepted.length === 0 ? (
+        <div className="panel" style={{ textAlign: 'center', padding: '30px 24px' }}>
+          <p
+            style={{
+              fontFamily: "'Sora', system-ui, sans-serif",
+              fontWeight: 400,
+              fontSize: 20,
+              letterSpacing: '-0.015em',
+              margin: '0 0 6px',
+            }}
+          >
+            Nobody yet.
+          </p>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-2)', lineHeight: 1.55, margin: 0 }}>
+            Spont needs at least one other person before it can find anything.
+          </p>
+        </div>
+      ) : (
+        <div className="panel">
           {accepted.map((u) => (
-            <li key={u.id}>{u.name}</li>
+            <div className="row" key={u.id}>
+              <span className="person-avatar">{initial(u.name)}</span>
+              <span className="person-name">{u.name}</span>
+            </div>
           ))}
-        </ul>
-      </section>
+        </div>
+      )}
 
-      <section>
-        <h2>Requests waiting on you</h2>
-        <ul>
-          {incoming.map((r) => (
-            <li key={r.id}>
-              {r.from.name}{' '}
-              <button disabled={pending} onClick={() => respond(r.id, true)}>
-                Accept
-              </button>{' '}
-              <button disabled={pending} onClick={() => respond(r.id, false)}>
-                Decline
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {outgoing.length > 0 && (
+        <>
+          <div className="section-label">
+            <span>Asked, no answer yet</span>
+            <span>{outgoing.length}</span>
+          </div>
+          <div className="panel">
+            {outgoing.map((r) => (
+              <div className="row" key={r.id}>
+                <span className="person-avatar">{initial(r.to.name)}</span>
+                <span className="person-name">{r.to.name}</span>
+                <span style={{ fontSize: 12.5, color: 'var(--ink-3)', fontWeight: 600 }}>
+                  Waiting
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
-      <section>
-        <h2>Sent, awaiting response</h2>
-        <ul>
-          {outgoing.map((r) => (
-            <li key={r.id}>{r.to.name}</li>
-          ))}
-        </ul>
-      </section>
+      {directory.length > 0 && (
+        <>
+          <div className="section-label">
+            <span>Also on Spont</span>
+          </div>
+          <div className="panel">
+            {directory.map((u) => (
+              <div className="row" key={u.id}>
+                <span className="person-avatar">{initial(u.name)}</span>
+                <span className="person-name">{u.name}</span>
+                <button
+                  className="btn btn-no"
+                  style={{ padding: '10px 16px' }}
+                  disabled={pending}
+                  onClick={() => sendRequest(u.id)}
+                >
+                  Add
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
-      <section>
-        <h2>People you can add</h2>
-        <ul>
-          {directory.map((u) => (
-            <li key={u.id}>
-              {u.name}{' '}
-              <button disabled={pending} onClick={() => sendRequest(u.id)}>
-                Add friend
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <p className="note">
+        Spont only ever suggests times with people you have both agreed to.
+      </p>
     </main>
   )
 }

@@ -109,5 +109,6 @@ export async function GET(request: NextRequest) {
   })
 
   setSessionCookie(userId)
-  return NextResponse.redirect(new URL('/', request.url))
+  // Straight to the feed says nothing about whether that worked.
+  return NextResponse.redirect(new URL('/connected', request.url))
 }

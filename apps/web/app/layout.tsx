@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import './globals.css'
 import { getCurrentUserId } from '@/lib/session'
 import { Dock } from '@/components/dock'
+import { ThemeScript } from '@/components/theme-toggle'
 
 export const metadata = { title: 'Spont' }
 
@@ -15,6 +16,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <html lang="en">
+      <head>
+        <ThemeScript />
+      </head>
       <body>
         {children}
         {signedIn && <Dock />}
