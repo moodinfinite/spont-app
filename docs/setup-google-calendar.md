@@ -74,11 +74,12 @@ most common place to get stuck.
 
 Click **Add or remove scopes**. A panel opens with every scope for the
 APIs you've enabled, split into Non-sensitive, Sensitive and Restricted.
-Filter for `calendar` and pick two:
+Filter for `calendar` and pick two (confirmed in the console
+2026-09-07 — note the middle `events`, which is easy to get wrong):
 
 | Scope | Why |
 | --- | --- |
-| `.../auth/calendar.freebusy` | Read *when* someone is busy, never what the event is |
+| `.../auth/calendar.events.freebusy` | Read *when* someone is busy, never what the event is |
 | `.../auth/calendar.app.created` | Create and manage only a calendar Spont makes — no access to existing events |
 
 Avoid `calendar` and `calendar.events`: both grant read access to event
@@ -87,8 +88,13 @@ later if this ever goes public. This pairing is what makes the app's
 privacy line — "we only ever see free or busy, never what's actually on
 your calendar" — true by construction rather than by policy.
 
-If a scope isn't in the list, there's a **manually add scopes** box at
-the bottom of the panel; paste the full URL. And whichever route you
+Both land under **"Your non-sensitive scopes"**, which is the good
+outcome — see the note on verification below.
+
+If a scope isn't in the list, the Calendar API probably isn't enabled
+yet (step 2); the picker only shows scopes for enabled APIs, and pasting
+into **manually add scopes** would leave you consenting to an API the
+project can't actually call. And whichever route you
 take, **click Update, then Save at the bottom of the page** — the panel
 closing does not mean anything was saved.
 
@@ -141,18 +147,23 @@ signing in again — so a test running longer than a week means everyone
 reconnecting, which will read as the app being broken rather than as a
 Google policy.
 
-Options, in order of effort:
+**The way out is cheaper than expected.** Both scopes above are
+classified *non-sensitive*, and Google's verification review is
+triggered by sensitive and restricted scopes — so publishing this app
+should not require a review. Published apps don't have the seven-day
+expiry.
 
-1. **Live with it** for a short test, and tell testers up front they'll
-   re-connect once a week.
-2. **Publish the app** (consent screen → Publish). With the narrow
-   scopes above this may go through with little friction, and tokens
-   stop expiring. Verification review applies to sensitive scopes.
-3. **Fall back to the mock provider** for the first pass and test the
-   loop rather than real availability.
+So, in order:
 
-Worth deciding before building far, because it changes what the test can
-actually tell you.
+1. **Stay in Testing** while you're the only user. Fine for a few days.
+2. **Publish before the test goes long** (consent screen → Publish app).
+   Confirm no review is demanded at that point; with non-sensitive
+   scopes it shouldn't be.
+3. **Fall back to the mock provider** only if something unexpected
+   blocks both, and test the loop rather than real availability.
+
+Worth knowing the narrow scopes bought this: the choice that keeps the
+privacy promise honest is also the one that keeps Google out of the way.
 
 ## What Spont still needs after this
 
