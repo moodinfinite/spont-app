@@ -26,6 +26,7 @@ export const GOOGLE_SCOPES = [
 ]
 
 export const STATE_COOKIE = 'spont_oauth_state'
+export const INVITE_COOKIE = 'spont_invite'
 
 export interface GoogleConfig {
   clientId: string

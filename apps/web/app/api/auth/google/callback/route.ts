@@ -6,6 +6,7 @@ import {
   exchangeCode,
   fetchIdentity,
   googleConfig,
+  INVITE_COOKIE,
   STATE_COOKIE,
   UnverifiedEmailError,
 } from '@/lib/google'
@@ -107,6 +108,32 @@ export async function GET(request: NextRequest) {
       tokenExpiresAt: tokens.expiresAt,
     },
   })
+
+  // Someone who arrived from an invite link shouldn't have to go and find
+  // that person again once they're in.
+  const invite = cookies().get(INVITE_COOKIE)?.value
+  if (invite) {
+    cookies().delete(INVITE_COOKIE)
+    const inviter = await prisma.user.findFirst({
+      where: { id: { endsWith: invite } },
+      select: { id: true },
+    })
+    if (inviter && inviter.id !== userId) {
+      const existingLink = await prisma.friendship.findFirst({
+        where: {
+          OR: [
+            { userAId: userId, userBId: inviter.id },
+            { userAId: inviter.id, userBId: userId },
+          ],
+        },
+      })
+      if (!existingLink) {
+        await prisma.friendship.create({
+          data: { userAId: userId, userBId: inviter.id, status: 'PENDING' },
+        })
+      }
+    }
+  }
 
   setSessionCookie(userId)
   // Straight to the feed says nothing about whether that worked.

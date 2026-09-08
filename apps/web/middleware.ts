@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
  * is impossible — you can't authenticate your way to the thing that
  * authenticates you.
  */
-const PUBLIC_PATHS = ['/welcome', '/api/auth/google']
+const PUBLIC_PATHS = ['/welcome', '/join', '/api/auth/google']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

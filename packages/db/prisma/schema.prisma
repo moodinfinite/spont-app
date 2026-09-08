@@ -34,6 +34,10 @@ model User {
   // { "wd-evening": "yes" | "never", ... }; absent keys mean no preference.
   hangoutTimes Json?
 
+  // The cap on what reaches the feed in a day. More isn't better — a short
+  // feed is what keeps the app something you close.
+  proposalsPerDay Int @default(2)
+
   // Set once onboarding has been walked through, so we don't drop a
   // returning user back into it.
   onboardedAt DateTime?

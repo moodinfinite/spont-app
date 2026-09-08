@@ -3,12 +3,15 @@ import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
 import { prisma } from '@spont/db'
 import { LogoutButton } from '@/components/logout-button'
+import { HangoutTimes } from '@/components/hangout-times'
+import { PreferencePicker } from '@/components/preference-picker'
 
 /**
  * Reached from the avatar in any page header, not from the dock.
- * Design: docs/superpowers/mockups/2026-09-06-settings-mockup.html — the
- * scheduling signals in that mockup arrive with the matcher; what's here is
- * what the app can honestly show today.
+ * Design: docs/superpowers/mockups/2026-09-06-settings-mockup.html
+ *
+ * Everything saves on tap. A settings screen in an app whose goal is that
+ * you don't open it shouldn't also ask you to remember to press Save.
  */
 export default async function SettingsPage() {
   const userId = getCurrentUserId()
@@ -18,6 +21,7 @@ export default async function SettingsPage() {
   if (!user) redirect('/welcome')
 
   const calendar = await prisma.calendarAccount.findFirst({ where: { userId } })
+  const times = (user.hangoutTimes ?? {}) as Record<string, 'yes' | 'never'>
 
   return (
     <main className="page">
@@ -37,14 +41,67 @@ export default async function SettingsPage() {
       </header>
 
       <div className="section-label">
-        <span>You</span>
+        <span>How Spont picks</span>
+      </div>
+      <div className="panel">
+        <div className="signal">
+          <div className="signal-name">Your hangout times</div>
+          <p className="signal-desc">
+            Your calendar already knows when you&rsquo;re free. This is when you&rsquo;d actually
+            want to see someone.
+          </p>
+          <HangoutTimes initial={times} cta="Save times" />
+        </div>
+
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">Hangout length</span>
+            <span className="row-sub">
+              Where two people differ, the shorter one wins — it&rsquo;s the one both are
+              comfortable with.
+            </span>
+          </span>
+          <PreferencePicker
+            field="preferredHangoutMinutes"
+            value={user.preferredHangoutMinutes}
+            options={[60, 90, 120, 180]}
+          />
+        </div>
+
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">Room around your day</span>
+            <span className="row-sub">
+              Breathing space either side, so nothing lands hard against a meeting.
+            </span>
+          </span>
+          <PreferencePicker
+            field="bufferMinutes"
+            value={user.bufferMinutes}
+            options={[0, 30, 60, 90]}
+          />
+        </div>
+      </div>
+
+      <div className="section-label">
+        <span>Proposals</span>
       </div>
       <div className="panel">
         <div className="row">
-          <span style={{ flex: 1 }}>
-            <strong style={{ display: 'block', fontSize: 14 }}>{user.name}</strong>
-            <span style={{ fontSize: 12.5, color: 'var(--ink-2)' }}>{user.email}</span>
+          <span className="row-text">
+            <span className="row-name">How many a day</span>
+            <span className="row-sub">
+              The cap on what reaches your feed. More isn&rsquo;t better.
+            </span>
           </span>
+          <PreferencePicker field="proposalsPerDay" value={user.proposalsPerDay} options={[1, 2, 3]} />
+        </div>
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">How far ahead</span>
+            <span className="row-sub">Spont won&rsquo;t propose anything past this.</span>
+          </span>
+          <span className="row-value">30 days</span>
         </div>
       </div>
 
@@ -53,13 +110,11 @@ export default async function SettingsPage() {
       </div>
       <div className="panel">
         <div className="row">
-          <span style={{ flex: 1 }}>
-            <strong style={{ display: 'block', fontSize: 14 }}>
-              {calendar ? 'Connected' : 'Not connected'}
-            </strong>
-            <span style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.45 }}>
+          <span className="row-text">
+            <span className="row-name">{calendar ? 'Google Calendar' : 'Not connected'}</span>
+            <span className="row-sub">
               {calendar
-                ? 'Free or busy only — never what’s actually on your calendar.'
+                ? 'Connected. Free or busy only — never what’s actually on it.'
                 : 'Spont can’t find anything until a calendar is connected.'}
             </span>
           </span>
@@ -67,44 +122,19 @@ export default async function SettingsPage() {
       </div>
 
       <div className="section-label">
-        <span>How Spont picks</span>
+        <span>You</span>
       </div>
       <div className="panel">
         <div className="row">
-          <span style={{ flex: 1 }}>
-            <strong style={{ display: 'block', fontSize: 14 }}>Hangout length</strong>
-            <span style={{ fontSize: 12.5, color: 'var(--ink-2)' }}>
-              Where two people differ, the shorter one wins.
-            </span>
-          </span>
-          <span style={{ fontSize: 13, color: 'var(--ink-2)', fontWeight: 600 }}>
-            {user.preferredHangoutMinutes} min
+          <span className="row-text">
+            <span className="row-name">{user.name}</span>
+            <span className="row-sub">{user.email}</span>
           </span>
         </div>
-        <div className="row">
-          <span style={{ flex: 1 }}>
-            <strong style={{ display: 'block', fontSize: 14 }}>Room around your day</strong>
-            <span style={{ fontSize: 12.5, color: 'var(--ink-2)' }}>
-              Breathing space either side of what&rsquo;s booked.
-            </span>
-          </span>
-          <span style={{ fontSize: 13, color: 'var(--ink-2)', fontWeight: 600 }}>
-            {user.bufferMinutes} min
-          </span>
-        </div>
-      </div>
-
-      <div className="section-label">
-        <span>Account</span>
-      </div>
-      <div className="panel">
         <LogoutButton />
       </div>
 
-      <p className="note">
-        Spont works fine if you never open this screen. That&rsquo;s the goal.
-      </p>
-
+      <p className="note">Spont works fine if you never open this screen. That&rsquo;s the goal.</p>
     </main>
   )
 }

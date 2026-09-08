@@ -18,6 +18,11 @@ export default async function FriendsPage() {
     prisma.user.findMany({ where: { id: { not: userId } } }),
   ])
 
+  const memberships = await prisma.groupMembership.findMany({
+    where: { userId, status: 'ACCEPTED' },
+    include: { group: { include: { _count: { select: { members: true } } } } },
+  })
+
   const excludedIds = new Set([
     ...accepted.map((u) => u.id),
     ...incoming.map((f) => f.userAId),
@@ -31,6 +36,11 @@ export default async function FriendsPage() {
       incoming={incoming.map((f) => ({ id: f.id, from: f.userA }))}
       outgoing={outgoing.map((f) => ({ id: f.id, to: f.userB }))}
       directory={directory}
+      groups={memberships.map((m) => ({
+        id: m.group.id,
+        name: m.group.name,
+        memberCount: m.group._count.members,
+      }))}
       you={me.name.trim().charAt(0).toUpperCase()}
     />
   )

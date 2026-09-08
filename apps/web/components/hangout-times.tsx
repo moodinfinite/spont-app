@@ -48,7 +48,7 @@ export function HangoutTimes({
   async function save() {
     setSaving(true)
     setError(null)
-    const res = await fetch('/api/me/hangout-times', {
+    const res = await fetch('/api/me/preferences', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hangoutTimes: times }),
