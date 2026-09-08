@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import crypto from 'node:crypto'
 import { prisma } from '@spont/db'
-import { exchangeCode, fetchIdentity, googleConfig, STATE_COOKIE } from '@/lib/google'
+import {
+  exchangeCode,
+  fetchIdentity,
+  googleConfig,
+  STATE_COOKIE,
+  UnverifiedEmailError,
+} from '@/lib/google'
 import { setSessionCookie } from '@/lib/session'
 
 const PROVIDER = 'google'
@@ -10,9 +17,24 @@ function back(request: NextRequest, error: string) {
   return NextResponse.redirect(new URL(`/welcome?error=${error}`, request.url))
 }
 
+/** Constant time, so a near-miss doesn't leak how near it was. */
+function matches(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8')
+  const bufB = Buffer.from(b, 'utf8')
+  if (bufA.length !== bufB.length) return false
+  return crypto.timingSafeEqual(bufA, bufB)
+}
+
 /**
- * Where Google sends people back to. This is the moment an account exists:
- * we find the user by the Google account id, or create one.
+ * Where Google sends people back to. This is the moment an account exists.
+ *
+ * Identity is keyed on Google's `sub` and nothing else. An earlier version
+ * fell back to matching on email and adopting that user, which is the classic
+ * pre-account-takeover shape: anyone who could get a row created for an
+ * address — the invite flow will do exactly that — would have handed the
+ * account to whoever signed in with it first. Linking an existing Spont
+ * account to a Google one needs a deliberate, signed-in merge step, not a
+ * silent match here.
  */
 export async function GET(request: NextRequest) {
   const config = googleConfig()
@@ -29,7 +51,7 @@ export async function GET(request: NextRequest) {
   cookies().delete(STATE_COOKIE)
 
   if (!code) return back(request, 'no_code')
-  if (!state || !expected || state !== expected) return back(request, 'bad_state')
+  if (!state || !expected || !matches(state, expected)) return back(request, 'bad_state')
 
   let identity
   let tokens
@@ -37,29 +59,39 @@ export async function GET(request: NextRequest) {
     tokens = await exchangeCode(config, code)
     identity = await fetchIdentity(tokens.accessToken)
   } catch (cause) {
+    if (cause instanceof UnverifiedEmailError) return back(request, 'unverified_email')
     console.error('Google sign-in failed', cause)
     return back(request, 'google_failed')
   }
 
-  // The Google account id is the stable identity; email can change.
   const existing = await prisma.calendarAccount.findFirst({
     where: { provider: PROVIDER, externalId: identity.sub },
   })
 
-  const user = existing
-    ? await prisma.user.update({
-        where: { id: existing.userId },
-        data: { email: identity.email },
-      })
-    : ((await prisma.user.findUnique({ where: { email: identity.email } })) ??
-      (await prisma.user.create({
-        data: { name: identity.name, email: identity.email },
-      })))
+  let userId: string
+
+  if (existing) {
+    const user = await prisma.user.update({
+      where: { id: existing.userId },
+      data: { email: identity.email, name: identity.name },
+    })
+    userId = user.id
+  } else {
+    // A Spont account already using this address, but never linked to this
+    // Google account. Refuse rather than adopt it.
+    const clash = await prisma.user.findUnique({ where: { email: identity.email } })
+    if (clash) return back(request, 'email_in_use')
+
+    const user = await prisma.user.create({
+      data: { name: identity.name, email: identity.email },
+    })
+    userId = user.id
+  }
 
   await prisma.calendarAccount.upsert({
-    where: { userId_provider: { userId: user.id, provider: PROVIDER } },
+    where: { userId_provider: { userId, provider: PROVIDER } },
     create: {
-      userId: user.id,
+      userId,
       provider: PROVIDER,
       externalId: identity.sub,
       accessToken: tokens.accessToken,
@@ -76,6 +108,6 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  setSessionCookie(user.id)
+  setSessionCookie(userId)
   return NextResponse.redirect(new URL('/', request.url))
 }

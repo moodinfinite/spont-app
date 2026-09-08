@@ -19,6 +19,10 @@ const MESSAGES: Record<string, string> = {
   no_code: 'Google sent us back without a code. Try again.',
   google_failed:
     "Google wouldn't finish the handshake. Try again, and check the setup if it keeps happening.",
+  unverified_email:
+    "Google hasn't verified that address, so we can't safely use it as your identity. Try an account with a verified email.",
+  email_in_use:
+    'There is already a Spont account with that email address. Sign in with the Google account it was created with.',
 }
 
 export default function WelcomePage({ searchParams }: { searchParams: { error?: string } }) {

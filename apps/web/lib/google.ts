@@ -108,6 +108,10 @@ export interface GoogleIdentity {
   name: string
 }
 
+/** Google returns this unset or false for some federated and Workspace
+ *  accounts, where the address is asserted rather than proven. */
+export class UnverifiedEmailError extends Error {}
+
 export async function fetchIdentity(accessToken: string): Promise<GoogleIdentity> {
   const response = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -117,9 +121,17 @@ export async function fetchIdentity(accessToken: string): Promise<GoogleIdentity
     throw new Error(`Could not read the Google profile: ${response.status}`)
   }
 
-  const data = (await response.json()) as { sub: string; email?: string; name?: string }
+  const data = (await response.json()) as {
+    sub: string
+    email?: string
+    email_verified?: boolean
+    name?: string
+  }
   if (!data.email) {
     throw new Error('Google did not return an email address — is the `email` scope granted?')
+  }
+  if (data.email_verified !== true) {
+    throw new UnverifiedEmailError('Google has not verified this address')
   }
 
   return {
