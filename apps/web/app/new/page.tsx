@@ -13,7 +13,7 @@ import { prisma } from '@spont/db'
  */
 export default async function NewHangoutPage() {
   const userId = getCurrentUserId()
-  if (!userId) redirect('/login')
+  if (!userId) redirect('/welcome')
 
   const friendships = await prisma.friendship.findMany({
     where: {

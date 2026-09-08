@@ -6,7 +6,7 @@ import { FriendsClient } from './friends-client'
 
 export default async function FriendsPage() {
   const userId = getCurrentUserId()
-  if (!userId) redirect('/login')
+  if (!userId) redirect('/welcome')
 
   const [accepted, incoming, outgoing, allUsers] = await Promise.all([
     listFriends(prisma, userId),

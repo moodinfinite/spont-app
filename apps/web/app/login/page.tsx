@@ -28,7 +28,10 @@ export default function LoginPage() {
   return (
     <main>
       <h1>Who are you?</h1>
-      <p>Dev-only picker — pick a seeded user to explore the app as them.</p>
+      <p>
+        Dev-only picker — pick a seeded user to explore the app as them. Real sign-up is{' '}
+        <a href="/welcome">connecting a calendar</a>.
+      </p>
       <ul>
         {users.map((u) => (
           <li key={u.id}>

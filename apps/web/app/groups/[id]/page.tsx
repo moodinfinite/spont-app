@@ -7,7 +7,7 @@ import { GroupDetailClient } from './group-detail-client'
 
 export default async function GroupDetailPage({ params }: { params: { id: string } }) {
   const userId = getCurrentUserId()
-  if (!userId) redirect('/login')
+  if (!userId) redirect('/welcome')
 
   const membership = await prisma.groupMembership.findUnique({
     where: { groupId_userId: { groupId: params.id, userId } },

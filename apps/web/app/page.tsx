@@ -13,7 +13,7 @@ import { prisma } from '@spont/db'
  */
 export default async function HomePage() {
   const userId = getCurrentUserId()
-  if (!userId) redirect('/login')
+  if (!userId) redirect('/welcome')
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -22,7 +22,7 @@ export default async function HomePage() {
       friendshipsReceived: { where: { status: 'ACCEPTED' } },
     },
   })
-  if (!user) redirect('/login')
+  if (!user) redirect('/welcome')
 
   const friendCount = user.friendshipsInitiated.length + user.friendshipsReceived.length
   const initial = user.name.trim().charAt(0).toUpperCase()

@@ -12,10 +12,10 @@ import { LogoutButton } from '@/components/logout-button'
  */
 export default async function SettingsPage() {
   const userId = getCurrentUserId()
-  if (!userId) redirect('/login')
+  if (!userId) redirect('/welcome')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (!user) redirect('/login')
+  if (!user) redirect('/welcome')
 
   const calendar = await prisma.calendarAccount.findFirst({ where: { userId } })
 

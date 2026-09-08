@@ -4,7 +4,7 @@ import { prisma } from '@spont/db'
 
 export default async function NotificationsPage() {
   const userId = getCurrentUserId()
-  if (!userId) redirect('/login')
+  if (!userId) redirect('/welcome')
 
   const notifications = await prisma.notification.findMany({
     where: { userId },

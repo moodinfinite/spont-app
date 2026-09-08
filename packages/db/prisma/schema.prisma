@@ -37,6 +37,13 @@ model CalendarAccount {
   externalId String
   createdAt  DateTime @default(now())
 
+  // Google's tokens. Stored as given, which is fine for a friends test but
+  // not for real users — a refresh token is long-lived access to somebody's
+  // calendar. Encrypt at rest before this leaves the allowlist.
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+
   user   User            @relation(fields: [userId], references: [id])
   events CalendarEvent[]
 
