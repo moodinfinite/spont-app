@@ -32,11 +32,7 @@ export default async function HomePage() {
   return (
     <main className="page">
       <header className="page-head">
-        <h1>
-          Welcome
-          <br />
-          {user.name.split(' ')[0]}.
-        </h1>
+        <h1>Welcome {user.name.split(' ')[0]}.</h1>
         <div className="head-actions">
           <ThemeToggle />
           <Link href="/notifications" className="icon-btn" aria-label="Notifications">
