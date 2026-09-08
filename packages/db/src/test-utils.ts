@@ -1,7 +1,6 @@
 import { prisma } from './client'
 
 export async function resetDb(): Promise<void> {
-  await prisma.notification.deleteMany()
   await prisma.groupMembership.deleteMany()
   await prisma.group.deleteMany()
   await prisma.friendship.deleteMany()

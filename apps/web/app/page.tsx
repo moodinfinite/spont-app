@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
 import { prisma } from '@spont/db'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { WaitingHeadline } from '@/components/waiting-headline'
 import { WeekScan } from '@/components/week-scan'
 import { weekView, type DayView } from '@/lib/availability'
@@ -29,30 +28,12 @@ export default async function HomePage() {
   if (!user) redirect('/welcome')
 
   const friendCount = user.friendshipsInitiated.length + user.friendshipsReceived.length
-  const initial = user.name.trim().charAt(0).toUpperCase()
   const days = await thisWeek(userId, user.preferredHangoutMinutes)
 
   return (
     <main className="page">
       <header className="page-head">
         <h1>Welcome {user.name.split(' ')[0]}.</h1>
-        <div className="head-actions">
-          <ThemeToggle />
-          <Link href="/notifications" className="icon-btn" aria-label="Notifications">
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path
-                d="M10 3a5 5 0 00-5 5v2.6c0 .5-.16 1-.46 1.4L3.6 13.6c-.6.8 0 1.9 1 1.9h10.8c1 0 1.6-1.1 1-1.9l-.94-1.6a2.4 2.4 0 01-.46-1.4V8a5 5 0 00-5-5z"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinejoin="round"
-              />
-              <path d="M8 17a2 2 0 004 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            </svg>
-          </Link>
-          <Link href="/settings" className="avatar" aria-label="You">
-            {initial}
-          </Link>
-        </div>
       </header>
 
       {friendCount === 0 ? (

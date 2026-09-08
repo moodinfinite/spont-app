@@ -113,6 +113,8 @@ a {
   max-width: 480px;
   margin: 0 auto;
   padding: 26px 18px 132px;
+  /* The accepted row flies in page coordinates — see .row-added. */
+  position: relative;
 }
 
 .page-head {
@@ -220,6 +222,23 @@ a {
   color: var(--ink);
 }
 
+/* The quiet half of a decision takes its outline from the card it sits on,
+   not the page — a page-coloured hairline vanishes against the dark card. */
+.card-dark .btn-no {
+  color: var(--dark-ink-2);
+  box-shadow: inset 0 0 0 1.5px rgba(243, 246, 234, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .card-dark .btn-no {
+    box-shadow: inset 0 0 0 1.5px rgba(22, 36, 10, 0.24);
+  }
+}
+
+:root[data-theme='dark'] .card-dark .btn-no {
+  box-shadow: inset 0 0 0 1.5px rgba(22, 36, 10, 0.24);
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -243,6 +262,28 @@ a {
   text-transform: uppercase;
   color: var(--ink-2);
 }
+
+/* The right slot of a section label, when that section has one thing you'd
+   actually want to do. Quiet enough not to compete with the list under it. */
+.section-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px 6px 9px;
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.section-action svg { width: 13px; height: 13px; }
 
 .note {
   text-align: center;
@@ -786,11 +827,15 @@ a {
   font-size: 15px;
 }
 
-.settings-head {
-  align-items: center;
+.head-back {
+  /* Top-aligned, not centred — a headline that runs to three lines would
+     otherwise leave the back arrow floating in the middle of it. */
+  align-items: flex-start;
   justify-content: flex-start;
   gap: 14px;
 }
+
+.head-back h1 { padding-top: 3px; }
 
 .back { background: var(--card); text-decoration: none; }
 
@@ -877,6 +922,93 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+/* Something on the other tab needs an answer. A dot rather than a count —
+   the number doesn't change what you do, and one waiting invite deserves the
+   same nudge as four. */
+.tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--warn);
+  align-self: center;
+}
+
+.pill[aria-current='page'] .tab-dot { background: var(--btn-ink); }
+
+/* ---------------- Accepting someone ----------------
+   The row says so where you tapped it, then carries the name down into Your
+   people, so you can see where they went rather than watching the page
+   reshuffle. Four studies are in
+   docs/superpowers/mockups/2026-09-08-accept-friend-motion.html; this is D's
+   in-place confirmation joined to A's travel, with the undo dropped —
+   nobody accepts a friend by accident. */
+
+.row-added {
+  background: var(--btn-bg);
+  border-radius: var(--radius-inner);
+  transition: background-color 340ms ease;
+}
+
+.row-added .person-name {
+  color: var(--btn-ink);
+  transition: color 340ms ease;
+}
+
+.row-added .person-avatar {
+  background: rgba(28, 43, 6, 0.14);
+  color: var(--btn-ink);
+  transition:
+    background-color 340ms ease,
+    color 340ms ease;
+}
+
+.row-added.in-flight {
+  z-index: 5;
+  box-shadow: var(--shadow);
+  transition:
+    top 480ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    box-shadow 480ms ease,
+    background-color 340ms ease;
+}
+
+/* Arrived. The green drains out and it's just a row in your list. */
+.row-added.landed {
+  background: var(--card);
+  box-shadow: none;
+}
+
+.row-added.landed .person-name {
+  color: var(--ink);
+}
+
+.row-added.landed .person-avatar {
+  background: var(--chip);
+  color: var(--ink);
+}
+
+/* Closes behind the row as it leaves, and opens in front of it as it
+   arrives. Same curve and duration as the flight, so the three read as one
+   movement rather than three. */
+.wait-collapse {
+  overflow: hidden;
+  transition:
+    height 460ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 220ms ease;
+}
+
+.landing-gap {
+  transition: height 480ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* Asked not to be moved: keep the confirmation, drop the travel. */
+@media (prefers-reduced-motion: reduce) {
+  .row-added.in-flight,
+  .wait-collapse,
+  .landing-gap {
+    transition: none;
+  }
+}
+
 .chev { color: var(--ink-3); flex: none; display: flex; }
 .chev svg { width: 15px; height: 15px; }
 
@@ -945,6 +1077,24 @@ a.row { text-decoration: none; }
 }
 
 .seg button[aria-pressed='true'] { background: var(--btn-bg); color: var(--btn-ink); }
+
+/* On a phone a row can't hold an explanation and four buttons side by side —
+   the label ends up four words wide. Narrow enough, and the control takes a
+   line of its own instead of squeezing the text that justifies it. */
+@media (max-width: 430px) {
+  .row:has(.seg) {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .row:has(.seg) .row-text {
+    flex: 1 1 100%;
+  }
+
+  .row:has(.seg) .seg {
+    margin-left: auto;
+  }
+}
 
 /* ---------------- Week scan ----------------
    The empty feed shows the engine looking rather than asserting it works.

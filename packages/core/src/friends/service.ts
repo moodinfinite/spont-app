@@ -57,7 +57,15 @@ export async function listFriends(prisma: PrismaClient, userId: string): Promise
     },
     include: { userA: true, userB: true },
   })
-  return friendships.map((f) => (f.userAId === userId ? f.userB : f.userA))
+  /**
+   * Sorted by name, because unsorted meant whatever order Postgres felt like
+   * returning — a list of people that could reshuffle between two loads for
+   * no reason the reader could see. It also gives the accepted-friend
+   * animation somewhere definite to land.
+   */
+  return friendships
+    .map((f) => (f.userAId === userId ? f.userB : f.userA))
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export async function listIncomingRequests(prisma: PrismaClient, userId: string) {

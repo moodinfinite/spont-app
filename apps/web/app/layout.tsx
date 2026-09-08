@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import './globals.css'
 import { getCurrentUserId } from '@/lib/session'
+import { prisma } from '@spont/db'
 import { Dock } from '@/components/dock'
 import { ThemeScript } from '@/components/theme-toggle'
 
@@ -8,11 +9,22 @@ export const metadata = { title: 'Spont' }
 
 /**
  * Chrome is deliberately thin: no top nav bar. Navigation is the floating
- * dock, and identity lives in each page's own header, where the avatar is
- * the way into Settings. See docs/knowledge-base/design-principles.md.
+ * dock — Home, People, Settings — and page headers carry nothing but their
+ * own title. See docs/knowledge-base/design-principles.md.
  */
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const userId = getCurrentUserId()
+
+  /**
+   * A signed cookie only proves the session was issued by us, not that the
+   * person it names still exists — a seeded database that gets rebuilt leaves
+   * cookies pointing at ids that are gone. Trusting the cookie alone put the
+   * dock on the welcome screen, offering Home and Settings to someone the app
+   * was about to send back to sign-in.
+   */
+  const user = userId
+    ? await prisma.user.findUnique({ where: { id: userId }, select: { id: true } })
+    : null
 
   return (
     <html lang="en">
@@ -23,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {children}
         {/* The same short code the People page shares — the tail of the id,
             not the whole thing. */}
-        {userId && <Dock inviteCode={userId.slice(-6)} />}
+        {user && <Dock inviteCode={user.id.slice(-6)} />}
       </body>
     </html>
   )

@@ -18,9 +18,26 @@ export default async function FriendsPage() {
     prisma.user.findMany({ where: { id: { not: userId } } }),
   ])
 
+  /**
+   * "3 people" has to mean three people who said yes. Counting every
+   * membership row counted the invitations too, so a group of two with one
+   * unanswered invite advertised itself as three — the same silence-as-a-yes
+   * the group screens go out of their way to avoid showing.
+   */
   const memberships = await prisma.groupMembership.findMany({
     where: { userId, status: 'ACCEPTED' },
-    include: { group: { include: { _count: { select: { members: true } } } } },
+    include: { group: { include: { members: { where: { status: 'ACCEPTED' }, select: { id: true } } } } },
+  })
+
+  /**
+   * Groups you've been asked to join. Without this the invite page is only
+   * reachable by direct link — the Groups tab counts accepted memberships,
+   * so a pending invite was invisible from inside the app.
+   */
+  const groupInvites = await prisma.groupMembership.findMany({
+    where: { userId, status: 'INVITED' },
+    include: { group: true },
+    orderBy: { createdAt: 'desc' },
   })
 
   const excludedIds = new Set([
@@ -39,9 +56,10 @@ export default async function FriendsPage() {
       groups={memberships.map((m) => ({
         id: m.group.id,
         name: m.group.name,
-        memberCount: m.group._count.members,
+        memberCount: m.group.members.length,
       }))}
-      you={me.name.trim().charAt(0).toUpperCase()}
+      groupInvites={groupInvites.map((m) => ({ id: m.group.id, name: m.group.name }))}
+      inviteCode={userId.slice(-6)}
     />
   )
 }

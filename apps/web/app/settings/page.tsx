@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
 import { prisma } from '@spont/db'
 import { LogoutButton } from '@/components/logout-button'
 import { HangoutTimes } from '@/components/hangout-times'
 import { PreferencePicker } from '@/components/preference-picker'
+import { ThemeChoice } from '@/components/theme-toggle'
 
 /**
- * Reached from the avatar in any page header, not from the dock.
+ * A stop on the dock, alongside Home and People.
  * Design: docs/superpowers/mockups/2026-09-06-settings-mockup.html
  *
  * Everything saves on tap. A settings screen in an app whose goal is that
@@ -25,18 +25,7 @@ export default async function SettingsPage() {
 
   return (
     <main className="page">
-      <header className="page-head settings-head">
-        <Link href="/" className="icon-btn back" aria-label="Back to your feed">
-          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path
-              d="M12 4l-6 6 6 6"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
+      <header className="page-head">
         <h1>Settings.</h1>
       </header>
 
@@ -122,10 +111,26 @@ export default async function SettingsPage() {
       </div>
 
       <div className="section-label">
+        <span>Appearance</span>
+      </div>
+      <div className="panel">
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">Light or dark</span>
+            <span className="row-sub">Follow your phone, or override it on this device.</span>
+          </span>
+          <ThemeChoice />
+        </div>
+      </div>
+
+      <div className="section-label">
         <span>You</span>
       </div>
       <div className="panel">
         <div className="row">
+          <span className="avatar" aria-hidden="true">
+            {user.name.trim().charAt(0).toUpperCase()}
+          </span>
           <span className="row-text">
             <span className="row-name">{user.name}</span>
             <span className="row-sub">{user.email}</span>
