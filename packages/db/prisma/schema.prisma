@@ -28,6 +28,15 @@ model User {
   // the one both are comfortable with.
   preferredHangoutMinutes Int @default(120)
   bufferMinutes           Int @default(30)
+
+  // Which parts of the week this person actually wants to see people in —
+  // appetite, not availability, which the calendar already knows. Shaped
+  // { "wd-evening": "yes" | "never", ... }; absent keys mean no preference.
+  hangoutTimes Json?
+
+  // Set once onboarding has been walked through, so we don't drop a
+  // returning user back into it.
+  onboardedAt DateTime?
 }
 
 model CalendarAccount {

@@ -8,11 +8,12 @@ function daysFromNow(days: number, hour: number): Date {
 }
 
 const SEED_USERS = [
-  { name: 'Alice', email: 'alice@example.com' },
-  { name: 'Bob', email: 'bob@example.com' },
-  { name: 'Carol', email: 'carol@example.com' },
-  { name: 'Dave', email: 'dave@example.com' },
-  { name: 'Erin', email: 'erin@example.com' },
+  { name: 'Raghav', email: 'raghav@example.com' },
+  { name: 'Jeff', email: 'jeff@example.com' },
+  { name: 'Edward', email: 'edward@example.com' },
+  { name: 'Ming', email: 'ming@example.com' },
+  { name: 'Rod', email: 'rod@example.com' },
+  { name: 'John', email: 'john@example.com' },
 ]
 
 const EVENT_TEMPLATES = [

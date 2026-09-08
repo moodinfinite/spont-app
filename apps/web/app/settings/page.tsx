@@ -21,7 +21,18 @@ export default async function SettingsPage() {
 
   return (
     <main className="page">
-      <header className="page-head">
+      <header className="page-head settings-head">
+        <Link href="/" className="icon-btn back" aria-label="Back to your feed">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path
+              d="M12 4l-6 6 6 6"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
         <h1>Settings.</h1>
       </header>
 
@@ -94,9 +105,6 @@ export default async function SettingsPage() {
         Spont works fine if you never open this screen. That&rsquo;s the goal.
       </p>
 
-      <p className="note">
-        <Link href="/">Back to your feed</Link>
-      </p>
     </main>
   )
 }

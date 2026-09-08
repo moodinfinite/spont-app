@@ -2,31 +2,57 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
 import { prisma } from '@spont/db'
-import { findOpenings } from '@/lib/google-calendar'
 import { InviteLink } from '@/components/invite-link'
+import { HangoutTimes } from '@/components/hangout-times'
 
 /**
- * The moment after connecting a calendar.
+ * Setup, after the calendar is connected. Follows the cold-start flow from
+ * docs/superpowers/mockups/2026-09-07-cold-start-flow.html: acknowledge the
+ * connection, get invites moving, then ask about times.
  *
- * Someone has just clicked through an "unverified app" warning and handed
- * over calendar access. Dropping them straight onto an empty feed says
- * nothing about whether that worked. This closes the loop, and does it with
- * their own data: real windows read from their real calendar, before a single
- * friend exists.
+ * Invites come before preferences on purpose — an invite has to travel to
+ * someone else and wait for them, so it should start as early as possible.
+ * Preferences are instant and can fill the wait.
+ *
+ * Deliberately not showing this person's own free windows here. Spont is
+ * about where two calendars overlap; your own gaps aren't the product, and
+ * showing them implies a promise the app can't keep alone.
  */
-export default async function ConnectedPage() {
+export default async function ConnectedPage({
+  searchParams,
+}: {
+  searchParams: { step?: string }
+}) {
   const userId = getCurrentUserId()
   if (!userId) redirect('/welcome')
 
-  const account = await prisma.calendarAccount.findFirst({
-    where: { userId, provider: 'google' },
-  })
-  if (!account) redirect('/')
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) redirect('/welcome')
 
-  const openings = await findOpenings(account.id, { days: 30, limit: 4 })
+  const step = searchParams.step === 'times' ? 'times' : 'invite'
 
-  const fmtDay = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-  const fmtTime = new Intl.DateTimeFormat('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true })
+  if (step === 'times') {
+    const stored = (user.hangoutTimes ?? {}) as Record<string, 'yes' | 'never'>
+
+    return (
+      <main className="page">
+        <div className="setup-steps" aria-hidden="true">
+          <i className="on" />
+          <i className="on" />
+        </div>
+
+        <h1 className="connected-head">What are your preferences for hangout times?</h1>
+        <p className="connected-lede">
+          Your calendar already knows when you&rsquo;re <i>free</i>. This is when you&rsquo;d
+          actually want to see someone.
+        </p>
+
+        <HangoutTimes initial={stored} onSaved="/" cta="Done" />
+
+        <p className="note">You can change these later, but you shouldn&rsquo;t need to.</p>
+      </main>
+    )
+  }
 
   return (
     <main className="page">
@@ -46,53 +72,23 @@ export default async function ConnectedPage() {
       </div>
 
       <h1 className="connected-head">Calendar connected.</h1>
+      <p className="connected-lede">
+        Spont can see when you&rsquo;re free. It needs someone else&rsquo;s calendar before it can
+        find where you overlap — so this is the part that matters.
+      </p>
 
-      {openings === null ? (
-        <p className="connected-lede">
-          We couldn&rsquo;t read your calendar just now — it&rsquo;s connected, so this usually
-          sorts itself out. Nothing else to do here.
-        </p>
-      ) : openings.length === 0 ? (
-        <p className="connected-lede">
-          You look busy for the next month. Spont will keep watching — the moment something opens
-          up alongside a friend, it&rsquo;ll be waiting for you.
-        </p>
-      ) : (
-        <>
-          <p className="connected-lede">
-            We found {openings.length === 1 ? 'a window' : `${openings.length} windows`} where
-            you&rsquo;re free over the next month. Now let&rsquo;s find out who else is.
-          </p>
+      <InviteLink userId={userId} />
 
-          <div className="panel">
-            {openings.map((o) => (
-              <div className="row" key={o.start.toISOString()}>
-                <span style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>{fmtDay.format(o.start)}</span>
-                <span
-                  style={{
-                    fontSize: 13,
-                    color: 'var(--ink-2)',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
-                  {fmtTime.format(o.start)} – {fmtTime.format(o.end)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      <div className="connected-invite">
-        <InviteLink userId={userId} />
-      </div>
+      <Link
+        href="/connected?step=times"
+        className="btn btn-yes setup-next"
+        style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+      >
+        Next
+      </Link>
 
       <p className="note">
         We look every morning. If there&rsquo;s a window in the next 30 days, it&rsquo;ll be here.
-      </p>
-
-      <p className="note">
-        <Link href="/">Go to your feed</Link>
       </p>
     </main>
   )

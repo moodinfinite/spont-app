@@ -713,3 +713,113 @@ a {
   font-size: 14.5px;
   color: var(--ink);
 }
+
+/* ---------------- Setup flow ---------------- */
+
+.setup-steps {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  padding: 8px 0 22px;
+}
+
+.setup-steps i {
+  width: 20px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--hairline);
+}
+
+.setup-steps i.on { background: var(--ink); }
+
+/* The way onward should look like the way onward. */
+.setup-next {
+  width: 100%;
+  margin-top: 18px;
+  padding: 17px 24px;
+  font-size: 15px;
+}
+
+.settings-head {
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.back { background: var(--card); text-decoration: none; }
+
+/* ---------------- Hangout time buckets ---------------- */
+
+.bucket-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 20px 0 8px;
+}
+
+.buckets { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.bucket {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 15px;
+  cursor: pointer;
+  background: var(--chip);
+  color: var(--ink-2);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+}
+
+.bucket[data-state='yes'] { background: var(--btn-bg); color: var(--btn-ink); }
+
+/* "Never" is the input that does the most work — it kills whole classes of
+   bad suggestion — so it gets its own look rather than just being unset. */
+.bucket[data-state='never'] {
+  background: transparent;
+  color: var(--ink-3);
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 6px 0; }
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.legend-chip {
+  width: 22px;
+  height: 14px;
+  border-radius: 999px;
+  flex: none;
+  background: var(--chip);
+}
+
+.legend-chip[data-state='yes'] { background: var(--btn-bg); }
+
+.legend-chip[data-state='never'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+  position: relative;
+}
+
+.legend-chip[data-state='never']::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  height: 1.5px;
+  background: var(--ink-3);
+}
+
+.bucket-hint { font-size: 12px; color: var(--ink-3); margin: 8px 0 0; line-height: 1.5; }

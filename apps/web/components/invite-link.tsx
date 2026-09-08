@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * The single most valuable thing a new user can do, so it's a copy button
@@ -11,9 +11,18 @@ export function InviteLink({ userId }: { userId: string }) {
   const [copied, setCopied] = useState(false)
 
   // Short and shareable rather than the raw id.
-  const code = userId.slice(-6)
-  const url =
-    typeof window === 'undefined' ? `/join/${code}` : `${window.location.origin}/join/${code}`
+  const path = `/join/${userId.slice(-6)}`
+
+  /**
+   * The origin only exists in the browser. Rendering it directly gave the
+   * server one string and the client another, which React rejects as a
+   * hydration mismatch — so start with the path both sides agree on and fill
+   * in the host after mount.
+   */
+  const [url, setUrl] = useState(path)
+  useEffect(() => {
+    setUrl(`${window.location.origin}${path}`)
+  }, [path])
 
   async function copy() {
     try {
