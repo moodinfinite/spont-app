@@ -1,34 +1,23 @@
 import type { ReactNode } from 'react'
-import Link from 'next/link'
 import './globals.css'
 import { getCurrentUserId } from '@/lib/session'
-import { prisma } from '@spont/db'
-import { LogoutButton } from '@/components/logout-button'
+import { Dock } from '@/components/dock'
 
 export const metadata = { title: 'Spont' }
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const userId = getCurrentUserId()
-  const user = userId ? await prisma.user.findUnique({ where: { id: userId } }) : null
+/**
+ * Chrome is deliberately thin: no top nav bar. Navigation is the floating
+ * dock, and identity lives in each page's own header, where the avatar is
+ * the way into Settings. See docs/knowledge-base/design-principles.md.
+ */
+export default function RootLayout({ children }: { children: ReactNode }) {
+  const signedIn = Boolean(getCurrentUserId())
 
   return (
     <html lang="en">
       <body>
-        <header>
-          <nav>
-            <Link href="/">Home</Link>
-            <Link href="/friends">Friends</Link>
-            <Link href="/groups">Groups</Link>
-            <Link href="/notifications">Notifications</Link>
-            <Link href="/settings">Settings</Link>
-          </nav>
-          {user && (
-            <span>
-              {user.name} <LogoutButton />
-            </span>
-          )}
-        </header>
         {children}
+        {signedIn && <Dock />}
       </body>
     </html>
   )

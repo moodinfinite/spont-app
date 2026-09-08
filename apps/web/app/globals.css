@@ -1,22 +1,376 @@
+/*
+ * Spont's visual system, ported from the mockups in
+ * docs/superpowers/mockups/. The reasoning behind every value lives in
+ * docs/knowledge-base/design-principles.md — read that before changing one.
+ *
+ * Four colour roles: ground, card, ink, accent. Green means action and
+ * nothing else. Black is emphasis, not a colour.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
 :root {
-  color-scheme: light dark;
+  --page: #edeee9;
+  --card: #ffffff;
+  --ink: #15150f;
+  --ink-2: #6c6c62;
+  --ink-3: #a8a89c;
+  --btn-bg: #c6ff4e;
+  --btn-ink: #1c2b06;
+  --dark: #15150f;
+  --dark-ink: #f3f6ea;
+  --dark-ink-2: rgba(243, 246, 234, 0.68);
+  --chip: #e5e7df;
+  --warn: #e14b3a;
+  --hairline: rgba(21, 21, 15, 0.1);
+  --dock: #17170f;
+  --dock-2: #2a2a1f;
+  --dock-ink: #f4f4ec;
+  --dock-ink-muted: rgba(244, 244, 236, 0.5);
+  --shadow: 0 14px 30px rgba(20, 20, 12, 0.1), 0 2px 8px rgba(20, 20, 12, 0.06);
+  --shadow-soft: 0 8px 18px rgba(20, 20, 12, 0.07);
+  --radius: 16px;
+  --radius-inner: 11px;
+}
+
+/* Dark needs an edge, not a shadow — a drop shadow does nothing against a
+   dark ground, so cards carry a light inset rule instead. Everything that
+   sits on a card lifts with it, or it dissolves into the surface. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --page: #0d0d0b;
+    --card: #292921;
+    --ink: #f2f2ea;
+    --ink-2: #a3a398;
+    --ink-3: #6e6e63;
+    --btn-bg: #d2ff66;
+    --btn-ink: #16240a;
+    --dark: #d2ff66;
+    --dark-ink: #16240a;
+    --dark-ink-2: rgba(22, 36, 10, 0.72);
+    --chip: #35352c;
+    --warn: #ff6a57;
+    --hairline: rgba(242, 242, 234, 0.13);
+    --dock: #1a1a14;
+    --dock-2: #363630;
+    --dock-ink: #eff3e6;
+    --dock-ink-muted: rgba(239, 243, 230, 0.42);
+    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.1);
+    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+  }
+}
+
+:root[data-theme='dark'] {
+  --page: #0d0d0b;
+  --card: #292921;
+  --ink: #f2f2ea;
+  --ink-2: #a3a398;
+  --ink-3: #6e6e63;
+  --btn-bg: #d2ff66;
+  --btn-ink: #16240a;
+  --dark: #d2ff66;
+  --dark-ink: #16240a;
+  --dark-ink-2: rgba(22, 36, 10, 0.72);
+  --chip: #35352c;
+  --warn: #ff6a57;
+  --hairline: rgba(242, 242, 234, 0.13);
+  --dock: #1a1a14;
+  --dock-2: #363630;
+  --dock-ink: #eff3e6;
+  --dock-ink-muted: rgba(239, 243, 230, 0.42);
+  --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.1);
+  --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: system-ui, sans-serif;
   margin: 0;
-  padding: 0 1.5rem;
+  padding: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
 }
 
-header {
+h1,
+h2,
+h3 {
+  font-family: 'Sora', system-ui, sans-serif;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+/* Big type is not bold type — the greeting is large and regular weight. */
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 26px 18px 132px;
+}
+
+.page-head {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid #ccc;
+  gap: 16px;
+  padding: 10px 4px 22px;
 }
 
-nav {
+.page-head h1 {
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.head-actions {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  flex: none;
+  cursor: pointer;
+}
+
+.icon-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  flex: none;
+  text-decoration: none;
+}
+
+/* ---------------- Surfaces ---------------- */
+
+.card {
+  position: relative;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+/* The system's voice for "this came from Spont, not a person". Inverts the
+   ground rather than using the accent, so a feed full of suggestions doesn't
+   become a wall of neon. */
+.card-dark {
+  background: var(--dark);
+  color: var(--dark-ink);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.card-dark p {
+  color: var(--dark-ink-2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+}
+
+.row + .row {
+  border-top: 1.5px solid var(--hairline);
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  margin: 22px 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.note {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin: 18px 10px 0;
+  line-height: 1.5;
+}
+
+/* ---------------- Controls ---------------- */
+
+/* Both halves of a decision live together, so they share a row and differ by
+   weight, not position. */
+.btn {
+  border: none;
+  border-radius: 999px;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  padding: 14px 20px;
+  cursor: pointer;
+}
+
+.btn-yes {
+  flex: 1;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+}
+
+.btn-no {
+  flex: none;
+  background: transparent;
+  color: var(--ink-2);
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.pill[aria-pressed='true'],
+.pill[aria-current='page'] {
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+}
+
+/* ---------------- Dock ---------------- */
+
+.dock-wrap {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 16px;
+  z-index: 20;
+}
+
+.dock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--dock);
+  border-radius: 999px;
+  padding: 8px;
+  box-shadow: var(--shadow);
+}
+
+.dock a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 46px;
+  min-height: 46px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: var(--dock-ink-muted);
+  text-decoration: none;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.dock a svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+
+.dock a[aria-current='page'] {
+  background: var(--dock-2);
+  color: var(--dock-ink);
+}
+
+.dock a:not([aria-current='page']) span {
+  display: none;
+}
+
+.fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  border: none;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.fab svg {
+  width: 20px;
+  height: 20px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

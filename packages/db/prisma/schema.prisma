@@ -15,11 +15,19 @@ model User {
   createdAt DateTime @default(now())
 
   calendarAccounts     CalendarAccount[]
-  friendshipsInitiated Friendship[]      @relation("FriendshipUserA")
-  friendshipsReceived  Friendship[]      @relation("FriendshipUserB")
+  friendshipsInitiated Friendship[]          @relation("FriendshipUserA")
+  friendshipsReceived  Friendship[]          @relation("FriendshipUserB")
   ownedGroups          Group[]
   groupMemberships     GroupMembership[]
   notifications        Notification[]
+  proposalsCreated     Proposal[]            @relation("ProposalsCreated")
+  proposalParticipants ProposalParticipant[]
+
+  // Set once in onboarding, correctable in Settings. Where two people's
+  // preferred lengths differ the matcher takes the shorter, since that is
+  // the one both are comfortable with.
+  preferredHangoutMinutes Int @default(120)
+  bufferMinutes           Int @default(30)
 }
 
 model CalendarAccount {
@@ -71,8 +79,9 @@ model Group {
   ownerId   String
   createdAt DateTime @default(now())
 
-  owner   User              @relation(fields: [ownerId], references: [id])
-  members GroupMembership[]
+  owner     User              @relation(fields: [ownerId], references: [id])
+  members   GroupMembership[]
+  proposals Proposal[]
 }
 
 enum GroupMemberStatus {
@@ -109,4 +118,67 @@ model Notification {
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+// ---------------------------------------------------------------------------
+// Proposals — a proposed hangout, and what each person said about it.
+// Every screen in the app is a view of these two tables: the feed is
+// proposals you haven't answered, Upcoming is ones you accepted.
+// See docs/superpowers/specs/2026-09-07-proposal-model-mvp.md
+// ---------------------------------------------------------------------------
+
+enum ProposalOrigin {
+  SUGGESTED // the matcher found it
+  INVITED // a person asked
+}
+
+enum ProposalStatus {
+  OPEN
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+}
+
+enum ParticipantResponse {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Proposal {
+  id          String         @id @default(cuid())
+  origin      ProposalOrigin
+  status      ProposalStatus @default(OPEN)
+  startsAt    DateTime
+  endsAt      DateTime
+  // Set when the proposal belongs to a group. Its absence is what makes a
+  // proposal a 1:1, which needs every participant to accept rather than two.
+  groupId     String?
+  createdById String?
+  createdAt   DateTime       @default(now())
+
+  group        Group?                @relation(fields: [groupId], references: [id])
+  createdBy    User?                 @relation("ProposalsCreated", fields: [createdById], references: [id])
+  participants ProposalParticipant[]
+
+  @@index([startsAt])
+  @@index([status])
+}
+
+model ProposalParticipant {
+  id              String              @id @default(cuid())
+  proposalId      String
+  userId          String
+  response        ParticipantResponse @default(PENDING)
+  respondedAt     DateTime?
+  // The event on this person's calendar, once the hangout is actually on.
+  // Null until quorum, which is what stops a 1:1 accepter holding an event
+  // for a hangout the other person declined.
+  calendarEventId String?
+
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([proposalId, userId])
+  @@index([userId, response])
 }
