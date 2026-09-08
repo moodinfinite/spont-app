@@ -680,7 +680,7 @@ a {
   margin-bottom: 8px;
   opacity: 0;
   transform: translateY(6px);
-  transition: opacity 400ms ease, transform 400ms cubic-bezier(0.2, 0.8, 0.25, 1);
+  transition: opacity 280ms ease, transform 280ms cubic-bezier(0.2, 0.8, 0.25, 1);
 }
 
 .waiting-headline.is-on { opacity: 1; transform: none; }

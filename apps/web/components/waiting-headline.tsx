@@ -18,8 +18,15 @@ const LINES = [
   'One more person and this starts working.',
 ]
 
-/** Long enough to read twice and forget it's going to change. */
-const HOLD_MS = 6000
+/**
+ * Long enough to read without the screen feeling restless. Six seconds read
+ * as stalled; below about three the lines start competing with each other
+ * rather than taking turns.
+ */
+const HOLD_MS = 4000
+
+/** Crossfade. Faster than the hold, or the gap reads as a blank screen. */
+const FADE_MS = 300
 
 export function WaitingHeadline() {
   const [index, setIndex] = useState(0)
@@ -33,7 +40,7 @@ export function WaitingHeadline() {
       setTimeout(() => {
         setIndex((i) => (i + 1) % LINES.length)
         setVisible(true)
-      }, 420)
+      }, FADE_MS)
     }, HOLD_MS)
 
     return () => clearInterval(timer)

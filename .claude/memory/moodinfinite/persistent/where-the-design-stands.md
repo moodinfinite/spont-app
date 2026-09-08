@@ -1,9 +1,53 @@
-# Where the design stands — end of 2026-09-06
+# Where the design stands — updated 2026-09-08
 
 A snapshot for whoever picks this up next (Raghav asked for this
 specifically). Companion to [[home-feed-visual-direction]],
 [[reliability-ranking-direction]] and [[onboarding-flow-and-voice]],
 which hold the reasoning; this holds the state.
+[[shipping-and-infrastructure]] covers the database, hosting and Google.
+
+## It's a real app now
+
+**Live at <https://spontapp.vercel.app>**, on a real Postgres, with
+Google sign-in. Signing up *is* connecting your calendar — no password,
+no separate account step.
+
+Built into the app, not just designed:
+
+| Screen | Route | State |
+| --- | --- | --- |
+| Welcome | `/welcome` | The mission screen, full-bleed accent green |
+| Setup | `/connected` | Calendar → hangout times → invite, in that order |
+| Feed | `/` | Renders the waiting state, because no proposals exist yet |
+| People | `/friends` | Friends and Groups tabs, add and accept |
+| Settings | `/settings` | Times, hangout length, buffer, per-day cap — all save on tap |
+| Create | `/new` | Step one only; picking a person is real, sending isn't |
+| Invite | `/join/[code]` | Carries the inviter's name; works signed in or out |
+
+The design system is ported into `apps/web/app/globals.css` — the same
+four colour roles, 16px surfaces, both themes plus a toggle.
+
+**Notifications were removed** (page, API, and the bell) rather than
+left half-built.
+
+## Code that exists behind it
+
+- `packages/core/src/scheduling/free-slots.ts` — the matcher. Inverts
+  busy blocks into gaps, intersects across people, drops anything too
+  short. 18 tests.
+- `packages/core/src/proposals/rules.ts` — the lifecycle. A 1:1 needs
+  every yes, a group needs two; nobody holds a calendar event for a
+  hangout that isn't happening. 29 tests.
+- `apps/web/lib/google-calendar.ts` — reads real availability from
+  Google, refreshing the access token when it's stale.
+- `Proposal` and `ProposalParticipant` exist as tables.
+
+**Nothing creates a Proposal row yet.** That's the gap between "the
+pieces work" and "the app does something" — the matcher and the rules
+are both tested and unused. It's the next real piece of work.
+
+**`hangoutTimes` is collected but not read by the matcher.** Small
+wire-up, both halves exist.
 
 ## Screens that exist as mockups
 
