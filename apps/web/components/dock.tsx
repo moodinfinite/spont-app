@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { AddMenu } from './add-menu'
 
 /**
  * The floating pill dock. Two destinations and a create button — "You" was
  * dropped because it duplicated the header avatar and its single-person icon
  * read as a near-copy of People's two-person one.
  */
-export function Dock() {
+export function Dock({ inviteCode }: { inviteCode: string }) {
   const pathname = usePathname()
   const current = (href: string) =>
     pathname === href || (href !== '/' && pathname.startsWith(href)) ? 'page' : undefined
@@ -46,11 +47,7 @@ export function Dock() {
           <span>People</span>
         </Link>
       </nav>
-      <Link href="/new" className="fab" aria-label="New hangout">
-        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-        </svg>
-      </Link>
+      <AddMenu inviteCode={inviteCode} />
     </div>
   )
 }

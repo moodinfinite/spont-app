@@ -12,7 +12,7 @@ export const metadata = { title: 'Spont' }
  * the way into Settings. See docs/knowledge-base/design-principles.md.
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
-  const signedIn = Boolean(getCurrentUserId())
+  const userId = getCurrentUserId()
 
   return (
     <html lang="en">
@@ -21,7 +21,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
-        {signedIn && <Dock />}
+        {/* The same short code the People page shares — the tail of the id,
+            not the whole thing. */}
+        {userId && <Dock inviteCode={userId.slice(-6)} />}
       </body>
     </html>
   )

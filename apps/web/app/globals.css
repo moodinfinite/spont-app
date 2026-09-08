@@ -21,6 +21,7 @@
   --dark-ink: #f3f6ea;
   --dark-ink-2: rgba(243, 246, 234, 0.68);
   --chip: #e5e7df;
+  --busy: #c2c8b8;
   --warn: #e14b3a;
   --hairline: rgba(21, 21, 15, 0.1);
   --dock: #17170f;
@@ -49,6 +50,7 @@
     --dark-ink: #16240a;
     --dark-ink-2: rgba(22, 36, 10, 0.72);
     --chip: #35352c;
+    --busy: #474d3b;
     --warn: #ff6a57;
     --hairline: rgba(242, 242, 234, 0.13);
     --dock: #1a1a14;
@@ -72,6 +74,7 @@
   --dark-ink: #16240a;
   --dark-ink-2: rgba(22, 36, 10, 0.72);
   --chip: #35352c;
+  --busy: #474d3b;
   --warn: #ff6a57;
   --hairline: rgba(242, 242, 234, 0.13);
   --dock: #1a1a14;
@@ -942,3 +945,236 @@ a.row { text-decoration: none; }
 }
 
 .seg button[aria-pressed='true'] { background: var(--btn-bg); color: var(--btn-ink); }
+
+/* ---------------- Week scan ----------------
+   The empty feed shows the engine looking rather than asserting it works.
+   Grey is where you're booked; green is a gap long enough to be worth
+   proposing into, so green never means merely "free".
+   Design: docs/superpowers/mockups/2026-09-08-empty-state-scanning.html */
+
+.week { padding: 4px 0 8px; }
+
+.day {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  font-size: 13px;
+}
+
+.day-name {
+  width: 38px;
+  flex: none;
+  font-weight: 700;
+  color: var(--ink-2);
+  transition: color 200ms ease;
+}
+
+.day.is-scanning .day-name { color: var(--ink); }
+
+.track {
+  position: relative;
+  flex: 1;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--chip);
+  overflow: hidden;
+}
+
+.busy {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--busy);
+}
+
+/* An opening starts collapsed and is "discovered" by the line passing over
+   it — then stays lit, so the end state is a readable week rather than an
+   animation you had to catch. */
+.open {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.open.found { transform: scaleX(1); }
+
+.scan {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 0;
+  width: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 8px 1px var(--ink);
+  opacity: 0;
+}
+
+.day.is-scanning .scan { animation: sweep 900ms linear; }
+
+@keyframes sweep {
+  0% { left: 0; opacity: 0; }
+  8% { opacity: 0.85; }
+  92% { opacity: 0.85; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* ---------------- Add sheet ----------------
+   What the + does. Two items, not three: creating a group is a once-a-year
+   act that already lives on the People page, and next to "a hangout" it
+   reads as the same thing twice.
+   Design: docs/superpowers/mockups/2026-09-08-add-button-flow.html */
+
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(10, 10, 6, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+}
+
+.sheet-scrim.on { opacity: 1; pointer-events: auto; }
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 31;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 22px 22px 0 0;
+  box-shadow: var(--shadow);
+  padding: 10px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(110%);
+  /* visibility keeps a closed sheet off the tab order; the 0s delay holds it
+     visible for the length of the slide out. */
+  visibility: hidden;
+  transition:
+    transform 300ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    visibility 0s linear 300ms;
+}
+
+.sheet.on {
+  transform: none;
+  visibility: visible;
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.25, 1), visibility 0s;
+}
+
+.grabber {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hairline);
+  margin: 0 auto 16px;
+}
+
+.sheet h3 {
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.018em;
+  margin-bottom: 4px;
+}
+
+.sheet-lede {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 14px;
+  background: var(--chip);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.action .ico {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action .ico svg { width: 16px; height: 16px; }
+.action .txt { flex: 1; min-width: 0; }
+.action .t { display: block; font-weight: 700; font-size: 14px; }
+.action .d { display: block; font-size: 12px; color: var(--ink-2); margin-top: 1px; }
+
+.action.primary { background: var(--dark); }
+.action.primary .t { color: var(--dark-ink); }
+.action.primary .d { color: var(--dark-ink-2); }
+.action.primary .ico { background: var(--btn-bg); color: var(--btn-ink); }
+
+/* Dark inverts --dark to the accent, so the accent-coloured icon disc
+   vanishes into the row it sits on. Same fix as .card-dark .btn-yes: take the
+   card surface, which is the only pale shape left. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .action.primary .ico {
+    background: var(--card);
+    color: var(--ink);
+  }
+}
+
+:root[data-theme='dark'] .action.primary .ico {
+  background: var(--card);
+  color: var(--ink);
+}
+
+/* The invite row again, but on a pale card instead of the dark one — its own
+   classes rather than overrides, so the two can't fight over specificity. */
+.sheet-invite {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--chip);
+  border-radius: var(--radius-inner);
+  padding: 10px 10px 10px 14px;
+}
+
+.sheet-invite-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.sheet-invite-copy {
+  flex: none;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: var(--ink);
+  color: var(--card);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+}
