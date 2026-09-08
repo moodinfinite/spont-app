@@ -6,17 +6,16 @@ import { InviteLink } from '@/components/invite-link'
 import { HangoutTimes } from '@/components/hangout-times'
 
 /**
- * Setup, after the calendar is connected. Follows the cold-start flow from
- * docs/superpowers/mockups/2026-09-07-cold-start-flow.html: acknowledge the
- * connection, get invites moving, then ask about times.
+ * Setup, after the calendar is connected: calendar → preferences → invite.
  *
- * Invites come before preferences on purpose — an invite has to travel to
- * someone else and wait for them, so it should start as early as possible.
- * Preferences are instant and can fill the wait.
+ * Inviting is last because it's the one step that leaves the app. Ending
+ * there means the final screen is the thing we most want someone to do, and
+ * they reach it already invested rather than being asked to recruit friends
+ * before they've seen anything.
  *
- * Deliberately not showing this person's own free windows here. Spont is
- * about where two calendars overlap; your own gaps aren't the product, and
- * showing them implies a promise the app can't keep alone.
+ * Deliberately not showing this person's own free windows anywhere here.
+ * Spont is about where two calendars overlap; your own gaps aren't the
+ * product, and showing them implies a promise the app can't keep alone.
  */
 export default async function ConnectedPage({
   searchParams,
@@ -29,11 +28,9 @@ export default async function ConnectedPage({
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) redirect('/welcome')
 
-  const step = searchParams.step === 'times' ? 'times' : 'invite'
+  const step = searchParams.step === 'invite' ? 'invite' : 'times'
 
-  if (step === 'times') {
-    const stored = (user.hangoutTimes ?? {}) as Record<string, 'yes' | 'never'>
-
+  if (step === 'invite') {
     return (
       <main className="page">
         <div className="setup-steps" aria-hidden="true">
@@ -41,18 +38,30 @@ export default async function ConnectedPage({
           <i className="on" />
         </div>
 
-        <h1 className="connected-head">What are your preferences for hangout times?</h1>
+        <h1 className="connected-head">Now the part that matters.</h1>
         <p className="connected-lede">
-          Your calendar already knows when you&rsquo;re <i>free</i>. This is when you&rsquo;d
-          actually want to see someone.
+          Spont can&rsquo;t find anything until someone else is on it. Send this to the people you
+          actually want to see — a group chat works best.
         </p>
 
-        <HangoutTimes initial={stored} onSaved="/" cta="Done" />
+        <InviteLink userId={userId} />
 
-        <p className="note">You can change these later, but you shouldn&rsquo;t need to.</p>
+        <Link
+          href="/"
+          className="btn btn-yes setup-next"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+        >
+          Go to your feed
+        </Link>
+
+        <p className="note">
+          We look every morning. If there&rsquo;s a window in the next 30 days, it&rsquo;ll be here.
+        </p>
       </main>
     )
   }
+
+  const stored = (user.hangoutTimes ?? {}) as Record<string, 'yes' | 'never'>
 
   return (
     <main className="page">
@@ -71,25 +80,20 @@ export default async function ConnectedPage({
         </svg>
       </div>
 
+      <div className="setup-steps" aria-hidden="true">
+        <i className="on" />
+        <i />
+      </div>
+
       <h1 className="connected-head">Calendar connected.</h1>
       <p className="connected-lede">
-        Spont can see when you&rsquo;re free. It needs someone else&rsquo;s calendar before it can
-        find where you overlap — so this is the part that matters.
+        One question, then you&rsquo;re done. Your calendar already knows when you&rsquo;re{' '}
+        <i>free</i> — this is when you&rsquo;d actually want to see someone.
       </p>
 
-      <InviteLink userId={userId} />
+      <HangoutTimes initial={stored} onSaved="/connected?step=invite" cta="Next" />
 
-      <Link
-        href="/connected?step=times"
-        className="btn btn-yes setup-next"
-        style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
-      >
-        Next
-      </Link>
-
-      <p className="note">
-        We look every morning. If there&rsquo;s a window in the next 30 days, it&rsquo;ll be here.
-      </p>
+      <p className="note">You can change these later, but you shouldn&rsquo;t need to.</p>
     </main>
   )
 }

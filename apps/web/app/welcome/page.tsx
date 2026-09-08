@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { prisma } from '@spont/db'
 import { getCurrentUserId } from '@/lib/session'
 import { googleConfig } from '@/lib/google'
 
@@ -25,8 +26,22 @@ const MESSAGES: Record<string, string> = {
     'There is already a Spont account with that email address. Sign in with the Google account it was created with.',
 }
 
-export default function WelcomePage({ searchParams }: { searchParams: { error?: string } }) {
-  if (getCurrentUserId()) redirect('/')
+export default async function WelcomePage({
+  searchParams,
+}: {
+  searchParams: { error?: string }
+}) {
+  /**
+   * A cookie that parses isn't enough — it has to point at a user who still
+   * exists. Trusting the signature alone caused a redirect loop: a session
+   * outliving its user sent the feed here, and here sent it straight back.
+   * Signing in again issues a fresh cookie, which clears it.
+   */
+  const userId = getCurrentUserId()
+  if (userId) {
+    const stillThere = await prisma.user.findUnique({ where: { id: userId } })
+    if (stillThere) redirect('/')
+  }
 
   const configured = googleConfig() !== null
   const message = searchParams.error ? MESSAGES[searchParams.error] : null
