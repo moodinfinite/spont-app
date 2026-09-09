@@ -8,6 +8,7 @@ const STATUS_BY_CODE: Record<string, number> = {
   NOT_AUTHORIZED: 403,
   INVALID_STATE: 400,
   NOT_FOUND: 404,
+  RATE_LIMITED: 429,
 }
 
 export function toErrorResponse(err: unknown) {
