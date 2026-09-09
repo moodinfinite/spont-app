@@ -11,11 +11,10 @@ export default async function FriendsPage() {
   const me = await prisma.user.findUnique({ where: { id: userId } })
   if (!me) redirect('/welcome')
 
-  const [accepted, incoming, outgoing, allUsers] = await Promise.all([
+  const [accepted, incoming, outgoing] = await Promise.all([
     listFriends(prisma, userId),
     listIncomingRequests(prisma, userId),
     listOutgoingRequests(prisma, userId),
-    prisma.user.findMany({ where: { id: { not: userId } } }),
   ])
 
   /**
@@ -40,19 +39,11 @@ export default async function FriendsPage() {
     orderBy: { createdAt: 'desc' },
   })
 
-  const excludedIds = new Set([
-    ...accepted.map((u) => u.id),
-    ...incoming.map((f) => f.userAId),
-    ...outgoing.map((f) => f.userBId),
-  ])
-  const directory = allUsers.filter((u) => !excludedIds.has(u.id))
-
   return (
     <FriendsClient
       accepted={accepted}
       incoming={incoming.map((f) => ({ id: f.id, from: f.userA }))}
       outgoing={outgoing.map((f) => ({ id: f.id, to: f.userB }))}
-      directory={directory}
       groups={memberships.map((m) => ({
         id: m.group.id,
         name: m.group.name,

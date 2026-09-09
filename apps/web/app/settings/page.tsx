@@ -32,6 +32,51 @@ export default async function SettingsPage() {
         <HeadActions initial={user.name.trim().charAt(0).toUpperCase()} linked={false} />
       </header>
 
+      {/* Your account, your calendar and how the app looks are all the same
+          question — "this is me and this device" — and three one-row panels
+          in a stack made them look like three unrelated systems.
+
+          It leads the screen because it's what people come here to check:
+          which account they're on and whether the calendar is still
+          connected. The matching preferences below are set once and rarely
+          revisited, so they were sitting above the thing being looked for. */}
+      <div className="section-label">
+        <span>You</span>
+      </div>
+      <div className="panel">
+        <div className="row">
+          <span className="avatar" aria-hidden="true">
+            {user.name.trim().charAt(0).toUpperCase()}
+          </span>
+          <span className="row-text">
+            <span className="row-name">{user.name}</span>
+            <span className="row-sub">{user.email}</span>
+          </span>
+        </div>
+
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">{calendar ? 'Google Calendar' : 'No calendar yet'}</span>
+            <span className="row-sub">
+              {calendar
+                ? 'Free or busy only — never what’s actually on it.'
+                : 'Spont can’t find anything until a calendar is connected.'}
+            </span>
+          </span>
+          <span className="row-value">{calendar ? 'Connected' : 'Off'}</span>
+        </div>
+
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">Light or dark</span>
+            <span className="row-sub">Follow your phone, or override it on this device.</span>
+          </span>
+          <ThemeChoice />
+        </div>
+
+        <LogoutButton />
+      </div>
+
       <div className="section-label">
         <span>How Spont picks</span>
       </div>
@@ -101,46 +146,6 @@ export default async function SettingsPage() {
           </span>
           <span className="row-value">30 days</span>
         </div>
-      </div>
-
-      {/* Your account, your calendar and how the app looks are all the same
-          question — "this is me and this device" — and three one-row panels
-          in a stack made them look like three unrelated systems. */}
-      <div className="section-label">
-        <span>You</span>
-      </div>
-      <div className="panel">
-        <div className="row">
-          <span className="avatar" aria-hidden="true">
-            {user.name.trim().charAt(0).toUpperCase()}
-          </span>
-          <span className="row-text">
-            <span className="row-name">{user.name}</span>
-            <span className="row-sub">{user.email}</span>
-          </span>
-        </div>
-
-        <div className="row">
-          <span className="row-text">
-            <span className="row-name">{calendar ? 'Google Calendar' : 'No calendar yet'}</span>
-            <span className="row-sub">
-              {calendar
-                ? 'Free or busy only — never what’s actually on it.'
-                : 'Spont can’t find anything until a calendar is connected.'}
-            </span>
-          </span>
-          <span className="row-value">{calendar ? 'Connected' : 'Off'}</span>
-        </div>
-
-        <div className="row">
-          <span className="row-text">
-            <span className="row-name">Light or dark</span>
-            <span className="row-sub">Follow your phone, or override it on this device.</span>
-          </span>
-          <ThemeChoice />
-        </div>
-
-        <LogoutButton />
       </div>
 
       <p className="note">Spont works fine if you never open this screen. That&rsquo;s the goal.</p>
