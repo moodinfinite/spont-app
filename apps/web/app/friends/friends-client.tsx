@@ -17,7 +17,6 @@ export function FriendsClient({
   accepted,
   incoming,
   outgoing,
-  directory,
   groups,
   groupInvites,
   you,
@@ -26,7 +25,6 @@ export function FriendsClient({
   accepted: UserSummary[]
   incoming: { id: string; from: UserSummary }[]
   outgoing: { id: string; to: UserSummary }[]
-  directory: UserSummary[]
   groups: { id: string; name: string; memberCount: number }[]
   groupInvites: { id: string; name: string }[]
   you: string
@@ -158,24 +156,6 @@ export function FriendsClient({
       return
     }
     setNewGroup('')
-    setPending(false)
-    router.refresh()
-  }
-
-  async function sendRequest(toUserId: string) {
-    setPending(true)
-    setError(null)
-    const res = await fetch('/api/friends', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ toUserId }),
-    })
-    if (!res.ok) {
-      const body = await res.json().catch(() => null)
-      setError(body?.error?.message ?? 'Something went wrong')
-      setPending(false)
-      return
-    }
     setPending(false)
     router.refresh()
   }
@@ -476,30 +456,6 @@ export function FriendsClient({
                 <span style={{ fontSize: 12.5, color: 'var(--ink-3)', fontWeight: 600 }}>
                   Waiting
                 </span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {directory.length > 0 && (
-        <>
-          <div className="section-label">
-            <span>Also on Spont</span>
-          </div>
-          <div className="panel">
-            {directory.map((u) => (
-              <div className="row" key={u.id}>
-                <span className="person-avatar">{initial(u.name)}</span>
-                <span className="person-name">{u.name}</span>
-                <button
-                  className="btn btn-no"
-                  style={{ padding: '10px 16px' }}
-                  disabled={pending}
-                  onClick={() => sendRequest(u.id)}
-                >
-                  Add
-                </button>
               </div>
             ))}
           </div>
