@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 /**
  * One thing Spont found. The inverted ground is the system's voice — this
@@ -26,7 +26,7 @@ export function ProposalCard({
   time,
 }: {
   id: string
-  headline: string
+  headline: ReactNode
   reason: string
   day: string
   time: string
