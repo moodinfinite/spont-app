@@ -1033,6 +1033,33 @@ a {
   margin-bottom: 10px;
 }
 
+/* Saying no should look like the card leaving, not like the page reloading.
+ *
+ * The decline used to wait on the round trip and then a full server refresh
+ * — which re-runs the matcher, and the matcher reads everyone's calendar. So
+ * the card sat there, visibly unchanged, for as long as Google took. The
+ * answer was already decided the moment it was pressed; the card just wasn't
+ * allowed to say so.
+ *
+ * Now it collapses immediately and the request goes out underneath it. Same
+ * curve as the accepted friend row's flight, a touch quicker, so the two read
+ * as one movement language. The card's own margin is inside this wrapper, so
+ * collapsing the height takes the gap with it and the feed closes up cleanly.
+ *
+ * The global prefers-reduced-motion rule turns this into an instant
+ * disappearance, which is the correct version of it.
+ */
+.sug-wrap {
+  overflow: hidden;
+  transition:
+    height 320ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 200ms ease;
+}
+
+.sug-wrap.is-leaving {
+  opacity: 0;
+}
+
 .sug-top {
   display: flex;
   align-items: center;

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * One thing Spont found. The inverted ground is the system's voice — this
@@ -17,6 +17,13 @@ import { useEffect, useState } from 'react'
  * run out — which is the whole reason the window exists.
  */
 const UNDO_MS = 5000
+
+/**
+ * How long the declined card takes to fold away. Matched to the friend row's
+ * flight curve but shorter — that movement carries a row somewhere, this one
+ * only has to get out of the way.
+ */
+const LEAVE_MS = 320
 
 export function ProposalCard({
   id,
@@ -36,6 +43,9 @@ export function ProposalCard({
   const [error, setError] = useState<string | null>(null)
   const [accepted, setAccepted] = useState(false)
   const [draining, setDraining] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const [frozenHeight, setFrozenHeight] = useState<number | null>(null)
+  const wrap = useRef<HTMLDivElement>(null)
 
   async function answer(accept: boolean) {
     setPending(true)
@@ -65,6 +75,40 @@ export function ProposalCard({
     }
   }
 
+  /**
+   * No, thanks.
+   *
+   * The card starts leaving on the press rather than on the response. Waiting
+   * for the server meant waiting for router.refresh(), which re-runs the
+   * matcher and therefore everybody's calendar — seconds of a card sitting
+   * there looking like a dead button, for an answer that was never in doubt.
+   *
+   * The refresh still happens; it just happens behind a card that has already
+   * gone. If the request fails the card comes back and says why, which is the
+   * one case where the optimism has to be paid for.
+   */
+  async function decline() {
+    if (pending || leaving) return
+
+    // Height has to be a number before it can be animated to zero.
+    const el = wrap.current
+    if (el) setFrozenHeight(el.offsetHeight)
+    requestAnimationFrame(() => setLeaving(true))
+
+    const [ok] = await Promise.all([
+      answer(false),
+      new Promise((resolve) => setTimeout(resolve, LEAVE_MS)),
+    ])
+
+    if (!ok) {
+      setLeaving(false)
+      setFrozenHeight(null)
+      return
+    }
+
+    router.refresh()
+  }
+
   // The ring drains, then the card hands over to the server and becomes an
   // Upcoming row.
   useEffect(() => {
@@ -77,63 +121,77 @@ export function ProposalCard({
     }
   }, [accepted, router])
 
+  /**
+   * One wrapper across both states, so React keeps the same element when the
+   * card flips to "You're in" — a swapped node would restart the collapse.
+   */
+  const wrapProps = {
+    ref: wrap,
+    className: `sug-wrap${leaving ? ' is-leaving' : ''}`,
+    style: frozenHeight != null ? { height: leaving ? 0 : frozenHeight } : undefined,
+  }
+
   if (accepted) {
     return (
-      <div className="card-dark card-suggested">
-        <div className="sug-top">
-          <span className="sug-eyebrow">You&rsquo;re in</span>
-        </div>
-        <h3 className="card-headline">{headline}</h3>
-        <div className="stat-row">
-          <span>{day}</span>
-          <span>{time}</span>
-        </div>
-        <div className="undo-row">
-          <button className="btn btn-no" onClick={undo} disabled={pending}>
-            Undo
-          </button>
-          <svg className="undo-ring" viewBox="0 0 24 24" aria-hidden="true">
-            <circle className="track" cx="12" cy="12" r="10" />
-            <circle className={`sweep${draining ? ' draining' : ''}`} cx="12" cy="12" r="10" />
-          </svg>
+      <div {...wrapProps}>
+        <div className="card-dark card-suggested">
+          <div className="sug-top">
+            <span className="sug-eyebrow">You&rsquo;re in</span>
+          </div>
+          <h3 className="card-headline">{headline}</h3>
+          <div className="stat-row">
+            <span>{day}</span>
+            <span>{time}</span>
+          </div>
+          <div className="undo-row">
+            <button className="btn btn-no" onClick={undo} disabled={pending}>
+              Undo
+            </button>
+            <svg className="undo-ring" viewBox="0 0 24 24" aria-hidden="true">
+              <circle className="track" cx="12" cy="12" r="10" />
+              <circle className={`sweep${draining ? ' draining' : ''}`} cx="12" cy="12" r="10" />
+            </svg>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="card-dark card-suggested">
-      <div className="sug-top">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="9.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="14.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
-        <span className="sug-eyebrow">Suggested</span>
+    <div {...wrapProps}>
+      <div className="card-dark card-suggested">
+        <div className="sug-top">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.4" />
+            <circle cx="9.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
+            <circle cx="14.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
+          </svg>
+          <span className="sug-eyebrow">Suggested</span>
+        </div>
+
+        <h3 className="card-headline">{headline}</h3>
+        <p className="sug-reason">{reason}</p>
+
+        <div className="stat-row">
+          <span>{day}</span>
+          <span>{time}</span>
+        </div>
+
+        <div className="card-actions">
+          <button className="btn btn-yes" onClick={accept} disabled={pending}>
+            I&rsquo;m in
+          </button>
+          <button className="btn btn-no" onClick={decline} disabled={pending || leaving}>
+            Not this time
+          </button>
+        </div>
+
+        {error && (
+          <p className="note" style={{ color: 'var(--warn)', marginBottom: 0 }}>
+            {error}
+          </p>
+        )}
       </div>
-
-      <h3 className="card-headline">{headline}</h3>
-      <p className="sug-reason">{reason}</p>
-
-      <div className="stat-row">
-        <span>{day}</span>
-        <span>{time}</span>
-      </div>
-
-      <div className="card-actions">
-        <button className="btn btn-yes" onClick={accept} disabled={pending}>
-          I&rsquo;m in
-        </button>
-        <button className="btn btn-no" onClick={() => answer(false).then((ok) => ok && router.refresh())} disabled={pending}>
-          Not this time
-        </button>
-      </div>
-
-      {error && (
-        <p className="note" style={{ color: 'var(--warn)', marginBottom: 0 }}>
-          {error}
-        </p>
-      )}
     </div>
   )
 }
