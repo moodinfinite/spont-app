@@ -4,6 +4,7 @@ import { prisma } from '@spont/db'
 import { LogoutButton } from '@/components/logout-button'
 import { HangoutTimes } from '@/components/hangout-times'
 import { PreferencePicker } from '@/components/preference-picker'
+import { WindowPicker } from '@/components/window-picker'
 import { ThemeChoice } from '@/components/theme-toggle'
 import { HeadActions } from '@/components/head-actions'
 
@@ -57,6 +58,17 @@ export default async function SettingsPage() {
             value={user.preferredHangoutMinutes}
             options={[60, 90, 120, 180]}
           />
+        </div>
+
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">Which time wins</span>
+            <span className="row-sub">
+              When several fit: the next one going, or the one with the most room around
+              it — usually a weekend.
+            </span>
+          </span>
+          <WindowPicker value={user.windowPreference} />
         </div>
 
         <div className="row">

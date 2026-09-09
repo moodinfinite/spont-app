@@ -37,6 +37,11 @@ model User {
   // feed is what keeps the app something you close.
   proposalsPerDay Int @default(2)
 
+  // When several windows fit, which one wins. Soonest is the default because
+  // a plan four weeks out isn't spontaneous; BEST trades that for the roomier
+  // window, which is usually a weekend.
+  windowPreference WindowPreference @default(SOONEST)
+
   // Set once onboarding has been walked through, so we don't drop a
   // returning user back into it.
   onboardedAt DateTime?
@@ -72,6 +77,11 @@ model CalendarEvent {
   isBusy            Boolean  @default(true)
 
   calendarAccount CalendarAccount @relation(fields: [calendarAccountId], references: [id])
+}
+
+enum WindowPreference {
+  SOONEST
+  BEST
 }
 
 enum FriendshipStatus {

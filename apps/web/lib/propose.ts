@@ -1,10 +1,13 @@
 import { prisma } from '@spont/db'
 import {
+  anyonePrefers,
+  anyoneRefuses,
   placeHangout,
   reconcileDuration,
   sharedWindows,
   type Availability,
   type BusyBlock,
+  type HangoutTimes,
 } from '@spont/core'
 import { busyBetween } from './availability'
 
@@ -29,9 +32,13 @@ const HORIZON_DAYS = 30
  */
 const LEAD_HOURS = 2
 
-/** Hours a hangout may start within. Nobody wants a 04:00 proposal. */
+/**
+ * Hours a hangout may start within: 08:00 through 02:00, wrapping past
+ * midnight. The dead zone is 02:00–08:00 — a proposal at 4am isn't a late
+ * night out, it's the app not knowing what time it is.
+ */
 const EARLIEST_HOUR = 8
-const LATEST_START_HOUR = 21
+const LATEST_START_HOUR = 2
 
 /**
  * Nobody agrees to meet at 7:24. The matcher works in exact milliseconds
@@ -52,6 +59,7 @@ type Person = {
   name: string
   preferredHangoutMinutes: number
   bufferMinutes: number
+  hangoutTimes: HangoutTimes
 }
 
 /** One thing we could propose, before deciding whether to. */
@@ -60,6 +68,10 @@ type Candidate = {
   end: Date
   userIds: string[]
   groupId: string | null
+  /** Somebody marked this time of week as one they're up for. */
+  wanted: boolean
+  /** Spare minutes around the hangout inside its window — how roomy it is. */
+  slackMinutes: number
 }
 
 /**
@@ -72,7 +84,15 @@ type Candidate = {
 export async function refreshProposalsFor(userId: string): Promise<number> {
   const me = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, preferredHangoutMinutes: true, bufferMinutes: true, proposalsPerDay: true },
+    select: {
+      id: true,
+      name: true,
+      preferredHangoutMinutes: true,
+      bufferMinutes: true,
+      hangoutTimes: true,
+      proposalsPerDay: true,
+      windowPreference: true,
+    },
   })
   if (!me) return 0
 
@@ -102,7 +122,7 @@ export async function refreshProposalsFor(userId: string): Promise<number> {
    */
   const busyWith = await peopleWithSomethingOpen(userId)
 
-  const people = new Map<string, Person>([[me.id, me]])
+  const people = new Map<string, Person>([[me.id, person(me)]])
   for (const f of friends) people.set(f.id, f)
   for (const g of groups) for (const m of g.members) people.set(m.id, m)
 
@@ -112,9 +132,11 @@ export async function refreshProposalsFor(userId: string): Promise<number> {
 
   const candidates: Candidate[] = []
 
+  const self = person(me)
+
   for (const friend of friends) {
     if (busyWith.has(friend.id)) continue
-    candidates.push(...windowsFor([me, friend], availability, range, 2, null))
+    candidates.push(...windowsFor([self, friend], availability, range, 2, null))
   }
 
   for (const group of groups) {
@@ -122,11 +144,25 @@ export async function refreshProposalsFor(userId: string): Promise<number> {
     const members = group.members.filter((m) => m.id !== me.id)
     if (members.length === 0) continue
     // A group proposes as soon as any two of you are free — see the spec.
-    candidates.push(...windowsFor([me, ...members], availability, range, 2, group.id))
+    candidates.push(...windowsFor([self, ...members], availability, range, 2, group.id))
   }
 
-  // Soonest first: a window this week beats a better one next month.
-  candidates.sort((a, b) => a.start.getTime() - b.start.getTime())
+  /**
+   * A time somebody said they're up for always goes first — that's the point
+   * of having asked. After that it's the reader's own choice: soonest, or the
+   * roomiest window, which is usually a weekend.
+   *
+   * Times anyone marked "never" were dropped before they got here.
+   */
+  const bySoonest = (a: Candidate, b: Candidate) => a.start.getTime() - b.start.getTime()
+
+  candidates.sort((a, b) => {
+    if (a.wanted !== b.wanted) return a.wanted ? -1 : 1
+    if (me.windowPreference === 'BEST' && a.slackMinutes !== b.slackMinutes) {
+      return b.slackMinutes - a.slackMinutes
+    }
+    return bySoonest(a, b)
+  })
 
   const taken = await existingHolds(userId, range)
   const spokenFor = new Set<string>()
@@ -185,6 +221,8 @@ function windowsFor(
   const known = people.filter((p) => availability.has(p.id))
   if (known.length < minParticipants) return []
 
+  const preferences = known.map((p) => p.hangoutTimes)
+
   const options = {
     durationMinutes: reconcileDuration(known.map((p) => p.preferredHangoutMinutes)),
     paddingMinutes: reconcileDuration(known.map((p) => p.bufferMinutes)),
@@ -208,8 +246,21 @@ function windowsFor(
     const end = new Date(start.getTime() + options.durationMinutes * 60_000)
     if (end.getTime() + options.paddingMinutes * 60_000 > window.end.getTime()) continue
     if (!civilised(start)) continue
+    // One person's "never" is enough. Proposing a time somebody explicitly
+    // ruled out is worse than proposing nothing.
+    if (anyoneRefuses(preferences, start)) continue
 
-    out.push({ start, end, userIds: window.userIds, groupId })
+    const needed = (options.durationMinutes + options.paddingMinutes * 2) * 60_000
+    out.push({
+      start,
+      end,
+      userIds: window.userIds,
+      groupId,
+      wanted: anyonePrefers(preferences, start),
+      slackMinutes: Math.round(
+        (window.end.getTime() - window.start.getTime() - needed) / 60_000,
+      ),
+    })
     if (out.length >= WINDOWS_PER_PAIRING) break
   }
 
@@ -222,10 +273,13 @@ function snap(d: Date): Date {
   return new Date(Math.ceil(d.getTime() / step) * step)
 }
 
-/** Waking hours, and not so late that the hangout is really tomorrow. */
+/**
+ * The range wraps midnight, so this is an OR rather than the usual AND: 1am
+ * is inside it, 7am is not.
+ */
 function civilised(start: Date): boolean {
   const hour = start.getHours()
-  return hour >= EARLIEST_HOUR && hour <= LATEST_START_HOUR
+  return hour >= EARLIEST_HOUR || hour < LATEST_START_HOUR
 }
 
 async function gatherAvailability(
@@ -322,11 +376,14 @@ function person(u: {
   name: string
   preferredHangoutMinutes: number
   bufferMinutes: number
+  hangoutTimes: unknown
 }): Person {
   return {
     id: u.id,
     name: u.name,
     preferredHangoutMinutes: u.preferredHangoutMinutes,
     bufferMinutes: u.bufferMinutes,
+    // Prisma types this as Json, and an unset column comes back null.
+    hangoutTimes: (u.hangoutTimes ?? {}) as HangoutTimes,
   }
 }
