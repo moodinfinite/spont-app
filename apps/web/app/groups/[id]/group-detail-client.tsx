@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
 import { GroupQuorum } from '@/components/group-quorum'
+import { GroupDelete } from '@/components/group-delete'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -33,12 +34,16 @@ export function GroupDetailClient({
   minAttendees,
   members,
   directory,
+  isOwner,
+  upcomingCount,
 }: {
   groupId: string
   groupName: string
   minAttendees: number
   members: Member[]
   directory: { id: string; name: string }[]
+  isOwner: boolean
+  upcomingCount: number
 }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -153,6 +158,18 @@ export function GroupDetailClient({
       )}
 
       <p className="note">{quorumNote(minAttendees, inside.length)}</p>
+
+      {/* Last on the page, the way logging out is last in Settings — the one
+          thing here you can't take back shouldn't sit next to the ones you
+          can. */}
+      {isOwner && (
+        <GroupDelete
+          groupId={groupId}
+          groupName={groupName}
+          memberCount={inside.length}
+          upcomingCount={upcomingCount}
+        />
+      )}
     </main>
   )
 }

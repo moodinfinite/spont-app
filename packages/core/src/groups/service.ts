@@ -90,3 +90,57 @@ export async function getGroupDetail(prisma: PrismaClient, groupId: string, requ
   }
   return group
 }
+
+/**
+ * Deleting a group, for everyone.
+ *
+ * Unlike the quorum, which any accepted member can set, this is the owner's
+ * alone. Both are "changing how the group works" — the difference is that a
+ * quorum someone disagrees with can be changed back, and a group someone
+ * deletes is gone from four other people's app with nothing to undo it.
+ *
+ * The group's proposals go with it, including ones already confirmed. A
+ * proposal is Spont's answer to "when are this particular set of people
+ * free" — outliving the set would leave a plan nobody can open. Callers are
+ * expected to say how many upcoming plans that cancels before asking.
+ *
+ * Deletes are explicit rather than leaning on a schema cascade: the group
+ * relations don't declare one, and spelling out the order here keeps the
+ * blast radius visible — the same reason `resetDb` spells it out.
+ */
+export async function deleteGroup(
+  prisma: PrismaClient,
+  groupId: string,
+  requestingUserId: string,
+): Promise<void> {
+  const group = await prisma.group.findUnique({ where: { id: groupId } })
+  if (!group) {
+    throw new AppError('NOT_FOUND', 'Group not found')
+  }
+  if (group.ownerId !== requestingUserId) {
+    throw new AppError('NOT_AUTHORIZED', 'Only whoever started this group can delete it')
+  }
+
+  await prisma.$transaction([
+    prisma.proposalParticipant.deleteMany({ where: { proposal: { groupId } } }),
+    prisma.proposal.deleteMany({ where: { groupId } }),
+    prisma.groupMembership.deleteMany({ where: { groupId } }),
+    prisma.group.delete({ where: { id: groupId } }),
+  ])
+}
+
+/**
+ * How many plans this group still has ahead of it — what a member is about
+ * to cancel by deleting it. Past proposals aren't counted: they've either
+ * happened or been missed, and warning about them would inflate the number
+ * that's meant to give someone pause.
+ */
+export async function countUpcomingGroupProposals(
+  prisma: PrismaClient,
+  groupId: string,
+  now: Date = new Date(),
+): Promise<number> {
+  return prisma.proposal.count({
+    where: { groupId, startsAt: { gt: now }, status: { in: ['OPEN', 'CONFIRMED'] } },
+  })
+}

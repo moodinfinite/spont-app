@@ -2,7 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
 import { prisma } from '@spont/db'
-import { getGroupDetail } from '@spont/core'
+import { countUpcomingGroupProposals, getGroupDetail } from '@spont/core'
 import { GroupInviteResponse } from './group-invite-response'
 import { GroupDetailClient } from './group-detail-client'
 
@@ -93,6 +93,7 @@ export default async function GroupDetailPage({ params }: { params: { id: string
   const group = await getGroupDetail(prisma, params.id, userId)
   const memberIds = new Set(group.members.map((m) => m.userId))
   const directory = await prisma.user.findMany({ where: { id: { notIn: [...memberIds] } } })
+  const upcomingCount = await countUpcomingGroupProposals(prisma, group.id)
 
   return (
     <GroupDetailClient
@@ -106,6 +107,8 @@ export default async function GroupDetailPage({ params }: { params: { id: string
         user: { id: m.user.id, name: m.user.name },
       }))}
       directory={directory.map((u) => ({ id: u.id, name: u.name }))}
+      isOwner={group.ownerId === userId}
+      upcomingCount={upcomingCount}
     />
   )
 }
