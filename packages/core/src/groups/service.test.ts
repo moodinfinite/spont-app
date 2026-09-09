@@ -6,6 +6,7 @@ import {
   deleteGroup,
   getGroupDetail,
   inviteMember,
+  leaveGroup,
   listGroupsForUser,
   respondToInvite,
 } from './service'
@@ -172,6 +173,90 @@ describe('groups service', () => {
       await deleteGroup(prisma, group.id, alice.id)
 
       expect(await prisma.user.count({ where: { id: { in: [alice.id, bob.id] } } })).toBe(2)
+    })
+  })
+
+  describe('leaving a group', () => {
+    async function groupOfThree() {
+      const alice = await makeUser('Alice')
+      const bob = await makeUser('Bob')
+      const carol = await makeUser('Carol')
+      const group = await createGroup(prisma, alice.id, 'Five-a-side')
+      for (const person of [bob, carol]) {
+        const m = await inviteMember(prisma, group.id, alice.id, person.id)
+        await respondToInvite(prisma, m.id, person.id, true)
+      }
+      return { alice, bob, carol, group }
+    }
+
+    const soon = new Date('2026-10-01T18:00:00Z')
+    const past = new Date('2020-01-01T18:00:00Z')
+
+    async function proposalAt(groupId: string, startsAt: Date, userIds: string[]) {
+      return prisma.proposal.create({
+        data: {
+          origin: 'SUGGESTED',
+          startsAt,
+          endsAt: new Date(startsAt.getTime() + 2 * 60 * 60 * 1000),
+          groupId,
+          participants: { create: userIds.map((userId) => ({ userId })) },
+        },
+      })
+    }
+
+    it('lets a member leave, and the group drops off their list', async () => {
+      const { alice, bob, group } = await groupOfThree()
+
+      await leaveGroup(prisma, group.id, bob.id)
+
+      expect(await listGroupsForUser(prisma, bob.id)).toHaveLength(0)
+      // Still there for everyone else.
+      expect((await listGroupsForUser(prisma, alice.id)).map((g) => g.id)).toContain(group.id)
+    })
+
+    it('refuses the owner, who deletes instead', async () => {
+      const { alice, group } = await groupOfThree()
+
+      await expect(leaveGroup(prisma, group.id, alice.id)).rejects.toThrow(AppError)
+      expect(await prisma.group.findUnique({ where: { id: group.id } })).not.toBeNull()
+    })
+
+    it('refuses someone who was never in it', async () => {
+      const { group } = await groupOfThree()
+      const dave = await makeUser('Dave')
+
+      await expect(leaveGroup(prisma, group.id, dave.id)).rejects.toThrow(AppError)
+    })
+
+    it('takes the leaver off upcoming proposals but leaves the rest on', async () => {
+      const { alice, bob, carol, group } = await groupOfThree()
+      const proposal = await proposalAt(group.id, soon, [alice.id, bob.id, carol.id])
+
+      await leaveGroup(prisma, group.id, bob.id, new Date('2026-09-09T00:00:00Z'))
+
+      const left = await prisma.proposalParticipant.findMany({
+        where: { proposalId: proposal.id },
+      })
+      expect(left.map((p) => p.userId).sort()).toEqual([alice.id, carol.id].sort())
+    })
+
+    it('deletes an upcoming proposal that would be left with one person', async () => {
+      const { alice, bob, group } = await groupOfThree()
+      const pair = await proposalAt(group.id, soon, [alice.id, bob.id])
+
+      await leaveGroup(prisma, group.id, bob.id, new Date('2026-09-09T00:00:00Z'))
+
+      expect(await prisma.proposal.findUnique({ where: { id: pair.id } })).toBeNull()
+      expect(await prisma.proposalParticipant.count({ where: { proposalId: pair.id } })).toBe(0)
+    })
+
+    it('leaves proposals that already happened untouched', async () => {
+      const { alice, bob, group } = await groupOfThree()
+      const history = await proposalAt(group.id, past, [alice.id, bob.id])
+
+      await leaveGroup(prisma, group.id, bob.id, new Date('2026-09-09T00:00:00Z'))
+
+      expect(await prisma.proposalParticipant.count({ where: { proposalId: history.id } })).toBe(2)
     })
   })
 })
