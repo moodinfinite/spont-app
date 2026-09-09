@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@spont/db'
-import { AppError } from '@spont/core'
+import { AppError, deleteGroup } from '@spont/core'
 import { getCurrentUserId } from '@/lib/session'
 import { toErrorResponse } from '@/lib/api-error'
 
@@ -42,6 +42,31 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       data: { minAttendees },
     })
     return NextResponse.json({ minAttendees: group.minAttendees })
+  } catch (err) {
+    return toErrorResponse(err)
+  }
+}
+
+/**
+ * Deleting the group. Owner only — see `deleteGroup` for why this one isn't
+ * shared with the rest of the group the way the quorum is.
+ *
+ * Authorization lives in core rather than being repeated here: a check that
+ * decides whether four people lose a group shouldn't have a second copy that
+ * can drift from the first.
+ */
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  const userId = getCurrentUserId()
+  if (!userId) {
+    return NextResponse.json(
+      { error: { code: 'UNAUTHENTICATED', message: 'Not logged in' } },
+      { status: 401 },
+    )
+  }
+
+  try {
+    await deleteGroup(prisma, params.id, userId)
+    return NextResponse.json({ deleted: true })
   } catch (err) {
     return toErrorResponse(err)
   }

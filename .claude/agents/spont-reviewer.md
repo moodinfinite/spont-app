@@ -1,6 +1,6 @@
 ---
 name: spont-reviewer
-description: Reviews code changes in the Spont app (spont_app/) against this repo's specific conventions — the AppError/toErrorResponse error contract, the CalendarProvider abstraction seam, and the packages/core vs apps/web boundary. Use for any code review in this repo, in place of a generic reviewer.
+description: Reviews code changes in the Spont app (apps/web, packages/) against this repo's specific conventions — the AppError/toErrorResponse error contract, the CalendarProvider abstraction seam, and the packages/core vs apps/web boundary. Use for any code review in this repo, in place of a generic reviewer.
 tools: Glob, Grep, Read, Bash
 model: sonnet
 color: blue

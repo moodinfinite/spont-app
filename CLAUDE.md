@@ -38,19 +38,18 @@ and agents below.)
 ## Codebase structure
 
 ```
-spont_app/
-  apps/web/          # Next.js app — pages, API routes, login. The only
-                      # piece that knows about HTTP/cookies/pages.
-  packages/core/      # Business rules (Friends, Groups, CalendarProvider
-                      # interface) — no knowledge of the web layer.
-  packages/db/        # Prisma schema, client, seed data.
-  docs/superpowers/   # Phase-by-phase specs and implementation plans —
-                      # point-in-time, becomes history once a phase ships.
-  docs/knowledge-base/ # Durable context — architecture, glossary, design
-                      # principles, references, proposals. Doesn't expire.
-  .claude/skills/     # Shared skills any contributor's session can use.
-  .claude/agents/     # Shared subagents (code review, product review).
-  .claude/memory/     # Per-contributor session memory (see below).
+apps/web/            # Next.js app — pages, API routes, login. The only
+                     # piece that knows about HTTP/cookies/pages.
+packages/core/       # Business rules (Friends, Groups, CalendarProvider
+                     # interface) — no knowledge of the web layer.
+packages/db/         # Prisma schema, client, seed data.
+docs/superpowers/    # Phase-by-phase specs and implementation plans —
+                     # point-in-time, becomes history once a phase ships.
+docs/knowledge-base/ # Durable context — architecture, glossary, design
+                     # principles, references, proposals. Doesn't expire.
+.claude/skills/      # Shared skills any contributor's session can use.
+.claude/agents/      # Shared subagents (code review, product review).
+.claude/memory/      # Per-contributor session memory (see below).
 ```
 
 See `docs/knowledge-base/architecture.md` for *why* it's shaped this way.
@@ -92,13 +91,11 @@ gotchas, anything worth surviving past the task that produced it.
 declared technical/non-technical role also lives in
 `persistent/role.md` — see the `spont-onboarding` skill.
 
-**Gotcha:** the repo-root `.gitignore`'s `.claude/` rule is anchored to
-`/.claude/` (repo root only) *on purpose* — this is what lets
-`spont_app/.claude/memory/*/persistent/` commit normally while
-`ephemeral/` stays ignored via `spont_app/.gitignore`'s own rules. Widening
-that root pattern back to a bare `.claude/` silently breaks the whole
-contributor-memory convention (a bare `git add` on any persistent file
-would start failing repo-wide).
+**Gotcha:** `.gitignore` ignores `.claude/memory/*/ephemeral/*` and nothing
+else under `.claude/` — deliberately narrow, so `persistent/` and the shared
+`skills/` and `agents/` commit normally. Broadening it to a bare `.claude/`
+silently breaks the whole contributor-memory convention: `git add` on any
+persistent file starts failing, and the shared tooling stops being shared.
 
 Current phase: see `docs/superpowers/specs/` for the latest design and
 `docs/superpowers/plans/` for the active implementation plan.

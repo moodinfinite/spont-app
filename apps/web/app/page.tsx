@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUserId } from '@/lib/session'
@@ -124,16 +125,39 @@ export default async function HomePage() {
 }
 
 /** "You + Edward," / "The Softest Lads," and the day it's on. */
-function headlineFor(p: FeedProposal): string {
-  return `${withWhom(p)}, ${shortDay(p.startsAt)}.`
+function headlineFor(p: FeedProposal): ReactNode {
+  return (
+    <>
+      {withWhom(p)}, {shortDay(p.startsAt)}.
+    </>
+  )
 }
 
-function withWhom(p: FeedProposal): string {
+/**
+ * Who this is with, you first.
+ *
+ * "You" is set apart typographically (see `.you`) because this phrase is on
+ * every card and every Upcoming row — it's the word the eye uses to find
+ * itself in a list of names. A group leads with its own name instead: the
+ * group is the answer to "who", and prefixing it with You would say nothing
+ * the reader doesn't already know.
+ */
+function withWhom(p: FeedProposal): ReactNode {
   if (p.groupName) return p.groupName
+
   const names = p.others.map((o) => o.name)
-  if (names.length === 1) return `You + ${names[0]}`
-  if (names.length === 2) return `You + ${names[0]} + ${names[1]}`
-  return `You + ${names.length} others`
+  const rest =
+    names.length === 1
+      ? names[0]
+      : names.length === 2
+        ? `${names[0]} + ${names[1]}`
+        : `${names.length} others`
+
+  return (
+    <>
+      <em className="you">You</em> + {rest}
+    </>
+  )
 }
 
 /**
