@@ -3,8 +3,22 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
+import { GroupQuorum } from '@/components/group-quorum'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
+
+/**
+ * Says what this group actually does, not what groups used to do. It was a
+ * fixed "any two of you" line, which stopped being true the moment the
+ * number became the group's own to set.
+ */
+export function quorumNote(minAttendees: number, accepted: number): string {
+  const needed = Math.min(minAttendees, accepted)
+  if (accepted > 0 && needed >= accepted) {
+    return 'Spont waits until all of you are free before it proposes anything.'
+  }
+  return `Spont proposes to this group as soon as any ${needed} of you are free — it doesn’t wait for everyone.`
+}
 
 type Member = {
   membershipId: string
@@ -16,11 +30,13 @@ type Member = {
 export function GroupDetailClient({
   groupId,
   groupName,
+  minAttendees,
   members,
   directory,
 }: {
   groupId: string
   groupName: string
+  minAttendees: number
   members: Member[]
   directory: { id: string; name: string }[]
 }) {
@@ -110,6 +126,8 @@ export function GroupDetailClient({
         </>
       )}
 
+      <GroupQuorum groupId={groupId} value={minAttendees} memberCount={inside.length} />
+
       {directory.length > 0 && (
         <>
           <div className="section-label">
@@ -134,10 +152,7 @@ export function GroupDetailClient({
         </>
       )}
 
-      <p className="note">
-        Spont proposes to this group as soon as any two of you are free — it doesn&rsquo;t wait for
-        everyone.
-      </p>
+      <p className="note">{quorumNote(minAttendees, inside.length)}</p>
     </main>
   )
 }

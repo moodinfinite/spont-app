@@ -33,8 +33,12 @@ model User {
   // { "wd-evening": "yes" | "never", ... }; absent keys mean no preference.
   hangoutTimes Json?
 
-  // The cap on what reaches the feed in a day. More isn't better — a short
-  // feed is what keeps the app something you close.
+  // Parked. This capped how many proposals Spont could surface to you in a
+  // day, and it was removed rather than left half-working: the cap only ever
+  // consulted the person who opened the app, so being proposed *to* was never
+  // limited by it. The natural bound is now one open proposal per friend at a
+  // time. Kept as a column so the decision can be revisited without a
+  // migration; nothing reads it.
   proposalsPerDay Int @default(2)
 
   // When several windows fit, which one wins. Soonest is the default because
@@ -107,6 +111,12 @@ model Group {
   name      String
   ownerId   String
   createdAt DateTime @default(now())
+
+  // How many of you have to be free before Spont proposes anything. Two is
+  // the default because four busy people rarely share a window and two who
+  // actually turn up beats a perfect window nobody has — but that's a
+  // judgement about this particular group, so the group makes it.
+  minAttendees Int @default(2)
 
   owner     User              @relation(fields: [ownerId], references: [id])
   members   GroupMembership[]

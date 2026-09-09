@@ -90,15 +90,10 @@ export default async function SettingsPage() {
         <span>Proposals</span>
       </div>
       <div className="panel">
-        <div className="row">
-          <span className="row-text">
-            <span className="row-name">How many a day</span>
-            <span className="row-sub">
-              The cap on what reaches your feed. More isn&rsquo;t better.
-            </span>
-          </span>
-          <PreferencePicker field="proposalsPerDay" value={user.proposalsPerDay} options={[1, 2, 3]} />
-        </div>
+        {/* "How many a day" lived here. It only ever limited what your own
+            visits generated, never what reached you from other people's, so
+            the number didn't mean what it said. One open proposal per friend
+            is the bound now, and it needs no setting. */}
         <div className="row">
           <span className="row-text">
             <span className="row-name">How far ahead</span>

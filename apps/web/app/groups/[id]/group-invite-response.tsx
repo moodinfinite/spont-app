@@ -12,10 +12,14 @@ export function GroupInviteResponse({
   membershipId,
   groupId,
   groupName,
+  minAttendees,
+  memberCount,
 }: {
   membershipId: string
   groupId: string
   groupName: string
+  minAttendees: number
+  memberCount: number
 }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -45,8 +49,17 @@ export function GroupInviteResponse({
     <>
       <div className="card-dark">
         <p style={{ margin: '0 0 16px', fontSize: 13.5, lineHeight: 1.55 }}>
-          In a group, Spont proposes as soon as <b>any two of you</b> are free — it doesn&rsquo;t
-          wait for everyone. It still only ever sees free or busy, never what any of you are doing.
+          {minAttendees >= memberCount + 1 ? (
+            <>
+              This group has asked Spont to wait until <b>all of you</b> are free.
+            </>
+          ) : (
+            <>
+              In a group, Spont proposes as soon as <b>any {minAttendees} of you</b> are free — it
+              doesn&rsquo;t wait for everyone.
+            </>
+          )}{' '}
+          It still only ever sees free or busy, never what any of you are doing.
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-yes" disabled={pending} onClick={() => respond(true)}>

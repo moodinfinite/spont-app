@@ -24,7 +24,6 @@ const TIME_KEYS = new Set([
 const TIME_STATES = new Set(['yes', 'never'])
 const HANGOUT_MINUTES = new Set([60, 90, 120, 180])
 const BUFFER_MINUTES = new Set([0, 30, 60, 90])
-const PER_DAY = new Set([1, 2, 3])
 const WINDOW_PREFERENCE = new Set(['SOONEST', 'BEST'])
 
 export async function PUT(request: NextRequest) {
@@ -64,9 +63,6 @@ export async function PUT(request: NextRequest) {
   if (BUFFER_MINUTES.has(body.bufferMinutes)) {
     data.bufferMinutes = body.bufferMinutes
   }
-  if (PER_DAY.has(body.proposalsPerDay)) {
-    data.proposalsPerDay = body.proposalsPerDay
-  }
   if (WINDOW_PREFERENCE.has(body.windowPreference)) {
     data.windowPreference = body.windowPreference
   }
@@ -84,7 +80,6 @@ export async function PUT(request: NextRequest) {
     hangoutTimes: user.hangoutTimes,
     preferredHangoutMinutes: user.preferredHangoutMinutes,
     bufferMinutes: user.bufferMinutes,
-    proposalsPerDay: user.proposalsPerDay,
     windowPreference: user.windowPreference,
   })
 }

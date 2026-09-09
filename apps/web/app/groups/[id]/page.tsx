@@ -78,6 +78,8 @@ export default async function GroupDetailPage({ params }: { params: { id: string
             membershipId={membership.id}
             groupId={group.id}
             groupName={group.name}
+            minAttendees={group.minAttendees}
+            memberCount={members.length}
           />
         </div>
 
@@ -96,6 +98,7 @@ export default async function GroupDetailPage({ params }: { params: { id: string
     <GroupDetailClient
       groupId={group.id}
       groupName={group.name}
+      minAttendees={group.minAttendees}
       members={group.members.map((m) => ({
         membershipId: m.id,
         status: m.status,

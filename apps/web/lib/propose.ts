@@ -77,9 +77,15 @@ type Candidate = {
 /**
  * Top up this person's open proposals, and return how many were created.
  *
- * Safe to call on every feed load: it's bounded by the per-day cap, skips
- * anyone who already has something open with you, and does nothing at all
- * once you've had your allowance for the day.
+ * Safe to call on every feed load. What bounds it is one open proposal per
+ * relationship: anyone you already have something open with is skipped, so a
+ * second visit five minutes later creates nothing.
+ *
+ * There used to be a daily cap on top of that. It was removed rather than
+ * left half-working, because it only ever consulted the person who opened the
+ * app — four friends opening Spont could each put a proposal in front of you
+ * regardless of your own number. One card per friend is a bound that means
+ * the same thing from both ends.
  */
 export async function refreshProposalsFor(userId: string): Promise<number> {
   const me = await prisma.user.findUnique({
@@ -90,24 +96,10 @@ export async function refreshProposalsFor(userId: string): Promise<number> {
       preferredHangoutMinutes: true,
       bufferMinutes: true,
       hangoutTimes: true,
-      proposalsPerDay: true,
       windowPreference: true,
     },
   })
   if (!me) return 0
-
-  /**
-   * The cap is on proposals that *reach you today*, not on proposals per
-   * future day. "More isn't better" is about how often Spont interrupts you,
-   * and two a day for the next thirty days would be sixty cards.
-   */
-  const since = new Date()
-  since.setHours(0, 0, 0, 0)
-  const madeToday = await prisma.proposalParticipant.count({
-    where: { userId, proposal: { origin: 'SUGGESTED', createdAt: { gte: since } } },
-  })
-  const allowance = me.proposalsPerDay - madeToday
-  if (allowance <= 0) return 0
 
   const friends = await acceptedFriends(userId)
   const groups = await groupsWithMembers(userId)
@@ -143,8 +135,13 @@ export async function refreshProposalsFor(userId: string): Promise<number> {
     if (busyWith.has(`group:${group.id}`)) continue
     const members = group.members.filter((m) => m.id !== me.id)
     if (members.length === 0) continue
-    // A group proposes as soon as any two of you are free — see the spec.
-    candidates.push(...windowsFor([self, ...members], availability, range, 2, group.id))
+    /**
+     * How many have to be free is the group's own call, not a global rule —
+     * "any two of us" suits a five-a-side, and doesn't suit a book club.
+     * Never more than the group actually has.
+     */
+    const quorum = Math.min(group.minAttendees, members.length + 1)
+    candidates.push(...windowsFor([self, ...members], availability, range, quorum, group.id))
   }
 
   /**
@@ -169,7 +166,6 @@ export async function refreshProposalsFor(userId: string): Promise<number> {
   let created = 0
 
   for (const candidate of candidates) {
-    if (created >= allowance) break
     // Two proposals you'd have to be in two places for is not a choice.
     if (taken.some((t) => overlaps(t, candidate))) continue
     // One card per relationship, however many windows it had.
@@ -325,7 +321,11 @@ async function groupsWithMembers(userId: string) {
     include: { members: { where: { status: 'ACCEPTED' }, include: { user: true } } },
   })
 
-  return groups.map((g) => ({ id: g.id, members: g.members.map((m) => person(m.user)) }))
+  return groups.map((g) => ({
+    id: g.id,
+    minAttendees: g.minAttendees,
+    members: g.members.map((m) => person(m.user)),
+  }))
 }
 
 /**

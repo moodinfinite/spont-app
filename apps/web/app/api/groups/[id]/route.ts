@@ -1,0 +1,48 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@spont/db'
+import { AppError } from '@spont/core'
+import { getCurrentUserId } from '@/lib/session'
+import { toErrorResponse } from '@/lib/api-error'
+
+/**
+ * Changing how a group works. Only how many of you have to be free, for now.
+ *
+ * Any accepted member can set it, matching invites — a group isn't a thing
+ * its owner administers, it's a thing you're all in.
+ */
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const userId = getCurrentUserId()
+  if (!userId) {
+    return NextResponse.json(
+      { error: { code: 'UNAUTHENTICATED', message: 'Not logged in' } },
+      { status: 401 },
+    )
+  }
+
+  try {
+    const membership = await prisma.groupMembership.findFirst({
+      where: { groupId: params.id, userId, status: 'ACCEPTED' },
+    })
+    if (!membership) throw new AppError('NOT_AUTHORIZED', 'You are not in this group')
+
+    const { minAttendees } = await request.json()
+    if (!Number.isInteger(minAttendees) || minAttendees < 2) {
+      throw new AppError('INVALID_STATE', 'A hangout needs at least two people')
+    }
+
+    const accepted = await prisma.groupMembership.count({
+      where: { groupId: params.id, status: 'ACCEPTED' },
+    })
+    if (minAttendees > accepted) {
+      throw new AppError('INVALID_STATE', 'That is more people than the group has')
+    }
+
+    const group = await prisma.group.update({
+      where: { id: params.id },
+      data: { minAttendees },
+    })
+    return NextResponse.json({ minAttendees: group.minAttendees })
+  } catch (err) {
+    return toErrorResponse(err)
+  }
+}
