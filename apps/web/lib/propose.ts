@@ -213,6 +213,7 @@ function windowsFor(
   range: { start: Date; end: Date },
   minParticipants: number,
   groupId: string | null,
+  limit: number = WINDOWS_PER_PAIRING,
 ): Candidate[] {
   const known = people.filter((p) => availability.has(p.id))
   if (known.length < minParticipants) return []
@@ -257,7 +258,7 @@ function windowsFor(
         (window.end.getTime() - window.start.getTime() - needed) / 60_000,
       ),
     })
-    if (out.length >= WINDOWS_PER_PAIRING) break
+    if (out.length >= limit) break
   }
 
   return out
@@ -386,4 +387,76 @@ function person(u: {
     // Prisma types this as Json, and an unset column comes back null.
     hangoutTimes: (u.hangoutTimes ?? {}) as HangoutTimes,
   }
+}
+
+/**
+ * Times a chosen set of people could actually make.
+ *
+ * The matcher's other entry point decides *who* to propose to; here the
+ * person has already decided that, so this only answers *when*. Everyone
+ * picked has to be free — you named these people, so a window three of the
+ * four can make isn't an answer to the question you asked.
+ *
+ * At most one window per day. The matcher's raw output clusters: the same
+ * Thursday evening yields 6:00, 6:15 and 6:30, which is three slots and no
+ * choice. A day apiece makes the options actually different from each other.
+ *
+ * Ordering follows the same rules as the feed — a time someone said they're
+ * up for first, then the reader's own soonest-or-roomiest preference.
+ */
+export async function windowsWith(
+  userId: string,
+  withUserIds: string[],
+  limit = 3,
+): Promise<{ start: Date; end: Date; wanted: boolean }[]> {
+  const ids = [...new Set([userId, ...withUserIds])]
+  if (ids.length < 2) return []
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: ids } },
+    select: {
+      id: true,
+      name: true,
+      preferredHangoutMinutes: true,
+      bufferMinutes: true,
+      hangoutTimes: true,
+      windowPreference: true,
+    },
+  })
+  const me = users.find((u) => u.id === userId)
+  // Somebody asking about people who don't exist gets nothing, not a crash.
+  if (!me || users.length !== ids.length) return []
+
+  const range = searchRange()
+  const availability = await gatherAvailability(ids, range)
+  if (!availability.has(userId)) return []
+
+  // Ask for a generous number, because the one-per-day pass below throws
+  // most of them away.
+  const candidates = windowsFor(users.map(person), availability, range, ids.length, null, 40)
+
+  candidates.sort((a, b) => {
+    if (a.wanted !== b.wanted) return a.wanted ? -1 : 1
+    if (me.windowPreference === 'BEST' && a.slackMinutes !== b.slackMinutes) {
+      return b.slackMinutes - a.slackMinutes
+    }
+    return a.start.getTime() - b.start.getTime()
+  })
+
+  // Not on top of something you've already said yes to.
+  const taken = await existingHolds(userId, range)
+
+  const out: { start: Date; end: Date; wanted: boolean }[] = []
+  const daysUsed = new Set<string>()
+
+  for (const candidate of candidates) {
+    if (taken.some((t) => overlaps(t, candidate))) continue
+    const day = `${candidate.start.getFullYear()}-${candidate.start.getMonth()}-${candidate.start.getDate()}`
+    if (daysUsed.has(day)) continue
+    daysUsed.add(day)
+    out.push({ start: candidate.start, end: candidate.end, wanted: candidate.wanted })
+    if (out.length >= limit) break
+  }
+
+  return out
 }

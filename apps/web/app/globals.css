@@ -842,6 +842,59 @@ a {
   color: var(--ink);
 }
 
+/* Choosing people, and then a time, on the create flow.
+ *
+ * A whole row is the target rather than a control on the end of it — you are
+ * picking the person, not operating a checkbox beside their name. The mark
+ * fills with ink rather than the accent: green means "do this", and these
+ * rows are a state, not an action. The one green thing on the screen stays
+ * the button that sends. */
+.pick {
+  width: 100%;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pick:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.pick-mark {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.pick-mark svg {
+  width: 12px;
+  height: 12px;
+  color: var(--page);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.pick[aria-pressed='true'] .pick-mark {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.pick[aria-pressed='true'] .pick-mark svg {
+  opacity: 1;
+}
+
 /* ---------------- Setup flow ---------------- */
 
 .setup-steps {

@@ -31,9 +31,12 @@ export function ProposalCard({
   reason,
   day,
   time,
+  askedBy = null,
 }: {
   id: string
   headline: ReactNode
+  /** A person asked for this; the matcher didn't find it. */
+  askedBy?: string | null
   reason: string
   day: string
   time: string
@@ -160,13 +163,18 @@ export function ProposalCard({
   return (
     <div {...wrapProps}>
       <div className="card-dark card-suggested">
+        {/* The mark is Spont's own logo, so it belongs on the cards Spont
+            found. When a person asked, their name is the whole eyebrow —
+            putting the app's mark beside it would take the credit. */}
         <div className="sug-top">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.4" />
-            <circle cx="9.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
-            <circle cx="14.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
-          </svg>
-          <span className="sug-eyebrow">Suggested</span>
+          {!askedBy && (
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.4" />
+              <circle cx="9.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
+              <circle cx="14.5" cy="12" r="5" stroke="currentColor" strokeWidth="1.4" />
+            </svg>
+          )}
+          <span className="sug-eyebrow">{askedBy ? `${askedBy} asked` : 'Suggested'}</span>
         </div>
 
         <h3 className="card-headline">{headline}</h3>

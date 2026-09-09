@@ -20,6 +20,12 @@ export type FeedProposal = {
   groupName: string | null
   others: FeedPerson[]
   view: ParticipantView
+  /**
+   * Set when a person asked for this rather than the matcher finding it, and
+   * that person isn't you. A friend asking carries more weight than an
+   * algorithm suggesting, and the card says so.
+   */
+  askedBy: string | null
 }
 
 export type Feed = {
@@ -37,7 +43,11 @@ export async function feedFor(userId: string, now = new Date()): Promise<Feed> {
       startsAt: { gt: now },
       status: { in: ['OPEN', 'CONFIRMED'] },
     },
-    include: { participants: { include: { user: true } }, group: true },
+    include: {
+      participants: { include: { user: true } },
+      group: true,
+      createdBy: { select: { name: true } },
+    },
     orderBy: { startsAt: 'asc' },
   })
 
@@ -67,6 +77,10 @@ export async function feedFor(userId: string, now = new Date()): Promise<Feed> {
         .filter((p) => p.userId !== userId)
         .map((p) => ({ id: p.userId, name: p.user.name, response: p.response as Response })),
       view: viewFor(state, userId, now),
+      askedBy:
+        row.origin === 'INVITED' && row.createdById !== null && row.createdById !== userId
+          ? (row.createdBy?.name ?? null)
+          : null,
     }
 
     if (proposal.view === 'AWAITING_YOU') open.push(proposal)

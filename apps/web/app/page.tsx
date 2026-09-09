@@ -77,6 +77,7 @@ export default async function HomePage() {
           reason={reasonFor(proposal)}
           day={dayLabel(proposal.startsAt)}
           time={timeLabel(proposal.startsAt, proposal.endsAt)}
+          askedBy={proposal.askedBy}
         />
       ))}
 
