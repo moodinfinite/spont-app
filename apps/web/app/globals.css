@@ -20,6 +20,7 @@
   --dark: #15150f;
   --dark-ink: #f3f6ea;
   --dark-ink-2: rgba(243, 246, 234, 0.68);
+  --you-line: rgba(243, 246, 234, 0.4);
   --chip: #e5e7df;
   --busy: #c2c8b8;
   --warn: #e14b3a;
@@ -49,6 +50,7 @@
     --dark: #d2ff66;
     --dark-ink: #16240a;
     --dark-ink-2: rgba(22, 36, 10, 0.72);
+    --you-line: rgba(22, 36, 10, 0.36);
     --chip: #35352c;
     --busy: #474d3b;
     --warn: #ff6a57;
@@ -73,6 +75,7 @@
   --dark: #d2ff66;
   --dark-ink: #16240a;
   --dark-ink-2: rgba(22, 36, 10, 0.72);
+  --you-line: rgba(22, 36, 10, 0.36);
   --chip: #35352c;
   --busy: #474d3b;
   --warn: #ff6a57;
@@ -412,8 +415,29 @@ a {
   font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
   font-style: italic;
   font-weight: 400;
-  font-size: 1.07em;
+  font-size: 1.19em;
   letter-spacing: 0;
+}
+
+/*
+ * On the card headline the word also takes a pill — the headline is 28px and
+ * can carry it; the 14.5px Upcoming row can't, so there it stays plain type.
+ *
+ * The padding is top-heavy on purpose, and this is the whole trick. "You" has
+ * no descenders — Y, o and u all sit between baseline and cap line — but an
+ * inline box is sized from the font's full ascender-to-descender metrics, so
+ * it reserves room underneath for descenders this word doesn't have. Border
+ * that box and the pill hangs below the letters. `line-height: 1` makes the
+ * box a predictable 1em, and the extra padding on top lifts the box's centre
+ * back onto the letters' optical centre. Newsreader's metrics differ from
+ * Sora's, which is why the correction has to be this deliberate.
+ */
+.card-headline .you {
+  display: inline-block;
+  line-height: 1;
+  padding: 0.2em 0.42em 0.11em;
+  border: 1px solid var(--you-line);
+  border-radius: 999px;
 }
 
 /* ---------------- Dock ---------------- */
