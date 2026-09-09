@@ -5,6 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { GroupQuorum } from '@/components/group-quorum'
 import { GroupDelete } from '@/components/group-delete'
+import { GroupLeave } from '@/components/group-leave'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -162,13 +163,15 @@ export function GroupDetailClient({
       {/* Last on the page, the way logging out is last in Settings — the one
           thing here you can't take back shouldn't sit next to the ones you
           can. */}
-      {isOwner && (
+      {isOwner ? (
         <GroupDelete
           groupId={groupId}
           groupName={groupName}
           memberCount={inside.length}
           upcomingCount={upcomingCount}
         />
+      ) : (
+        <GroupLeave groupId={groupId} upcomingCount={upcomingCount} />
       )}
     </main>
   )

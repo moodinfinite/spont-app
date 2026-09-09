@@ -144,3 +144,57 @@ export async function countUpcomingGroupProposals(
     where: { groupId, startsAt: { gt: now }, status: { in: ['OPEN', 'CONFIRMED'] } },
   })
 }
+
+/**
+ * Leaving a group you're in.
+ *
+ * The owner is deliberately excluded. Not because their membership is worth
+ * more, but because "leave" and "delete" would become the same act for the
+ * last person holding the group — and handing the group to someone else is a
+ * different decision, with its own question of who gets it. An owner who
+ * wants out today deletes; handing over is worth its own change.
+ *
+ * The leaver comes off the group's future proposals too. A proposal is a
+ * question put to a specific set of people, and staying on the list after
+ * leaving would keep asking someone about a group they've left. Anything left
+ * with fewer than two people isn't a hangout, so it goes.
+ */
+export async function leaveGroup(
+  prisma: PrismaClient,
+  groupId: string,
+  userId: string,
+  now: Date = new Date(),
+): Promise<void> {
+  const group = await prisma.group.findUnique({ where: { id: groupId } })
+  if (!group) {
+    throw new AppError('NOT_FOUND', 'Group not found')
+  }
+  if (group.ownerId === userId) {
+    throw new AppError(
+      'INVALID_STATE',
+      'You started this group, so you can delete it but not leave it',
+    )
+  }
+
+  await requireAcceptedMembership(prisma, groupId, userId)
+
+  // Only ahead of us: a proposal that has already started is history, and
+  // rewriting who was at it would be a lie about something that happened.
+  const upcoming = await prisma.proposal.findMany({
+    where: { groupId, startsAt: { gt: now } },
+    include: { participants: true },
+  })
+
+  const emptied = upcoming
+    .filter((p) => p.participants.filter((x) => x.userId !== userId).length < 2)
+    .map((p) => p.id)
+
+  await prisma.$transaction([
+    prisma.proposalParticipant.deleteMany({
+      where: { userId, proposal: { groupId, startsAt: { gt: now } } },
+    }),
+    prisma.proposalParticipant.deleteMany({ where: { proposalId: { in: emptied } } }),
+    prisma.proposal.deleteMany({ where: { id: { in: emptied } } }),
+    prisma.groupMembership.delete({ where: { groupId_userId: { groupId, userId } } }),
+  ])
+}
