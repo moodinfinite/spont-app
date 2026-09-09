@@ -30,6 +30,20 @@ behaves strangely, read the dashboard before trusting the CLI.** Fixed by
 adding the address at github.com/settings/emails, which also links the
 existing commits retroactively.
 
+**Deploying does not run migrations, and that will break production.**
+`vercel.json` runs `next build` and nothing else, so a deploy ships code
+that reads columns the production database hasn't got. This happened on
+2026-09-08: `windowPreference` and `minAttendees` went live before their
+migrations, which 500s Settings and any group page while leaving the feed
+looking fine — the generator catches its own errors, so it just silently
+stops proposing. **Check `_prisma_migrations` on the production branch
+against `packages/db/prisma/migrations/` before or right after every
+deploy.** Vercel keeps the production `DATABASE_URL` hidden from the CLI,
+so `vercel env pull` won't get it; the Neon MCP reaches the production
+branch (`br-spring-resonance-arjsv7pj`) directly. Applying a migration by
+hand means the DDL *and* a `_prisma_migrations` row carrying the SHA-256
+of the migration file, or the next `migrate deploy` tries to re-run it.
+
 **A dev server left running holds the old Prisma client, and an advisory
 lock.** Two symptoms from one cause. After a migration, queries selecting
 a new column throw against the stale client — quietly, if the caller
