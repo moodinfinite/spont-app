@@ -7,7 +7,7 @@
  * nothing else. Black is emphasis, not a colour.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&display=swap');
 
 :root {
   --page: #edeee9;
@@ -387,6 +387,33 @@ a {
    one is different". */
 .danger {
   color: var(--warn);
+}
+
+/* You, the person reading, when you appear in a list of people.
+ *
+ * "You + Edward" is on every card and every Upcoming row, so this is the one
+ * word the eye can use to find itself. A serif italic against Manrope and
+ * Sora is the only thing in the system that changes voice rather than weight
+ * or colour — which is why it can be quiet and still be found. Neither Sora
+ * nor Manrope ships an italic, so this loads one face, at one weight, for
+ * this job alone.
+ *
+ * Only for you-the-reader among named people. NOT for the second person in
+ * ordinary copy ("Who do you want to see?"), and NOT for the plural you
+ * ("any two of you are free") — that one means the group, and marking it
+ * would point the cue at the wrong person. Used everywhere, it stops being
+ * a cue and becomes a texture.
+ *
+ * The size bump is optical: Newsreader's x-height sits below Manrope's, so
+ * matched font-size reads as smaller. Letter-spacing resets because the
+ * display face tracks negative and a serif italic doesn't want it.
+ */
+.you {
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.07em;
+  letter-spacing: 0;
 }
 
 /* ---------------- Dock ---------------- */
