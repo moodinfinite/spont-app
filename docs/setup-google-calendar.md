@@ -131,8 +131,8 @@ Save, and Google shows a **Client ID** and **Client secret**.
 
 ## 6. Put them in .env — and only there
 
-In `spont_app/.env` (already gitignored — never the repo, never chat,
-never a screenshot):
+In `.env` at the repository root (already gitignored — never the repo,
+never chat, never a screenshot):
 
 ```
 GOOGLE_CLIENT_ID="...apps.googleusercontent.com"

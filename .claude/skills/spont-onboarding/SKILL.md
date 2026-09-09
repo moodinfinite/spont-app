@@ -1,6 +1,6 @@
 ---
 name: spont-onboarding
-description: Use at the start of any new session in this repo (spont_app) — determines whether the contributor is technical or non-technical, remembers the answer, and sets how much git/CLI detail to surface for the rest of the session.
+description: Use at the start of any new session in this repo (spont-app) — determines whether the contributor is technical or non-technical, remembers the answer, and sets how much git/CLI detail to surface for the rest of the session.
 ---
 
 # Spont Contributor Onboarding

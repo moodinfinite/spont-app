@@ -12,8 +12,8 @@ Always use the background approach below.
 
 ## Starting the server
 
-1. From `spont_app/`, confirm `.env` exists (`cp .env.example .env` if
-   not) and Postgres is reachable — either via `docker compose up -d`
+1. From the repository root, confirm `.env` exists (`cp .env.example
+   .env` if not) and Postgres is reachable — either via `docker compose up -d`
    (if Docker is available) or an already-running local Postgres
    matching `DATABASE_URL` in `.env` (see
    `docs/knowledge-base/references.md` for why a local Postgres
