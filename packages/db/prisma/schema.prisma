@@ -20,6 +20,8 @@ model User {
   ownedGroups          Group[]
   groupMemberships     GroupMembership[]
   notifications        Notification[]
+  sentAvailabilityPings AvailabilityPing[]
+  pushSubscriptions     PushSubscription[]
 }
 
 model CalendarAccount {
@@ -73,6 +75,7 @@ model Group {
 
   owner   User              @relation(fields: [ownerId], references: [id])
   members GroupMembership[]
+  availabilityPings AvailabilityPing[]
 }
 
 enum GroupMemberStatus {
@@ -107,6 +110,30 @@ model Notification {
   payload   Json
   readAt    DateTime?
   createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AvailabilityPing {
+  id          String    @id @default(cuid())
+  senderId    String
+  groupId     String
+  message     String?
+  windowStart DateTime  @default(now())
+  windowEnd   DateTime?
+  createdAt   DateTime  @default(now())
+
+  sender User  @relation(fields: [senderId], references: [id])
+  group  Group @relation(fields: [groupId], references: [id])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
