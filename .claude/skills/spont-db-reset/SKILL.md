@@ -9,7 +9,7 @@ Resets the local Postgres database to a known-clean state: current
 schema, 5 fresh seeded fake users (Alice, Bob, Carol, Dave, Erin), each
 with a mock calendar account and sample events.
 
-From `spont_app/`:
+From the repository root:
 
 ```bash
 npm run db:migrate
