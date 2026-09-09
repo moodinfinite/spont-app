@@ -117,7 +117,7 @@ export default async function HomePage() {
 
       {open.length > 0 && (
         <p className="note">
-          Two of these a day, at most. Saying no to one doesn&rsquo;t stop the next.
+          One of these per person at a time. Saying no to one doesn&rsquo;t stop the next.
         </p>
       )}
     </main>
