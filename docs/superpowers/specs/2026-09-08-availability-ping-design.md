@@ -105,6 +105,14 @@ storage, and read-tracking for free via the existing `Notification.readAt`.
 If the group has no other accepted members (a group of one), the send
 still succeeds — it's a no-op for delivery purposes, not an error.
 
+### Rate limiting
+
+A per-sender, per-group cooldown: `sendAvailabilityPing` checks for an
+existing `AvailabilityPing` from the same `senderId`/`groupId` within
+the last 15 minutes and throws `AppError('RATE_LIMITED', ...)` if one
+exists. A single query against the table already being written to —
+no new table, no background job.
+
 ## Push delivery mechanics
 
 Standard Web Push, since there is no native app to hook into:
@@ -141,7 +149,9 @@ is a best-effort nudge on top of it.
 
 - `POST /api/pings` — body `{ groupId, message?, windowEnd? }`. Creates
   the ping, fans out notifications, triggers push. `NOT_AUTHORIZED` if
-  the sender isn't an accepted member of `groupId`.
+  the sender isn't an accepted member of `groupId`. `RATE_LIMITED` if
+  the sender has already pinged this `groupId` within the cooldown
+  window (see Rate limiting, below).
 - `POST /api/push/subscribe` — stores a `PushSubscription` for the
   current user.
 - `DELETE /api/push/subscribe` — removes a subscription (e.g. on
@@ -161,8 +171,11 @@ Errors use the existing app-wide shape, `{ error: { code, message } }`.
 
 ## Deferred / explicitly out of scope
 
-- **Button placement and visual design** — not decided. To be mocked up
-  once this data model is implemented.
+- **Button placement and visual design** — not decided. Handed to the
+  collaborator working on the visual design system to place in context
+  of the current app shell (note: that branch removed the notifications
+  feature entirely, so where a received ping surfaces in-app needs
+  resolving alongside the button itself, not as an afterthought).
 - **Where a tapped push notification navigates to** — defaults to the
   home page for now; the real destination is unresolved by design (the
   user hasn't decided which part of the app it should open to).
@@ -170,14 +183,17 @@ Errors use the existing app-wide shape, `{ error: { code, message } }`.
   not built now. The ping's shape (sender, group, time window) is meant
   to be sufficient for a future function to turn a ping into a real
   Proposal, without needing a schema change to do it.
-- **Rate limiting / spam prevention** — nothing stops a user from
-  pinging the same group repeatedly. Not addressed here; worth deciding
-  before this ships broadly.
 - **Automatic staleness/expiry** — a ping whose `windowEnd` has passed
   just sits there; there's no job that marks it stale or hides it from
-  anything. Not addressed, since there's no ping-history UI yet for it
-  to matter to.
-- **Multi-device subscription cleanup** — logging out doesn't currently
-  remove that device's `PushSubscription`; it'll just start failing
-  silently (404/410) and get pruned lazily on next send. Acceptable for
-  now, not actively handled.
+  anything. Deferred with a specific revisit trigger: build this only
+  once a ping-history or "active pings" view exists — there is no such
+  UI in this spec, so there's currently nothing for staleness to affect.
+- **Multi-device subscription cleanup** — logging out doesn't remove
+  that device's `PushSubscription`; it fails silently (404/410) and gets
+  pruned lazily on next send. This is an accepted permanent trade-off,
+  not a backlog item — revisit only if push failure *rates* become
+  noticeable enough to matter for observability or cost.
+
+Rate limiting/spam prevention is **no longer deferred** — see "Rate
+limiting" above; it's cheap enough to build into the initial
+implementation rather than punt on.
