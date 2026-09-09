@@ -1,63 +1,48 @@
 # Architecture
 
-Why this codebase is put together the way it is. Plain language first;
-if a term needs more technical depth, that comes after, not instead of,
-the plain explanation.
+Spont has a Next.js website, shared business rules, and Postgres.
+See [the handoff](../HANDOFF.md) for current status and next work.
 
-## The three main pieces
+## Ownership
 
-In plain terms: there's a website (what you see and click), a shared
-"rulebook" of what's allowed to happen (like "you can't invite someone
-who's already in a group"), and a database layer that actually stores
-information. Keeping these three separate means a rule like "you can't
-friend yourself" only has to be written once and both the website and
-any future non-website surface (like a mobile app, someday) would use
-the same rule.
+- `apps/web`: pages, React components, API routes, sessions, Google OAuth,
+  free/busy requests, suggestion orchestration, and proposal persistence.
+- `packages/core`: scheduling helpers, proposal rules, friends/groups services,
+  calendar-provider types, and the mock provider. Pure helpers need no database;
+  services accept a Prisma client.
+- `packages/db`: Prisma schema, migrations, client, test fixtures, and seed data.
 
-Technically, this is an npm-workspaces monorepo with three packages:
+Run npm workspace commands from the repository root. Next.js transpiles the
+shared TypeScript packages through `apps/web/next.config.js`.
 
-- **`apps/web`** — the actual Next.js website: pages, API routes, login.
-  This is the only piece that knows about HTTP requests, cookies, or
-  what a web page looks like.
-- **`packages/core`** — the rulebook. Business logic like "who can send
-  a friend request," "who can respond to a group invite," with no idea
-  that a website exists — it just takes plain data in and gives plain
-  data (or a specific, named error) back out.
-- **`packages/db`** — the database layer. The schema (what tables exist,
-  what columns they have) and the connection to Postgres. `packages/core`
-  uses this to actually read/write data, but the *rules* about what's
-  allowed live in `packages/core`, not here.
+## Current flow
 
-## Why calendar access is behind an abstraction
+1. `/welcome` starts Google OAuth. The callback identifies users by Google's
+   subject, stores calendar tokens, and creates a signed session.
+2. `/connected` collects preferences and offers an invite link.
+3. Home calls `lib/propose.ts` when the viewer has accepted friends.
+4. `lib/availability.ts` dispatches to `lib/google-calendar.ts` for Google accounts
+   or stored events for mock accounts. Google reads primary-calendar free/busy,
+   not event titles or descriptions.
+5. `lib/proposals.ts` builds feed data. The response API applies core rules and
+   stores participant/proposal state in a database transaction.
 
-In plain terms: the app needs to know when you're free, which eventually
-means connecting to your real Google Calendar. But getting Google's
-approval to do that takes time and review on Google's end. So the app
-was built to work against realistic fake calendar data first, with a
-clean swap-point left for when real Google Calendar access is ready —
-nothing else in the app needs to change when that swap happens.
+Generation runs during Home requests, not in a scheduled worker. Accepting a
+proposal does not yet create or remove events on Google Calendar.
 
-Technically: `packages/core/src/calendar-provider/types.ts` defines a
-`CalendarProvider` interface (`listBusyBlocks`, `listRawLabels`,
-`createEvent`). Today, only `MockCalendarProvider` implements it,
-backed by seeded fake data in Postgres. A future `GoogleCalendarProvider`
-implementing the same interface is the only thing that changes when real
-Google Calendar integration ships — Friends, Groups, and every page in
-`apps/web` are written against the interface, never the mock
-implementation directly.
+## Calendar boundary
 
-## Why real login/auth isn't built yet
+`packages/core/src/calendar-provider/types.ts` defines an interface implemented
+by `MockCalendarProvider`. Real Google integration currently lives in
+`apps/web/lib` and does not implement that interface. The mock's `createEvent`
+method does not mean real calendar writing is complete.
 
-In plain terms: real login (via your actual Google account) is also
-gated behind that same Google approval process mentioned above. So for
-now, logging in just means picking a name from a list of test users —
-there's no password, no real account. This is intentionally temporary,
-and the login page says so directly ("Dev-only picker") so nobody
-mistakes it for how the real app will work.
+Google scopes request identity, free/busy, and access to calendars the app creates.
+Integrating the older taxonomy branch must not silently broaden event-detail
+access or change the app's privacy promise.
 
-## Where to look for "why does X exist" that isn't answered here
+## Sources of truth
 
-- `docs/superpowers/specs/` — the detailed design reasoning for each
-  phase of work, written at the time that phase was planned.
-- `docs/knowledge-base/references.md` — specific tooling gotchas
-  (library quirks, config conflicts) discovered while building this.
+Current code and [HANDOFF.md](../HANDOFF.md) describe implemented behavior. Dated
+specs and mockups preserve historical plans; not every feature they describe is
+implemented or integrated into main.

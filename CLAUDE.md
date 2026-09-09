@@ -1,5 +1,13 @@
 # Spont App
 
+## Current repository and handoff
+
+The canonical repository is `moodinfinite/spont-app`. Start from `main`, which
+includes the rounded/green app. The app lives at this repository's root.
+Read `README.md`, `docs/HANDOFF.md`, and `AGENTS.md` before older plans or memory.
+Do not recreate removed UI based solely on historical documentation. A personal
+memory file or a specific assistant product is not required to contribute.
+
 ## New here? Start by picking a path
 
 - **Non-technical / product contributor** — you have opinions on what

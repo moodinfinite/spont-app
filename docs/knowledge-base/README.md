@@ -11,6 +11,8 @@ and contribute product/design ideas.
 
 ## What's here
 
+- [`../HANDOFF.md`](../HANDOFF.md) — current app status, preserved branches,
+  implementation gaps, and first tasks for a new collaborator.
 - [`architecture.md`](architecture.md) — why the codebase is organized
   the way it is, in plain language first, technical detail second.
 - [`glossary.md`](glossary.md) — what Spont-specific terms mean (flake

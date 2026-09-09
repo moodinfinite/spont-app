@@ -1,39 +1,75 @@
 # Spont
 
-A scheduler that helps close friends spend more time together spontaneously,
-by cutting down the time it takes to find when everyone's free.
+Spont helps friends find time to see each other using calendar availability.
+The current goal is a functioning MVP for one private friend group, not a public product launch.
 
-This repo is mid-build. See `docs/superpowers/specs/` for the phase-by-phase
-design and `docs/superpowers/plans/` for implementation plans.
+**Canonical repository: [moodinfinite/spont-app](https://github.com/moodinfinite/spont-app).**
+Start from `main`: the rounded/green app is merged there. The app lives at this
+repository's root now, not inside the old `nba-props-agent/spont_app` folder.
 
-## New here? Start by picking a path
+## Start here
 
-- **Non-technical / product contributor** — you don't need to do
-  anything below. Start at
-  [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md)
-  instead, and see `CLAUDE.md` for how your Claude session will get
-  oriented to your background automatically.
-- **Technical contributor** — continue below.
+- [Collaborator handoff](docs/HANDOFF.md): current behavior, gaps, preserved branches, and next tasks.
+- [Contributing](CONTRIBUTING.md): branching, PRs, and safe test setup.
+- [Design principles](docs/knowledge-base/design-principles.md): current visual direction.
+- [Vercel setup](docs/setup-deploy.md): build settings and release procedure.
 
-## Local setup
+## Run locally
 
-1. `npm install`
-2. `cp .env.example .env`
-3. `docker compose up -d` (starts local Postgres)
-4. `npm run db:migrate`
-5. `npm run db:seed`
-6. `npm run dev` — app runs at http://localhost:3000
+Use Node.js 24 (`.nvmrc`), npm, and Docker for local Postgres (or your own dedicated
+development database). Run commands from the repository root.
 
-Pick any seeded user on the login screen to explore the app as them. No
-real Google account or Google Calendar connection is needed yet — Phase 1
-runs entirely against seeded fake data (see the Phase 1 design spec for why).
+```bash
+git clone https://github.com/moodinfinite/spont-app.git
+cd spont-app
+npm ci
+cp .env.example .env
+docker compose up -d
+npm run db:deploy
+npm run dev
+```
 
-## Running tests
+Open [localhost:3000](http://localhost:3000). The welcome page works without Google
+credentials, but **signing in requires real Google OAuth**. The old test-user picker
+was removed. Ask the maintainer for access to the test OAuth project, or configure
+your own using [the Google guide](docs/setup-google-calendar.md).
 
-`npm test` (runs Vitest across `packages/db` and `packages/core`; requires
-Postgres running per the setup steps above).
+Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI` in `.env`.
+The local callback is `http://localhost:3000/api/auth/google/callback`. To try shared
+availability, sign in as two test accounts in separate browser profiles and connect
+using a friend invite link.
 
-## Contributing
+The example database URL targets the local Docker database. Keep development and
+tests separate from the live friends-test database. Credentials, `.env`, `.neon`,
+and `.vercel/` are excluded from Git.
 
-See `CONTRIBUTING.md`, including the per-contributor Claude memory
-convention under `.claude/memory/`.
+`npm run db:seed` is optional fake-data setup that **deletes existing app data**.
+It does not let you log in as a seeded user. Do not run it against real users.
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Local app |
+| `npm run test:unit` | Scheduling/proposal tests; no database or Google credentials |
+| `npm test` | All tests; deletes app data in the selected database |
+| `npm run lint` | Frontend lint |
+| `npm run build` | Production build, including lint and TypeScript |
+| `npm run db:deploy` | Apply existing migrations to the selected database |
+| `npm run db:migrate` | Author migrations during development |
+
+See [isolated test setup](CONTRIBUTING.md#testing-without-touching-real-data) before
+running the full suite. CI uses fresh Postgres to check migrations, all tests, and
+the production build without production or Google secrets.
+
+## Layout
+
+```text
+apps/web/       Next.js UI, auth, API routes, calendar integration
+packages/core/ Business rules, scheduling helpers, tests
+packages/db/   Prisma schema, migrations, seed data, database tests
+docs/          Handoff, setup, product decisions, specs, visual mockups
+```
+
+Dated specs preserve historical plans. Read [HANDOFF.md](docs/HANDOFF.md) and current
+code to distinguish implemented features from ideas.

@@ -10,6 +10,8 @@
     "build": "dotenv -e .env -- npm run build --workspace apps/web",
     "lint": "npm run lint --workspaces --if-present",
     "test": "dotenv -e .env -- npm run test --workspaces --if-present",
+    "test:unit": "npm run test --workspace packages/core -- src/scheduling/free-slots.test.ts src/scheduling/hangout-times.test.ts src/proposals/rules.test.ts",
+    "db:deploy": "dotenv -e .env -- npm run migrate:deploy --workspace packages/db",
     "db:migrate": "dotenv -e .env -- npm run migrate --workspace packages/db",
     "db:seed": "dotenv -e .env -- npm run seed --workspace packages/db"
   },

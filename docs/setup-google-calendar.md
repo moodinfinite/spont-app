@@ -1,5 +1,10 @@
 # Connecting Google Calendar (local + friends test)
 
+**Implementation update:** Google sign-in, token refresh, and primary-calendar
+free/busy reading are implemented on `main`. The final section of this historical
+guide describes work that has since shipped. Start with [README](../README.md)
+and [HANDOFF](HANDOFF.md); verify current OAuth settings in the Google project.
+
 What you need before Spont can read anyone's real availability. Free —
 no billing account, no credit card. Roughly fifteen minutes.
 

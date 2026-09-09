@@ -1,85 +1,70 @@
-# Putting Spont on a URL
+# Deploying Spont on Vercel
 
-Until this is done, Spont only exists on one laptop — collaborators can't
-reach `localhost:3000` no matter what you send them. Deploying is what
-turns the invite link into something that works in a group chat.
+Canonical source: `moodinfinite/spont-app`, production branch `main`.
+The repository root is the app workspace. Old instructions pointing to
+`echao49/nba-props-agent` and a root directory of `spont_app` are obsolete.
 
-Free on Vercel's hobby tier. The database is already hosted on Neon, so
-the same connection string works from your machine and from Vercel.
+## Project configuration
 
-## 1. Import the repo
+Reuse Vercel project `spont_app` and its existing domain,
+`https://spontapp.vercel.app`. Verify **Settings → Git** points to the new repo;
+pushing source alone does not create this connection. The account owner may need
+to grant the Vercel GitHub app access. See
+[Vercel's GitHub guide](https://vercel.com/docs/git/vercel-for-github).
 
-<https://vercel.com/new> → import `echao49/nba-props-agent`.
-
-**Set Root Directory to `spont_app`.** This is the fiddly part and the
-thing most likely to waste an hour: the repo root is a Python project,
-the npm workspace root is `spont_app`, and the Next app is two levels
-down at `spont_app/apps/web`. Point Vercel at `spont_app` and the
-committed `vercel.json` handles the rest — it sets the build command,
-install command and the output directory (`apps/web/.next`).
-
-## 2. Environment variables
-
-Add these in Vercel's project settings, not in the repo:
-
-| Name | Value |
+| Setting | Value |
 | --- | --- |
-| `DATABASE_URL` | The pooled string from Neon — same one in `.env.local` |
-| `SESSION_SECRET` | **A fresh random value. Do not reuse the dev one.** |
-| `GOOGLE_CLIENT_ID` | From the Google console |
-| `GOOGLE_CLIENT_SECRET` | From the Google console |
-| `GOOGLE_REDIRECT_URI` | `https://YOUR-DOMAIN/api/auth/google/callback` |
+| Repository | `moodinfinite/spont-app` |
+| Production branch | `main` |
+| Root directory | Repository root (leave blank) |
+| Framework | Next.js |
+| Install | `npm install` |
+| Build | `npm run build` |
+| Output | `apps/web/.next` |
 
-**Generate a real session secret.** The local one is
-`dev-secret-change-me`, which is published in `.env.example` in this
-repo — anyone could forge a session cookie for any user against a server
-using it. Any long random string works:
+Build settings are also in `vercel.json`. Preserve the working deployment while
+resolving connection problems. A public source repo is not a public app launch.
 
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+## Environment
 
-## 3. Tell Google about the new address
+Configure these separately for Production and Preview in Vercel:
 
-In the Google console → **Credentials** → your OAuth client, **add** the
-deployed callback alongside the localhost one:
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Database for the selected deployment environment |
+| `SESSION_SECRET` | Long random secret; not the example development value |
+| `GOOGLE_CLIENT_ID` | OAuth client |
+| `GOOGLE_CLIENT_SECRET` | OAuth client secret |
+| `GOOGLE_REDIRECT_URI` | Exact deployed OAuth callback URL |
 
-```
-https://YOUR-DOMAIN/api/auth/google/callback
-```
+The existing domain's callback is
+`https://spontapp.vercel.app/api/auth/google/callback`. Keep localhost registered
+separately. Arbitrary preview URLs need explicit OAuth setup before sign-in works.
+Check test-user access with the OAuth project owner; the
+[Google guide](setup-google-calendar.md) provides background.
 
-Keep localhost too, so local development still works. Miss this and
-sign-in fails with `redirect_uri_mismatch`, which reads as the app being
-broken rather than a setting being absent.
+Keep development and automated tests isolated from the live database. Never copy
+secrets into Git, PR descriptions, issues, or CI configuration.
 
-Then set `GOOGLE_REDIRECT_URI` on Vercel to exactly that string —
-character for character, including `https`.
+## Migrations are separate from deployment
 
-## 4. Add every collaborator as a Google test user
+**Neither `npm run build` nor Vercel deployment applies migrations.** Install only
+generates Prisma's client.
 
-Consent screen → **Audience → Test users**. Anyone not listed is refused
-outright, with no useful explanation. The app is unverified, so they will
-also hit **"Google hasn't verified this app"** and need
-**Advanced → Go to Spont (unsafe)**.
+1. Review new SQL in `packages/db/prisma/migrations` and test the chain on disposable
+   Postgres (CI does this).
+2. Coordinate schema and app releases. Use a separate database or maintenance
+   window for incompatible changes; historical migrations remove `Notification`.
+3. Securely set `DATABASE_URL` to the intended deployment database, then run
+   `npm run db:deploy`. An externally supplied value takes precedence over `.env`.
+4. Deploy the matching revision and smoke-test Google sign-in, People, Home, and
+   proposal responses with test accounts.
 
-Warn them in the same message as the invite link, or you'll lose people
-at the door for reasons that have nothing to do with whether Spont works.
+`db:migrate` is for authoring migrations in development. Never run `db:seed`,
+`npm test`, or reset workflows against the live database.
 
-## 5. Migrations
+## Limits
 
-`npm run db:migrate` from your machine already changed the shared Neon
-database, so the deployed app sees the same schema. There is no separate
-production database yet.
-
-**That means a bad migration takes down whatever your collaborators are
-using.** Worth a second Neon branch for production before the testing
-gets serious.
-
-## Known limits
-
-- **Refresh tokens are stored unencrypted.** Fine for an allowlist of
-  people you know; not fine beyond that.
-- **One database for local and deployed.** See above.
-- **Testing-mode refresh tokens expire in about a week**, so a longer
-  test means everyone reconnecting — unless the app is published, which
-  the narrow scopes should make straightforward.
+See [HANDOFF.md](HANDOFF.md). Token encryption is not implemented in the app,
+reconnect status is incomplete, and calendar writing/background notifications
+remain unfinished.

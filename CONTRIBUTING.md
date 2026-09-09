@@ -2,11 +2,35 @@
 
 ## Workflow
 
-1. Follow the local setup steps in `README.md`.
-2. Work off the current phase's plan in `docs/superpowers/plans/`.
-3. Write a failing test before implementation code (TDD) — see existing
-   tests in `packages/core` and `packages/db` for the pattern.
-4. Commit frequently with focused commits.
+1. Read [README.md](README.md) and [docs/HANDOFF.md](docs/HANDOFF.md).
+   Work in `moodinfinite/spont-app`, from the repository root.
+2. Create a focused branch from current `main`; the rounded/green work is already
+   merged. Preserved feature branches need reconciliation before integration.
+3. Open a PR targeting `main` with the user-visible outcome, focused regression
+   tests for behavior changes, and screenshots for UI changes.
+4. Run `npm run test:unit` and `npm run build`. Use disposable Postgres for
+   database-backed tests. CI checks migrations, all tests, and the build.
+5. Add new migrations for schema changes, update `docs/HANDOFF.md` when status or
+   setup changes, and commit focused changes. Seek collaborator review when
+   available; do not force-push `main`.
+
+## Testing without touching real data
+
+`npm run test:unit` needs no database or Google account. `npm test` calls
+`resetDb()` and deletes app data. Use a dedicated test database, not the database
+holding your sign-in sessions or the live friends test.
+
+With the local Docker service running, create the test database once:
+
+```bash
+docker compose exec -T postgres psql -U spont -d postgres -c 'CREATE DATABASE spont_test;'
+DATABASE_URL=postgresql://spont:spont@localhost:5432/spont_test npm run db:deploy
+DATABASE_URL=postgresql://spont:spont@localhost:5432/spont_test npm test
+```
+
+The explicit environment variable overrides `.env`. CI uses a fresh Postgres
+service and no live secrets. Do not run multiple test processes against the same
+database concurrently.
 
 ## Iteration loop across contributor backgrounds
 
