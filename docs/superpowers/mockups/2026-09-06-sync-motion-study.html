@@ -1,0 +1,379 @@
+<title>Spont Sync Motion Study</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  /* Abstract loading marks for the calendar-connect screen. Each one loops a
+     full cycle: searching → found → reset. Every mark is drawn from the same
+     idea — two schedules resolving into one open slot. */
+  :root {
+    --ground: #C6FF4E;
+    --ink: #15150F;
+    --ink-2: rgba(21, 21, 15, 0.66);
+    --ink-3: rgba(21, 21, 15, 0.42);
+    --rule: rgba(21, 21, 15, 0.16);
+    --dim: rgba(21, 21, 15, 0.22);
+    --panel: rgba(255, 255, 255, 0.30);
+    --hit: #15150F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #96C927;
+      --ink: #10160A;
+      --ink-2: rgba(16, 22, 10, 0.72);
+      --ink-3: rgba(16, 22, 10, 0.48);
+      --rule: rgba(16, 22, 10, 0.2);
+      --dim: rgba(16, 22, 10, 0.26);
+      --panel: rgba(255, 255, 255, 0.20);
+      --hit: #10160A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #96C927;
+    --ink: #10160A;
+    --ink-2: rgba(16, 22, 10, 0.72);
+    --ink-3: rgba(16, 22, 10, 0.48);
+    --rule: rgba(16, 22, 10, 0.2);
+    --dim: rgba(16, 22, 10, 0.26);
+    --panel: rgba(255, 255, 255, 0.20);
+    --hit: #10160A;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Manrope', sans-serif; }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 34px 22px 60px; }
+
+  header.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .sub { margin: 10px 0 30px; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 56ch; }
+  .toggle-btn {
+    flex: none;
+    width: 38px; height: 38px;
+    border: none; border-radius: 999px;
+    background: var(--panel);
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .toggle-btn svg { width: 17px; height: 17px; }
+  .toggle-btn .moon { display: none; }
+  :root[data-theme="dark"] .toggle-btn .sun { display: none; }
+  :root[data-theme="dark"] .toggle-btn .moon { display: block; }
+
+  .grid { display: grid; gap: 14px; }
+  @media (min-width: 680px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .panel {
+    border: 1.5px solid var(--rule);
+    border-radius: 22px;
+    background: var(--panel);
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .panel-name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; }
+  .panel-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .panel-note { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); margin: 0; }
+  .stage { display: flex; align-items: center; justify-content: center; height: 150px; }
+  .stage svg { width: 100%; height: 100%; overflow: visible; }
+
+  /* ---- 1. Overlap: two schedules converge, the shared window fills ---- */
+  .m-overlap .c-left  { animation: ovLeft 4.4s cubic-bezier(.4,0,.2,1) infinite; }
+  .m-overlap .c-right { animation: ovRight 4.4s cubic-bezier(.4,0,.2,1) infinite; }
+  .m-overlap .lens    { animation: ovLens 4.4s ease infinite; }
+  @keyframes ovLeft {
+    0%, 8% { transform: translateX(-20px); }
+    45%, 82% { transform: translateX(0); }
+    100% { transform: translateX(-20px); }
+  }
+  @keyframes ovRight {
+    0%, 8% { transform: translateX(20px); }
+    45%, 82% { transform: translateX(0); }
+    100% { transform: translateX(20px); }
+  }
+  @keyframes ovLens {
+    0%, 42% { opacity: 0; }
+    52%, 82% { opacity: 1; }
+    92%, 100% { opacity: 0; }
+  }
+
+  /* ---- 2. Grid scan: the week fills with busy, one slot stays open ---- */
+  .m-grid rect.cell { fill: var(--dim); }
+  .m-grid rect.busy { animation: cellOn 4.4s ease infinite both; }
+  .m-grid rect.open { animation: cellOpen 4.4s ease infinite both; }
+  @keyframes cellOn {
+    0%, 4% { fill: var(--dim); }
+    22%, 84% { fill: var(--ink); }
+    96%, 100% { fill: var(--dim); }
+  }
+  @keyframes cellOpen {
+    0%, 55% { fill: var(--dim); transform: scale(1); }
+    68% { fill: var(--ground); transform: scale(1.5); }
+    76%, 84% { fill: var(--ground); transform: scale(1.28); }
+    96%, 100% { fill: var(--dim); transform: scale(1); }
+  }
+
+  /* ---- 3. Slot align: two columns scroll until their gaps line up ---- */
+  .m-slots .col-a { animation: slotA 4.4s cubic-bezier(.3,0,.2,1) infinite; }
+  .m-slots .col-b { animation: slotB 4.4s cubic-bezier(.3,0,.2,1) infinite; }
+  .m-slots .hitline { animation: hitline 4.4s ease infinite; }
+  @keyframes slotA {
+    0% { transform: translateY(-96px); }
+    58%, 86% { transform: translateY(-40px); }
+    100% { transform: translateY(-96px); }
+  }
+  @keyframes slotB {
+    0% { transform: translateY(-16px); }
+    58%, 86% { transform: translateY(-40px); }
+    100% { transform: translateY(-16px); }
+  }
+  @keyframes hitline {
+    0%, 55% { opacity: 0; transform: scaleX(0.3); }
+    66%, 86% { opacity: 1; transform: scaleX(1); }
+    94%, 100% { opacity: 0; transform: scaleX(0.3); }
+  }
+
+  /* ---- 4. Phase lock: two rhythms drift, then fall into step ---- */
+  .m-wave .wave-a { animation: waveA 4.4s cubic-bezier(.4,0,.2,1) infinite; }
+  .m-wave .wave-b { animation: waveB 4.4s cubic-bezier(.4,0,.2,1) infinite; }
+  .m-wave .node   { animation: waveNode 4.4s ease infinite; }
+  @keyframes waveA {
+    0% { transform: translateX(0); }
+    60%, 86% { transform: translateX(-40px); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes waveB {
+    0% { transform: translateX(-62px); }
+    60%, 86% { transform: translateX(-40px); }
+    100% { transform: translateX(-62px); }
+  }
+  @keyframes waveNode {
+    0%, 58% { opacity: 0; r: 3; }
+    70%, 86% { opacity: 1; r: 6; }
+    94%, 100% { opacity: 0; r: 3; }
+  }
+
+  /* ---- 5. Ripple: two signals meet, the meeting point becomes the plan ---- */
+  .m-ripple .ring { transform-origin: center; }
+  .m-ripple .r1 { animation: ripple 4.4s ease-out infinite; }
+  .m-ripple .r2 { animation: ripple 4.4s ease-out infinite 0.35s; }
+  .m-ripple .r3 { animation: ripple 4.4s ease-out infinite 0.7s; }
+  .m-ripple .meet { animation: meet 4.4s ease infinite; }
+  @keyframes ripple {
+    0% { transform: scale(0.2); opacity: 0; }
+    12% { opacity: 0.9; }
+    58% { transform: scale(1); opacity: 0; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+  @keyframes meet {
+    0%, 52% { opacity: 0; transform: scale(0.4); }
+    66%, 86% { opacity: 1; transform: scale(1); }
+    94%, 100% { opacity: 0; transform: scale(0.4); }
+  }
+
+  /* ---- 6. Weave: strands cross and knot at one point ---- */
+  .m-weave .strand {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: draw 4.4s cubic-bezier(.4,0,.2,1) infinite;
+  }
+  .m-weave .strand.b { animation-delay: 0.18s; }
+  .m-weave .knot { animation: meet 4.4s ease infinite; }
+  @keyframes draw {
+    0% { stroke-dashoffset: 300; }
+    52%, 86% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 300; }
+  }
+
+  footer.note {
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 1.5px solid var(--rule);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  footer.note b { color: var(--ink); }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage * { animation: none !important; }
+    .m-weave .strand { stroke-dashoffset: 0 !important; }
+    .m-overlap .lens, .m-ripple .meet, .m-weave .knot, .m-wave .node { opacity: 1 !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <h1>Six abstract marks for the sync moment.</h1>
+    <button class="toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+      <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+    </button>
+  </header>
+
+  <p class="sub">Each loops a full cycle — searching, then finding, then resetting — so you can see the resolve, which is the part that matters. All six say the same thing in different accents: two schedules becoming one open slot.</p>
+
+  <div class="grid">
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Overlap</span><span class="panel-tag">Literal</span></div>
+      <div class="stage">
+        <svg class="m-overlap" viewBox="0 0 200 130" fill="none" aria-hidden="true">
+          <g class="c-left"><circle cx="86" cy="65" r="34" stroke="var(--ink)" stroke-width="2"/></g>
+          <g class="c-right"><circle cx="114" cy="65" r="34" stroke="var(--ink)" stroke-width="2"/></g>
+          <path class="lens" d="M100 34.6a34 34 0 0 1 0 60.8 34 34 0 0 1 0-60.8z" fill="var(--ink)"/>
+        </svg>
+      </div>
+      <p class="panel-note">Your existing mark, given a search-and-settle cycle. Safest choice — it's already the logo, so the loading screen teaches the brand.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Grid scan</span><span class="panel-tag">On-theme</span></div>
+      <div class="stage">
+        <svg class="m-grid" id="grid-svg" viewBox="0 0 200 130" fill="none" aria-hidden="true"></svg>
+      </div>
+      <p class="panel-note">A week filling up with busy, until one square refuses to fill and flares open. The most honest picture of what Spont actually does.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Slot align</span><span class="panel-tag">Strongest idea</span></div>
+      <div class="stage">
+        <svg class="m-slots" viewBox="0 0 200 130" fill="none" aria-hidden="true">
+          <clipPath id="slotClip"><rect x="0" y="0" width="200" height="130" rx="8"/></clipPath>
+          <g clip-path="url(#slotClip)">
+            <g class="col-a">
+              <rect x="46" y="0" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="46" y="32" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="46" y="96" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="46" y="128" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="46" y="160" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="46" y="192" width="34" height="26" rx="5" fill="var(--ink)"/>
+            </g>
+            <g class="col-b">
+              <rect x="120" y="0" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="120" y="32" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="120" y="96" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="120" y="128" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="120" y="160" width="34" height="26" rx="5" fill="var(--ink)"/>
+              <rect x="120" y="192" width="34" height="26" rx="5" fill="var(--ink)"/>
+            </g>
+          </g>
+          <rect class="hitline" x="40" y="60" width="120" height="10" rx="5" fill="var(--ground)" stroke="var(--ink)" stroke-width="2"/>
+        </svg>
+      </div>
+      <p class="panel-note">Two calendars scrolling past each other until their gaps line up and a free window locks in. Reads as a machine searching — which is literally what's happening.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Phase lock</span><span class="panel-tag">Most abstract</span></div>
+      <div class="stage">
+        <svg class="m-wave" viewBox="0 0 200 130" fill="none" aria-hidden="true">
+          <g class="wave-a">
+            <path d="M-20 65 q20 -26 40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="var(--ink)" stroke-width="2" opacity="0.55"/>
+          </g>
+          <g class="wave-b">
+            <path d="M-20 65 q20 26 40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="var(--ink)" stroke-width="2" opacity="0.55"/>
+          </g>
+          <circle class="node" cx="100" cy="65" r="3" fill="var(--ink)"/>
+        </svg>
+      </div>
+      <p class="panel-note">Two rhythms drifting out of step, then falling into sync. Prettiest and least literal — risks reading as audio rather than calendars.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Ripple</span><span class="panel-tag">Ambient</span></div>
+      <div class="stage">
+        <svg class="m-ripple" viewBox="0 0 200 130" fill="none" aria-hidden="true">
+          <g transform="translate(62 65)">
+            <circle class="ring r1" r="46" stroke="var(--ink)" stroke-width="1.8"/>
+            <circle class="ring r2" r="46" stroke="var(--ink)" stroke-width="1.8"/>
+            <circle class="ring r3" r="46" stroke="var(--ink)" stroke-width="1.8"/>
+            <circle r="4" fill="var(--ink)"/>
+          </g>
+          <g transform="translate(138 65)">
+            <circle class="ring r1" r="46" stroke="var(--ink)" stroke-width="1.8"/>
+            <circle class="ring r2" r="46" stroke="var(--ink)" stroke-width="1.8"/>
+            <circle class="ring r3" r="46" stroke="var(--ink)" stroke-width="1.8"/>
+            <circle r="4" fill="var(--ink)"/>
+          </g>
+          <g class="meet" style="transform-origin: 100px 65px;">
+            <circle cx="100" cy="65" r="13" fill="var(--ink)"/>
+          </g>
+        </svg>
+      </div>
+      <p class="panel-note">Two people sending out signals; where the waves meet, the plan appears. Calm and ambient — good if the screen holds longer than a second.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Weave</span><span class="panel-tag">Warmest</span></div>
+      <div class="stage">
+        <svg class="m-weave" viewBox="0 0 200 130" fill="none" aria-hidden="true">
+          <path class="strand a" d="M10 30 C 60 30, 60 100, 100 65 C 140 30, 140 100, 190 100" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"/>
+          <path class="strand b" d="M10 100 C 60 100, 60 30, 100 65 C 140 100, 140 30, 190 30" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+          <g class="knot" style="transform-origin: 100px 65px;">
+            <circle cx="100" cy="65" r="9" fill="var(--ground)" stroke="var(--ink)" stroke-width="2.4"/>
+          </g>
+        </svg>
+      </div>
+      <p class="panel-note">Two paths drawing themselves until they cross and knot. The only one that feels like people rather than data — least techy of the six.</p>
+    </section>
+
+  </div>
+
+  <footer class="note">
+    <b>All six are built to loop, but the real screen resolves once.</b> Whichever you pick, the found-state is the frame that matters — it's what someone sees at the moment the connect actually finishes, and it should hand off cleanly into the &ldquo;Calendar connected&rdquo; beat rather than snapping back to the start.
+  </footer>
+</div>
+
+<script>
+  // Grid scan: 7 columns × 5 rows, one cell deliberately left open.
+  (function () {
+    var svg = document.getElementById('grid-svg');
+    var COLS = 7, ROWS = 5, W = 22, H = 18, GX = 4, GY = 5;
+    var offX = (200 - (COLS * W + (COLS - 1) * GX)) / 2;
+    var offY = (130 - (ROWS * H + (ROWS - 1) * GY)) / 2;
+    var openCol = 4, openRow = 2;
+
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', offX + c * (W + GX));
+        rect.setAttribute('y', offY + r * (H + GY));
+        rect.setAttribute('width', W);
+        rect.setAttribute('height', H);
+        rect.setAttribute('rx', 4);
+        var isOpen = (c === openCol && r === openRow);
+        rect.setAttribute('class', 'cell ' + (isOpen ? 'open' : 'busy'));
+        if (isOpen) {
+          rect.setAttribute('stroke', 'var(--ink)');
+          rect.setAttribute('stroke-width', '2');
+          rect.style.transformOrigin = (offX + c * (W + GX) + W / 2) + 'px ' + (offY + r * (H + GY) + H / 2) + 'px';
+        } else {
+          // stagger the fill so the week loads like a scan, not a flash
+          rect.style.animationDelay = (c * 55 + r * 30) + 'ms';
+        }
+        svg.appendChild(rect);
+      }
+    }
+  })();
+
+  var root = document.documentElement;
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+</script>

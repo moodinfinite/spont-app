@@ -1,106 +1,205 @@
 # Design principles
 
 The durable, reusable visual system and product-decision patterns for
-Spont — extracted from the home-feed design work so they outlive that
-one feature. This is the system; for the specific decisions made about
-the home feed itself (and their history/reasoning), see
-`docs/superpowers/specs/2026-09-05-home-feed-design-notes.md`. Check
-here first for any new UI work; check the home-feed notes for how these
-principles were applied to that specific feature.
+Spont. Check here first for any new UI work.
+
+**Rewritten 2026-09-06.** This document previously described a white +
+red "specimen" system built on hairline rules, hard edges and no
+shadows. That system was replaced wholesale in a design session on
+2026-09-06 — see the "What changed" note at the bottom for what was
+dropped and why, so the history isn't lost. Feature-specific history for
+the home feed lives in
+`docs/superpowers/specs/2026-09-05-home-feed-design-notes.md`, which
+predates this rewrite and still describes the old system.
 
 ## The core method: borrow cues, not formats
 
-When drawing on a visual reference (a poster, a type specimen, another
-app), pull the *vocabulary* — specific type choices, color rules, line
-treatments — not the whole format. An early home-feed pass rendered
-proposals as a literal technical document (spec-style label/value
-tables) because it borrowed a type specimen's *format* wholesale; that
-was rejected because a feed needs to read as a feed, not a form. What
-carried over instead was the specimen's vocabulary: wide-tracked capital
-letters, hairline rules, one accent color on a light ground, heavy
-texture/grain. Apply this method to any future visual work: identify
-what a reference is actually contributing (a color relationship? a type
-pairing? a structural device?) and take only that.
+Unchanged, and the most portable thing in this document. When drawing on
+a visual reference (a poster, an app, a type specimen), pull the
+*vocabulary* — specific colour relationships, shape language, structural
+devices — not the whole format.
 
-## Typefaces
+Two worked examples, both real:
 
-Two typefaces, each with one job: a geometric grotesque (currently
-**Jost**, 400/500 weight) for everything non-numeric — headlines, nav,
-labels, body copy — and a monospace (currently **Space Mono**) for
-anything that's data: dates, durations, scores, captions.
+- An early home-feed pass borrowed a type specimen's *format* and
+  rendered proposals as spec-style label/value tables. Rejected: a feed
+  needs to read as a feed, not a form.
+- The current system takes its shape language and colour energy from a
+  meetup app, but **not** its content structure. What carried over was
+  the idea that an algorithmic suggestion and a human invitation should
+  look like different objects — which mapped onto Spont's own
+  friend-initiated vs system-suggested split.
 
-The reasoning for *which* geometric grotesque matters more than the
-specific pick: a rounded typeface can read as either *soft* (friendly,
-casual — fat strokes, tight tracking, small closed counters) or
-*technical* (precise, structural — even monoline strokes, open counters,
-wide tracking). Spont's visual system wants the technical reading, not
-the soft one — pick and set type accordingly if this ever needs to
-change.
+Identify what a reference is actually contributing, and take only that.
 
-**Tracking (letter-spacing) carries real weight in this system** — it's
-not a finishing touch, it's load-bearing. Roughly: very wide (0.4em+)
-for a wordmark/logotype, wide (0.3em) for section/group labels, moderate
-(0.18-0.2em) for interactive elements (nav, buttons, form labels), and
-tighter (0.05-0.06em) for headline-scale text. Tight-set capitals
-anywhere in this system read as a mistake, not a stylistic choice.
+## Colour
 
-## Color
+Four roles. Everything on screen takes one of them.
 
-Three colors, each with exactly one job: an off-white/paper ground, one
-accent color (currently red) for structure and action, and near-black
-for reading text (ink, not "a color" — this system treats black
-differently from the accent color, the way a printed poster does).
+| Role | Light | Dark |
+| --- | --- | --- |
+| Ground | `#EDEEE9` | `#0D0D0B` |
+| Card | `#FFFFFF` | `#292921` |
+| Ink | `#15150F` | `#F2F2EA` |
+| Accent (green) | `#C6FF4E` | `#D2FF66` |
 
-**The accent color means structure or action** — section dividers,
-primary action buttons, an active/selected state — never decoration.
-Body text should never be set in the accent color at small sizes (fails
-contrast); ink carries all reading text. The accent color's one
-non-structural use (in the home-feed feature) is to signal something
-*costing* the user attention — e.g. a warning-adjacent value. If a
-future feature wants to reuse the accent color for a similar "this
-matters, look here" signal, that's consistent with the system; using it
-decoratively is not.
+- **Green means action.** Primary buttons, the active filter, the create
+  button, the confirmation check. It is never decoration and never a
+  large background field in the app proper.
+- **The one exception is the first-run flow**, where green is the entire
+  ground. That screen is the app introducing itself; it gets to be loud
+  once. Nowhere else.
+- **Black is emphasis, not a colour.** The system-suggested card is a
+  black card on the neutral ground (and inverts to green-on-dark in dark
+  mode). Reason worth remembering: most of the feed will be system
+  suggestions, so making *them* the accent colour produces a wall of
+  neon and the accent stops meaning "act on this."
+- **Semantic colour is separate from the accent.** A warning red
+  (`#E14B3A`) exists for notification badges and genuine problem states.
+  It is not a second brand colour.
 
-## Line and surface treatment
+Both themes are first-class. Every colour is a token defined on bare
+`:root`, redefined for `prefers-color-scheme: dark` and again for an
+explicit `[data-theme="dark"]`, so a page renders correctly whether the
+viewer has chosen a theme or left it on system.
 
-No shadows, no rounded corners — hairline (thin, ~1.5px) rules and hard
-edges do the work a shadow or radius would do elsewhere (separating
-elements, implying a card boundary). A subtle grain/texture overlay
-(very light over the whole page, heavier specifically over accent-color
-fields) keeps flat digital color from looking too flat next to the
-hairline rules — this was a deliberate fix, not an incidental style
-choice, so don't drop it without replacing what it was solving.
+## Shape and surface
 
-**Known unresolved exception:** the already-built "Photo-forward cards"
-feature (see
-`docs/superpowers/specs/2026-09-05-home-feed-design-notes.md`'s
-"Photo-forward cards" section) uses a rounded photo band and pill-shaped
-date/avatar chips, and sets its headline in a serif face — both in
-tension with the no-rounded-corners rule above and the two-typeface rule
-below. This was flagged by a `spont-product` review (2026-09-06) and has
-not yet been resolved either way (deliberate scoped exception vs.
-mockup revision) — check the home-feed notes' "Open threads" section
-before treating either this document or that mockup as settled on this
-specific point.
+- **Soft, rounded, shadowed.** Cards and panels are 16px radius with a
+  soft two-layer shadow; inner crops (a card's photo) sit at 11px;
+  buttons, chips, avatars and the nav dock are full pills (999px).
+  16px was chosen against 8, 26 and 36: 8 fought the pill buttons and
+  round dock, 36 read as a toy, and 26 made cards feel like lozenges
+  rather than objects.
+- **Dark mode needs an edge, not a shadow.** A drop shadow does nothing
+  against a dark ground, so in dark themes cards carry a 1px inset
+  light edge alongside the shadow, and the ground/card pair is held far
+  enough apart (`#0D0D0B` against `#292921`) that surfaces don't
+  dissolve into the page. Every surface that sits *on* a card — chips,
+  photo placeholders, the dock — has to clear it in turn, so lifting the
+  card means lifting those too.
+- **No borders as separators between cards** — elevation does that work.
+  Hairlines (1.5px at ~8% ink) are only used *inside* a surface, to
+  divide rows of a list.
+- **Spacing between feed cards is 8px.** Compared against 14px, 3px and
+  zero: below roughly 8px the soft shadows begin muddying into each
+  other, which is the floor this number comes from.
 
-## Product-decision patterns worth generalizing
+## Typography
 
-A few decisions made for the home feed reflect a pattern worth applying
-elsewhere, not just that one feature:
+Two typefaces, each with one job:
 
-- **Prefer plain, human copy over formal/administrative language.**
-  Buttons say things like "I'm in" / "Not this time," not "Approve" /
-  "Deny." Apply this voice to any new user-facing copy.
-- **Cut fields that don't have real backing data yet**, rather than
-  including a placeholder. Location (and category/activity type) were
-  explicitly cut from home-feed cards because neither exists in the data
-  model — don't design UI around data that isn't real yet; add the field
-  back once (and if) the data actually exists. (Duration was cut too,
-  but for an unrelated reason: it's derivable from the time range
-  already shown, and it was competing with the date/time for the same
-  attention — not a data-availability problem.)
-- **No filtering/configuration in a v1**, deliberately, when a simpler
-  constraint (a one-per-day cap, in the home feed's case) already keeps
-  the surface small enough not to need it. Revisit only once real usage
-  shows people actually want to narrow something down — don't build
-  configurability speculatively.
+- **Sora** — display. Headlines, names, numbers that matter, the
+  greeting. Set at 400 for anything large and editorial (the greeting,
+  mission copy); 700 only for small labels and names inside cards.
+- **Manrope** — everything else. Body copy, buttons, metadata, captions.
+  400–700 as needed.
+
+**Big type is not bold type.** The greeting and the mission statement
+are large and regular-weight. Bold is for small text that needs to
+survive being small, not for making large text louder. Use
+`font-variant-numeric: tabular-nums` wherever digits line up.
+
+## Layout patterns
+
+- **Page headers break out of the card system.** "Welcome Raghav.",
+  "People." — these sit directly on the ground, one weight, one colour,
+  no container. Chrome belongs in cards; identity doesn't.
+- **Navigation is a floating pill dock**, dark, with the primary create
+  action pulled out into a separate circular accent button beside it.
+  This deliberately reopens and reverses the earlier squared-dock
+  decision. Non-active dock items are icon-only; every item is at least
+  46×46 so it stays tappable.
+- **Filtering is horizontal pills at the top of a list**, active one
+  filled with the accent. This replaced month-header grouping in the
+  feed — time filters (Today / This week / This month) are cumulative
+  and carry counts.
+- **Tabs merge closely-related screens.** Friends and Groups are one
+  "People" screen with a tab pair, not two dock destinations.
+
+## Interaction patterns
+
+- **Both halves of a decision live together.** Accept and decline sit
+  side by side at the foot of a card — filled accent for the affirmative,
+  outlined for the negative. Splitting them across a card (accept at the
+  top, decline at the bottom) separates one decision into two, and was
+  fixed for exactly that reason.
+- **One primary action per card.** If a card has a second action, it is
+  visually quieter, not a second filled button.
+- **Motion resolves, it doesn't decorate.** Where something is being
+  computed or connected, the animation should look like search and
+  resolution — the loading mark converges, the progress fills, the
+  screen lands somewhere. Three comparison studies exist in
+  `docs/superpowers/mockups/` (text motion, kinetic type, abstract sync)
+  if a new surface needs one.
+- **Respect `prefers-reduced-motion`** everywhere: animation off,
+  end-state visible.
+
+## Reputation and ranking
+
+- **Tiers, not numbers.** Reliability is Flaky → Casual → Steady → Solid
+  → Ride or Die, rendered as one gem emblem that fills as the tier
+  rises. The underlying score is never shown. A number out of 100 reads
+  as a credit score; a tier reads as identity.
+- **Only the top tier gets the accent colour**, so rank stays inside the
+  palette rather than importing bronze/silver/gold.
+- **Seasons.** Rank resets periodically so a bad stretch doesn't brand
+  someone permanently. Forgiveness is structural, not a special case.
+- **Rank is visible to friends; the flattering number travels furthest.**
+  Hours-together is shared freely. See
+  `.claude/memory/moodinfinite/persistent/reliability-ranking-direction.md`
+  for the reasoning and what's still open.
+- **Never charge someone for honesty.** Declining early and bailing after
+  committing are different acts. A decline costs nothing; only
+  accept-then-no-show should ever affect reliability. This is why the
+  decline button says "Not this time" and not "Flake."
+- **Undo and cancel are different acts, separated by time.** Accepting
+  holds for a five-second undo window before anything reaches the
+  calendar — inside it, taking it back leaves no trace and notifies
+  nobody. Past it, the only route is "Can't make it" from Upcoming,
+  which does tell them. Undo is free because nothing happened; cancel
+  isn't, because it did.
+- **The app can't repair the social part, so it should point at it.**
+  Cancelling ends on a nudge to text the person directly — Spont won't
+  explain why, and they'll take it better from you. Automating the
+  apology would be worse than not offering one.
+- **A cancelled slot goes back, it doesn't vanish.** The time returns to
+  whoever you were meeting so they can keep it open or let it go, rather
+  than the plan silently disappearing from one side.
+
+## Product-decision patterns
+
+- **Prefer plain, human copy over administrative language.** "I'm in" /
+  "Not this time", never "Approve" / "Deny". Errors and empty states get
+  the same voice.
+- **Cut fields that don't have real backing data yet** rather than
+  shipping a placeholder. Location and category were both cut from cards
+  for this reason. Note the expiry: Phase 2 builds a label taxonomy, so
+  the "no data" argument against categories runs out then, and that's a
+  decision to make on purpose rather than by default.
+- **Quiet is a valid state, not a failure.** The feed caps proposals per
+  day deliberately, so an empty or near-empty feed is the normal case.
+  It should read as the goal being met — less time in the app — not as
+  the app having found nothing.
+- **No speculative configurability.** Add controls when real usage shows
+  people want them. (Being revisited for Phase 3's scheduling signals,
+  which the foundation spec does commit to making configurable.)
+
+## What changed on 2026-09-06, and what it cost
+
+The previous system was: off-white ground, red accent, near-black ink,
+Jost + Space Mono, hairline rules, hard edges, no shadows, a grain
+overlay, month bands, and a squared bottom dock. It was coherent and
+well-argued, and it is gone.
+
+Three things worth carrying forward from it even though the surface
+changed: the borrow-cues-not-formats method (kept above), the insistence
+that the accent colour means something rather than decorating, and the
+plain-spoken copy voice. Two things it solved that the new system solves
+differently: separating elements (hairlines → elevation) and keeping
+flat colour from looking dead (grain → soft shadow and a live accent).
+
+The pivot was made during an explicitly open-ended session. If it turns
+out to have been an experiment, this document should be reverted rather
+than quietly patched — the old system is recoverable from git history
+and from the home-feed design notes.

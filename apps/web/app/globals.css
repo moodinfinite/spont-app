@@ -1,22 +1,1540 @@
+/*
+ * Spont's visual system, ported from the mockups in
+ * docs/superpowers/mockups/. The reasoning behind every value lives in
+ * docs/knowledge-base/design-principles.md — read that before changing one.
+ *
+ * Four colour roles: ground, card, ink, accent. Green means action and
+ * nothing else. Black is emphasis, not a colour.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
 :root {
-  color-scheme: light dark;
+  --page: #edeee9;
+  --card: #ffffff;
+  --ink: #15150f;
+  --ink-2: #6c6c62;
+  --ink-3: #a8a89c;
+  --btn-bg: #c6ff4e;
+  --btn-ink: #1c2b06;
+  --dark: #15150f;
+  --dark-ink: #f3f6ea;
+  --dark-ink-2: rgba(243, 246, 234, 0.68);
+  --chip: #e5e7df;
+  --busy: #c2c8b8;
+  --warn: #e14b3a;
+  --hairline: rgba(21, 21, 15, 0.1);
+  --dock: #17170f;
+  --dock-2: #2a2a1f;
+  --dock-ink: #f4f4ec;
+  --dock-ink-muted: rgba(244, 244, 236, 0.5);
+  --shadow: 0 14px 30px rgba(20, 20, 12, 0.1), 0 2px 8px rgba(20, 20, 12, 0.06);
+  --shadow-soft: 0 8px 18px rgba(20, 20, 12, 0.07);
+  --radius: 16px;
+  --radius-inner: 11px;
+}
+
+/* Dark needs an edge, not a shadow — a drop shadow does nothing against a
+   dark ground, so cards carry a light inset rule instead. Everything that
+   sits on a card lifts with it, or it dissolves into the surface. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --page: #0d0d0b;
+    --card: #292921;
+    --ink: #f2f2ea;
+    --ink-2: #a3a398;
+    --ink-3: #6e6e63;
+    --btn-bg: #d2ff66;
+    --btn-ink: #16240a;
+    --dark: #d2ff66;
+    --dark-ink: #16240a;
+    --dark-ink-2: rgba(22, 36, 10, 0.72);
+    --chip: #35352c;
+    --busy: #474d3b;
+    --warn: #ff6a57;
+    --hairline: rgba(242, 242, 234, 0.13);
+    --dock: #1a1a14;
+    --dock-2: #363630;
+    --dock-ink: #eff3e6;
+    --dock-ink-muted: rgba(239, 243, 230, 0.42);
+    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.1);
+    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+  }
+}
+
+:root[data-theme='dark'] {
+  --page: #0d0d0b;
+  --card: #292921;
+  --ink: #f2f2ea;
+  --ink-2: #a3a398;
+  --ink-3: #6e6e63;
+  --btn-bg: #d2ff66;
+  --btn-ink: #16240a;
+  --dark: #d2ff66;
+  --dark-ink: #16240a;
+  --dark-ink-2: rgba(22, 36, 10, 0.72);
+  --chip: #35352c;
+  --busy: #474d3b;
+  --warn: #ff6a57;
+  --hairline: rgba(242, 242, 234, 0.13);
+  --dock: #1a1a14;
+  --dock-2: #363630;
+  --dock-ink: #eff3e6;
+  --dock-ink-muted: rgba(239, 243, 230, 0.42);
+  --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.1);
+  --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: system-ui, sans-serif;
   margin: 0;
-  padding: 0 1.5rem;
+  padding: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
 }
 
-header {
+h1,
+h2,
+h3 {
+  font-family: 'Sora', system-ui, sans-serif;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+/* Big type is not bold type — the greeting is large and regular weight. */
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 26px 18px 132px;
+  /* The accepted row flies in page coordinates — see .row-added. */
+  position: relative;
+}
+
+.page-head {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid #ccc;
+  gap: 16px;
+  padding: 10px 4px 22px;
 }
 
-nav {
+.page-head h1 {
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.head-actions {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  flex: none;
+  cursor: pointer;
+}
+
+.icon-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  flex: none;
+  text-decoration: none;
+}
+
+/* ---------------- Surfaces ---------------- */
+
+.card {
+  position: relative;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+/* The system's voice for "this came from Spont, not a person". Inverts the
+   ground rather than using the accent, so a feed full of suggestions doesn't
+   become a wall of neon. */
+.card-dark {
+  background: var(--dark);
+  color: var(--dark-ink);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.card-dark p {
+  color: var(--dark-ink-2);
+}
+
+/* In dark mode this card inverts to the accent, so an accent-coloured button
+   inside it disappears. The action takes the card surface instead — it still
+   reads as the one thing to press, because it's the only pale shape there. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .card-dark .btn-yes {
+    background: var(--card);
+    color: var(--ink);
+  }
+}
+
+:root[data-theme='dark'] .card-dark .btn-yes {
+  background: var(--card);
+  color: var(--ink);
+}
+
+/* The quiet half of a decision takes its outline from the card it sits on,
+   not the page — a page-coloured hairline vanishes against the dark card. */
+.card-dark .btn-no {
+  color: var(--dark-ink-2);
+  box-shadow: inset 0 0 0 1.5px rgba(243, 246, 234, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .card-dark .btn-no {
+    box-shadow: inset 0 0 0 1.5px rgba(22, 36, 10, 0.24);
+  }
+}
+
+:root[data-theme='dark'] .card-dark .btn-no {
+  box-shadow: inset 0 0 0 1.5px rgba(22, 36, 10, 0.24);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+}
+
+.row + .row {
+  border-top: 1.5px solid var(--hairline);
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  margin: 22px 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* The right slot of a section label, when that section has one thing you'd
+   actually want to do.
+
+   It began as a raised white pill, which made this one label 29px tall
+   against 17px for every other — the section it belonged to visibly sat
+   lower than its neighbours. It now borrows the label's own size and colour
+   and pulls its padding back out of the flow, so the row keeps its rhythm
+   and the button reads as part of the heading rather than floating above
+   it. */
+.section-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  border-radius: 999px;
+  padding: 4px 10px 4px 8px;
+  margin: -4px 0;
+  background: var(--chip);
+  color: var(--ink-2);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.section-action:hover {
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+}
+
+.section-action svg { width: 11px; height: 11px; }
+
+.note {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin: 18px 10px 0;
+  line-height: 1.5;
+}
+
+/* ---------------- Controls ---------------- */
+
+/* Both halves of a decision live together, so they share a row and differ by
+   weight, not position. */
+.btn {
+  border: none;
+  border-radius: 999px;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  padding: 14px 20px;
+  cursor: pointer;
+}
+
+.btn-yes {
+  flex: 1;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+}
+
+.btn-no {
+  flex: none;
+  background: transparent;
+  color: var(--ink-2);
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.pill[aria-pressed='true'],
+.pill[aria-current='page'] {
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+}
+
+/* A whole row that is itself the control — used for the one action in a
+   settings panel, so it keeps the row's shape instead of looking like a
+   button dropped into a list. */
+.row-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 15px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: left;
+}
+
+.row-action svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  opacity: 0.7;
+}
+
+/* Semantic, not the accent — the accent means "do this", red means "this
+   one is different". */
+.danger {
+  color: var(--warn);
+}
+
+/* ---------------- Dock ---------------- */
+
+.dock-wrap {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 16px;
+  z-index: 20;
+}
+
+.dock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--dock);
+  border-radius: 999px;
+  padding: 8px;
+  box-shadow: var(--shadow);
+}
+
+.dock a {
+  /* The waiting dot hangs off this — see .dock-dot. */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 46px;
+  min-height: 46px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: var(--dock-ink-muted);
+  background: transparent;
+  text-decoration: none;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition:
+    background 280ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    color 220ms ease,
+    gap 280ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* The label collapses rather than disappearing, so the pill grows and
+   shrinks between the two states instead of jumping. display:none can't be
+   animated; max-width can. */
+.dock a .dock-label {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transition:
+    max-width 280ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 180ms ease;
+}
+
+.dock a[aria-current='page'] .dock-label {
+  max-width: 80px;
+  opacity: 1;
+  transition:
+    max-width 280ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 220ms ease 80ms;
+}
+
+.dock a:not([aria-current='page']) {
+  gap: 0;
+}
+
+.dock a svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+
+.dock a[aria-current='page'] {
+  background: var(--dock-2);
+  color: var(--dock-ink);
+}
+
+/* Content arrives rather than blinking in, so moving between Home and
+   People reads as one motion with the dock. */
+.page {
+  animation: page-in 300ms cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  border: none;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.fab svg {
+  width: 20px;
+  height: 20px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------------- Welcome ----------------
+   The one screen where the accent is the ground rather than the action.
+   Night drops it a few stops so it isn't a flashlight at 11pm. */
+
+.welcome {
+  --ground: #c6ff4e;
+  --on-ground: #15150f;
+  --on-ground-2: rgba(21, 21, 15, 0.66);
+  --on-ground-3: rgba(21, 21, 15, 0.45);
+
+  background: var(--ground);
+  color: var(--on-ground);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.welcome-inner {
+  width: 100%;
+  max-width: 480px;
+  padding: 30px 26px 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .welcome {
+    --ground: #96c927;
+    --on-ground: #10160a;
+    --on-ground-2: rgba(16, 22, 10, 0.72);
+    --on-ground-3: rgba(16, 22, 10, 0.5);
+  }
+}
+
+:root[data-theme='dark'] .welcome {
+  --ground: #96c927;
+  --on-ground: #10160a;
+  --on-ground-2: rgba(16, 22, 10, 0.72);
+  --on-ground-3: rgba(16, 22, 10, 0.5);
+}
+
+.welcome .brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.welcome .brand svg {
+  width: 22px;
+  height: 22px;
+}
+
+.welcome-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+/* Big type is not bold type. */
+.welcome-body h1 {
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.welcome-body p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.52;
+  color: var(--on-ground-2);
+  max-width: 30ch;
+}
+
+.welcome-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.welcome-cta {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: var(--on-ground);
+  color: var(--ground);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 18px 24px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.welcome-message {
+  margin: 0;
+  background: rgba(21, 21, 15, 0.1);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--on-ground);
+}
+
+.welcome-fine {
+  margin: 0;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--on-ground-3);
+}
+
+/* ---------------- Theme toggle ---------------- */
+
+.theme-toggle .moon { display: none; }
+:root[data-theme='dark'] .theme-toggle .sun { display: none; }
+:root[data-theme='dark'] .theme-toggle .moon { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .theme-toggle .sun { display: none; }
+  :root:not([data-theme='light']) .theme-toggle .moon { display: block; }
+}
+
+/* ---------------- Connected ----------------
+   Closing the loop on a slightly scary thing the user just did. */
+
+.connected-mark {
+  width: 62px;
+  height: 62px;
+  color: var(--ink);
+  margin: 28px auto 20px;
+}
+
+.connected-mark svg { width: 100%; height: 100%; }
+
+.connected-mark .c-left { animation: converge-left 620ms cubic-bezier(0.2, 0.8, 0.25, 1) both; }
+.connected-mark .c-right { animation: converge-right 620ms cubic-bezier(0.2, 0.8, 0.25, 1) both; }
+.connected-mark .tick {
+  stroke-dasharray: 20;
+  animation: draw-tick 460ms ease 520ms both;
+}
+
+@keyframes converge-left {
+  from { transform: translateX(-7px); }
+  to { transform: none; }
+}
+
+@keyframes converge-right {
+  from { transform: translateX(7px); }
+  to { transform: none; }
+}
+
+@keyframes draw-tick {
+  from { stroke-dashoffset: 20; opacity: 0; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+.connected-head {
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.connected-lede {
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0 auto 20px;
+  max-width: 34ch;
+}
+
+.connected-invite { margin-top: 22px; }
+
+/* ---------------- Invite ---------------- */
+
+.invite {
+  background: var(--dark);
+  color: var(--dark-ink);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.invite-label {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--dark-ink-2);
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-inner);
+  padding: 10px 10px 10px 14px;
+}
+
+:root[data-theme='dark'] .invite-row { background: rgba(22, 36, 10, 0.14); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .invite-row { background: rgba(22, 36, 10, 0.14); }
+}
+
+.invite-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.invite-copy {
+  flex: none;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: var(--dark-ink);
+  color: var(--dark);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.invite-hint {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--dark-ink-2);
+}
+
+/* ---------------- Waiting headline ---------------- */
+
+.waiting-headline {
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 280ms ease, transform 280ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.waiting-headline.is-on { opacity: 1; transform: none; }
+
+/* ---------------- People tabs ---------------- */
+
+.tabs { display: flex; gap: 8px; padding: 2px 2px 16px; }
+
+/* ---------------- People ---------------- */
+
+.person-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--chip);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  flex: none;
+}
+
+.person-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+/* ---------------- Setup flow ---------------- */
+
+.setup-steps {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  padding: 8px 0 22px;
+}
+
+.setup-steps i {
+  width: 20px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--hairline);
+}
+
+.setup-steps i.on { background: var(--ink); }
+
+/* The way onward should look like the way onward. */
+.setup-next {
+  width: 100%;
+  margin-top: 18px;
+  padding: 17px 24px;
+  font-size: 15px;
+}
+
+.head-back {
+  /* Top-aligned, not centred — a headline that runs to three lines would
+     otherwise leave the back arrow floating in the middle of it. */
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.head-back h1 { padding-top: 3px; }
+
+.back { background: var(--card); text-decoration: none; }
+
+/* ---------------- Hangout time buckets ---------------- */
+
+.bucket-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 20px 0 8px;
+}
+
+.buckets { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.bucket {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 15px;
+  cursor: pointer;
+  background: var(--chip);
+  color: var(--ink-2);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+}
+
+.bucket[data-state='yes'] { background: var(--btn-bg); color: var(--btn-ink); }
+
+/* "Never" is the input that does the most work — it kills whole classes of
+   bad suggestion — so it gets its own look rather than just being unset. */
+.bucket[data-state='never'] {
+  background: transparent;
+  color: var(--ink-3);
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 6px 0; }
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.legend-chip {
+  width: 22px;
+  height: 14px;
+  border-radius: 999px;
+  flex: none;
+  background: var(--chip);
+}
+
+.legend-chip[data-state='yes'] { background: var(--btn-bg); }
+
+.legend-chip[data-state='never'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+  position: relative;
+}
+
+.legend-chip[data-state='never']::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  height: 1.5px;
+  background: var(--ink-3);
+}
+
+.bucket-hint { font-size: 12px; color: var(--ink-3); margin: 8px 0 0; line-height: 1.5; }
+
+.tab-count {
+  font-weight: 600;
+  font-size: 11.5px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Something on the other tab needs an answer. A dot rather than a count —
+   the number doesn't change what you do, and one waiting invite deserves the
+   same nudge as four. */
+.tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--warn);
+  align-self: center;
+}
+
+.pill[aria-current='page'] .tab-dot { background: var(--btn-ink); }
+
+/* ---------------- Accepting someone ----------------
+   The row says so where you tapped it, then carries the name down into Your
+   people, so you can see where they went rather than watching the page
+   reshuffle. Four studies are in
+   docs/superpowers/mockups/2026-09-08-accept-friend-motion.html; this is D's
+   in-place confirmation joined to A's travel, with the undo dropped —
+   nobody accepts a friend by accident. */
+
+.row-added {
+  background: var(--btn-bg);
+  border-radius: var(--radius-inner);
+  transition: background-color 340ms ease;
+}
+
+.row-added .person-name {
+  color: var(--btn-ink);
+  transition: color 340ms ease;
+}
+
+.row-added .person-avatar {
+  background: rgba(28, 43, 6, 0.14);
+  color: var(--btn-ink);
+  transition:
+    background-color 340ms ease,
+    color 340ms ease;
+}
+
+.row-added.in-flight {
+  z-index: 5;
+  box-shadow: var(--shadow);
+  transition:
+    top 480ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    box-shadow 480ms ease,
+    background-color 340ms ease;
+}
+
+/* Arrived. The green drains out and it's just a row in your list. */
+.row-added.landed {
+  background: var(--card);
+  box-shadow: none;
+}
+
+.row-added.landed .person-name {
+  color: var(--ink);
+}
+
+.row-added.landed .person-avatar {
+  background: var(--chip);
+  color: var(--ink);
+}
+
+/* Closes behind the row as it leaves, and opens in front of it as it
+   arrives. Same curve and duration as the flight, so the three read as one
+   movement rather than three. */
+.wait-collapse {
+  overflow: hidden;
+  transition:
+    height 460ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 220ms ease;
+}
+
+.landing-gap {
+  transition: height 480ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* Asked not to be moved: keep the confirmation, drop the travel. */
+@media (prefers-reduced-motion: reduce) {
+  .row-added.in-flight,
+  .wait-collapse,
+  .landing-gap {
+    transition: none;
+  }
+}
+
+/* ---------------- Proposal cards ----------------
+   A suggestion inverts the ground rather than using the accent, so a feed of
+   them doesn't become a wall of neon. Ported from
+   docs/superpowers/mockups/2026-09-06-home-feed-mockup-v2-rounded.html */
+
+.card-suggested {
+  padding: 20px 18px 18px;
+  margin-bottom: 10px;
+}
+
+.sug-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.sug-top svg {
+  width: 22px;
+  height: 22px;
+}
+
+.sug-eyebrow {
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dark-ink-2);
+}
+
+.card-headline {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  max-width: 16ch;
+  margin: 0 0 14px;
+  color: var(--dark-ink);
+  text-wrap: balance;
+}
+
+.sug-reason {
+  font-size: 13.5px;
+  margin: 0 0 16px;
+  max-width: 32ch;
+}
+
+.stat-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dark-ink-2);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Both halves of the decision together, at the foot of the card. */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The undo window. The ring is the clock: when it has drained, the answer is
+   final and the card becomes an Upcoming row. */
+.undo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.undo-ring {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  transform: rotate(-90deg);
+}
+
+.undo-ring circle {
+  fill: none;
+  stroke-width: 2.4;
+}
+
+.undo-ring .track {
+  stroke: var(--dark-ink-2);
+  opacity: 0.3;
+}
+
+.undo-ring .sweep {
+  stroke: var(--dark-ink);
+  stroke-linecap: round;
+  stroke-dasharray: 62.8;
+  stroke-dashoffset: 0;
+}
+
+.undo-ring .sweep.draining {
+  transition: stroke-dashoffset 5000ms linear;
+  stroke-dashoffset: 62.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .undo-ring .sweep.draining {
+    transition: none;
+  }
+}
+
+/* ---------------- Upcoming ---------------- */
+
+.upcoming-when {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+/* The whole of Spont's notification surface: a dot on the tab that has
+   something waiting. No bell, no badge count, nothing pushed.
+
+   The label rule above is scoped to .dock-label rather than to any span
+   precisely because of this — as "\.dock a span" it collapsed the dot to
+   zero width along with the labels, and the dot was invisible on every tab
+   except the one you were already on. */
+.dock-dot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--warn);
+}
+
+.dock a[aria-current='page'] .dock-dot {
+  background: var(--dock-ink);
+}
+
+/* The save button on the hangout times. Everything else on Settings saves on
+   tap and shows it at once; this one had to say something back, so the label
+   steps aside for a tick that draws itself and then hands the label back. */
+.btn-save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  transition:
+    background-color 240ms ease,
+    color 240ms ease,
+    opacity 240ms ease;
+}
+
+.btn-save:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.btn-save.is-saved:disabled {
+  opacity: 1;
+}
+
+.save-tick {
+  width: 0;
+  height: 17px;
+  opacity: 0;
+  flex: none;
+  transition:
+    width 260ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 160ms ease;
+}
+
+.save-tick path {
+  stroke-dasharray: 21;
+  stroke-dashoffset: 21;
+}
+
+.btn-save.is-saved .save-tick {
+  width: 17px;
+  opacity: 1;
+}
+
+.btn-save.is-saved .save-tick path {
+  transition: stroke-dashoffset 340ms cubic-bezier(0.4, 0, 0.2, 1) 120ms;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-tick,
+  .btn-save.is-saved .save-tick path {
+    transition: none;
+  }
+}
+
+.chev { color: var(--ink-3); flex: none; display: flex; }
+.chev svg { width: 15px; height: 15px; }
+
+a.row { text-decoration: none; }
+
+.text-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: var(--chip);
+  border-radius: 999px;
+  padding: 11px 16px;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.text-input::placeholder { color: var(--ink-3); }
+
+/* ---------------- Settings rows ---------------- */
+
+.signal { padding: 18px; }
+.signal + .row { border-top: 1.5px solid var(--hairline); }
+
+.signal-name {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin-bottom: 3px;
+}
+
+.signal-desc {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  margin: 0 0 4px;
+  max-width: 44ch;
+}
+
+.row-text { flex: 1; min-width: 0; }
+.row-name { display: block; font-weight: 700; font-size: 14px; }
+
+.row-sub {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  margin-top: 2px;
+  line-height: 1.45;
+}
+
+.row-value { font-size: 13px; color: var(--ink-2); font-weight: 600; flex: none; }
+
+.seg { display: flex; gap: 5px; flex: none; }
+
+.seg button {
+  border: none;
+  border-radius: 999px;
+  min-width: 40px;
+  padding: 8px 11px;
+  background: var(--chip);
+  color: var(--ink-2);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.seg button[aria-pressed='true'] { background: var(--btn-bg); color: var(--btn-ink); }
+
+/* On a phone a row can't hold an explanation and four buttons side by side —
+   the label ends up four words wide. Narrow enough, and the control takes a
+   line of its own instead of squeezing the text that justifies it. */
+@media (max-width: 430px) {
+  .row:has(.seg) {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .row:has(.seg) .row-text {
+    flex: 1 1 100%;
+  }
+
+  .row:has(.seg) .seg {
+    margin-left: auto;
+  }
+}
+
+/* ---------------- Week scan ----------------
+   The empty feed shows the engine looking rather than asserting it works.
+   Grey is where you're booked; green is a gap long enough to be worth
+   proposing into, so green never means merely "free".
+   Design: docs/superpowers/mockups/2026-09-08-empty-state-scanning.html */
+
+.week { padding: 4px 0 8px; }
+
+.day {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  font-size: 13px;
+}
+
+.day-name {
+  width: 38px;
+  flex: none;
+  font-weight: 700;
+  color: var(--ink-2);
+  transition: color 200ms ease;
+}
+
+.day.is-scanning .day-name { color: var(--ink); }
+
+.track {
+  position: relative;
+  flex: 1;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--chip);
+  overflow: hidden;
+}
+
+.busy {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--busy);
+}
+
+/* An opening starts collapsed and is "discovered" by the line passing over
+   it — then stays lit, so the end state is a readable week rather than an
+   animation you had to catch. */
+.open {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.open.found { transform: scaleX(1); }
+
+.scan {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 0;
+  width: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 8px 1px var(--ink);
+  opacity: 0;
+}
+
+.day.is-scanning .scan { animation: sweep 900ms linear; }
+
+@keyframes sweep {
+  0% { left: 0; opacity: 0; }
+  8% { opacity: 0.85; }
+  92% { opacity: 0.85; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* ---------------- Add sheet ----------------
+   What the + does. Two items, not three: creating a group is a once-a-year
+   act that already lives on the People page, and next to "a hangout" it
+   reads as the same thing twice.
+   Design: docs/superpowers/mockups/2026-09-08-add-button-flow.html */
+
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(10, 10, 6, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+}
+
+.sheet-scrim.on { opacity: 1; pointer-events: auto; }
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 31;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 22px 22px 0 0;
+  box-shadow: var(--shadow);
+  padding: 10px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(110%);
+  /* visibility keeps a closed sheet off the tab order; the 0s delay holds it
+     visible for the length of the slide out. */
+  visibility: hidden;
+  transition:
+    transform 300ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    visibility 0s linear 300ms;
+}
+
+.sheet.on {
+  transform: none;
+  visibility: visible;
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.25, 1), visibility 0s;
+}
+
+.grabber {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hairline);
+  margin: 0 auto 16px;
+}
+
+.sheet h3 {
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.018em;
+  margin-bottom: 4px;
+}
+
+.sheet-lede {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 14px;
+  background: var(--chip);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.action .ico {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action .ico svg { width: 16px; height: 16px; }
+.action .txt { flex: 1; min-width: 0; }
+.action .t { display: block; font-weight: 700; font-size: 14px; }
+.action .d { display: block; font-size: 12px; color: var(--ink-2); margin-top: 1px; }
+
+.action.primary { background: var(--dark); }
+.action.primary .t { color: var(--dark-ink); }
+.action.primary .d { color: var(--dark-ink-2); }
+.action.primary .ico { background: var(--btn-bg); color: var(--btn-ink); }
+
+/* Dark inverts --dark to the accent, so the accent-coloured icon disc
+   vanishes into the row it sits on. Same fix as .card-dark .btn-yes: take the
+   card surface, which is the only pale shape left. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .action.primary .ico {
+    background: var(--card);
+    color: var(--ink);
+  }
+}
+
+:root[data-theme='dark'] .action.primary .ico {
+  background: var(--card);
+  color: var(--ink);
+}
+
+/* The invite row again, but on a pale card instead of the dark one — its own
+   classes rather than overrides, so the two can't fight over specificity. */
+.sheet-invite {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--chip);
+  border-radius: var(--radius-inner);
+  padding: 10px 10px 10px 14px;
+}
+
+.sheet-invite-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.sheet-invite-copy {
+  flex: none;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: var(--ink);
+  color: var(--card);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
 }

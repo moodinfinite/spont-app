@@ -15,11 +15,40 @@ model User {
   createdAt DateTime @default(now())
 
   calendarAccounts     CalendarAccount[]
-  friendshipsInitiated Friendship[]      @relation("FriendshipUserA")
-  friendshipsReceived  Friendship[]      @relation("FriendshipUserB")
+  friendshipsInitiated Friendship[]          @relation("FriendshipUserA")
+  friendshipsReceived  Friendship[]          @relation("FriendshipUserB")
   ownedGroups          Group[]
   groupMemberships     GroupMembership[]
-  notifications        Notification[]
+  proposalsCreated     Proposal[]            @relation("ProposalsCreated")
+  proposalParticipants ProposalParticipant[]
+
+  // Set once in onboarding, correctable in Settings. Where two people's
+  // preferred lengths differ the matcher takes the shorter, since that is
+  // the one both are comfortable with.
+  preferredHangoutMinutes Int @default(120)
+  bufferMinutes           Int @default(30)
+
+  // Which parts of the week this person actually wants to see people in —
+  // appetite, not availability, which the calendar already knows. Shaped
+  // { "wd-evening": "yes" | "never", ... }; absent keys mean no preference.
+  hangoutTimes Json?
+
+  // Parked. This capped how many proposals Spont could surface to you in a
+  // day, and it was removed rather than left half-working: the cap only ever
+  // consulted the person who opened the app, so being proposed *to* was never
+  // limited by it. The natural bound is now one open proposal per friend at a
+  // time. Kept as a column so the decision can be revisited without a
+  // migration; nothing reads it.
+  proposalsPerDay Int @default(2)
+
+  // When several windows fit, which one wins. Soonest is the default because
+  // a plan four weeks out isn't spontaneous; BEST trades that for the roomier
+  // window, which is usually a weekend.
+  windowPreference WindowPreference @default(SOONEST)
+
+  // Set once onboarding has been walked through, so we don't drop a
+  // returning user back into it.
+  onboardedAt DateTime?
 }
 
 model CalendarAccount {
@@ -28,6 +57,13 @@ model CalendarAccount {
   provider   String
   externalId String
   createdAt  DateTime @default(now())
+
+  // Google's tokens. Stored as given, which is fine for a friends test but
+  // not for real users — a refresh token is long-lived access to somebody's
+  // calendar. Encrypt at rest before this leaves the allowlist.
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
 
   user   User            @relation(fields: [userId], references: [id])
   events CalendarEvent[]
@@ -45,6 +81,11 @@ model CalendarEvent {
   isBusy            Boolean  @default(true)
 
   calendarAccount CalendarAccount @relation(fields: [calendarAccountId], references: [id])
+}
+
+enum WindowPreference {
+  SOONEST
+  BEST
 }
 
 enum FriendshipStatus {
@@ -71,8 +112,15 @@ model Group {
   ownerId   String
   createdAt DateTime @default(now())
 
-  owner   User              @relation(fields: [ownerId], references: [id])
-  members GroupMembership[]
+  // How many of you have to be free before Spont proposes anything. Two is
+  // the default because four busy people rarely share a window and two who
+  // actually turn up beats a perfect window nobody has — but that's a
+  // judgement about this particular group, so the group makes it.
+  minAttendees Int @default(2)
+
+  owner     User              @relation(fields: [ownerId], references: [id])
+  members   GroupMembership[]
+  proposals Proposal[]
 }
 
 enum GroupMemberStatus {
@@ -100,13 +148,65 @@ model GroupMembership {
   @@unique([groupId, userId])
 }
 
-model Notification {
-  id        String    @id @default(cuid())
-  userId    String
-  type      String
-  payload   Json
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
+// ---------------------------------------------------------------------------
+// Proposals — a proposed hangout, and what each person said about it.
+// Every screen in the app is a view of these two tables: the feed is
+// proposals you haven't answered, Upcoming is ones you accepted.
+// See docs/superpowers/specs/2026-09-07-proposal-model-mvp.md
+// ---------------------------------------------------------------------------
 
-  user User @relation(fields: [userId], references: [id])
+enum ProposalOrigin {
+  SUGGESTED // the matcher found it
+  INVITED // a person asked
+}
+
+enum ProposalStatus {
+  OPEN
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+}
+
+enum ParticipantResponse {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Proposal {
+  id          String         @id @default(cuid())
+  origin      ProposalOrigin
+  status      ProposalStatus @default(OPEN)
+  startsAt    DateTime
+  endsAt      DateTime
+  // Set when the proposal belongs to a group. Its absence is what makes a
+  // proposal a 1:1, which needs every participant to accept rather than two.
+  groupId     String?
+  createdById String?
+  createdAt   DateTime       @default(now())
+
+  group        Group?                @relation(fields: [groupId], references: [id])
+  createdBy    User?                 @relation("ProposalsCreated", fields: [createdById], references: [id])
+  participants ProposalParticipant[]
+
+  @@index([startsAt])
+  @@index([status])
+}
+
+model ProposalParticipant {
+  id              String              @id @default(cuid())
+  proposalId      String
+  userId          String
+  response        ParticipantResponse @default(PENDING)
+  respondedAt     DateTime?
+  // The event on this person's calendar, once the hangout is actually on.
+  // Null until quorum, which is what stops a 1:1 accepter holding an event
+  // for a hangout the other person declined.
+  calendarEventId String?
+
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([proposalId, userId])
+  @@index([userId, response])
 }

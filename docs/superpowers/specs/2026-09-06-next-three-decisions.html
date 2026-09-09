@@ -1,0 +1,335 @@
+<title>Spont's Next Three Decisions</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root {
+    --page: #EDEEE9;
+    --card: #FFFFFF;
+    --ink: #15150F;
+    --ink-2: #64645B;
+    --ink-3: #9C9C90;
+    --green: #C6FF4E;
+    --green-ink: #1C2B06;
+    --green-deep: #7FAF1B;
+    --dark: #15150F;
+    --dark-ink: #F3F6EA;
+    --dark-ink-2: rgba(243, 246, 234, 0.68);
+    --hairline: rgba(21, 21, 15, 0.10);
+    --shadow: 0 10px 26px rgba(20, 20, 12, 0.09), 0 2px 6px rgba(20, 20, 12, 0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #121210;
+      --card: #1C1C17;
+      --ink: #F2F2EA;
+      --ink-2: #A0A096;
+      --ink-3: #6E6E63;
+      --green: #D2FF66;
+      --green-ink: #16240A;
+      --green-deep: #A9DC3C;
+      --dark: #080806;
+      --dark-ink: #F2F2EA;
+      --dark-ink-2: rgba(242, 242, 234, 0.66);
+      --hairline: rgba(242, 242, 234, 0.10);
+      --shadow: 0 10px 26px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #121210;
+    --card: #1C1C17;
+    --ink: #F2F2EA;
+    --ink-2: #A0A096;
+    --ink-3: #6E6E63;
+    --green: #D2FF66;
+    --green-ink: #16240A;
+    --green-deep: #A9DC3C;
+    --dark: #080806;
+    --dark-ink: #F2F2EA;
+    --dark-ink-2: rgba(242, 242, 234, 0.66);
+    --hairline: rgba(242, 242, 234, 0.10);
+    --shadow: 0 10px 26px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    line-height: 1.6;
+  }
+  h1, h2, h3 { font-family: 'Sora', sans-serif; margin: 0; }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 44px 22px 70px; }
+
+  /* ---- masthead ---- */
+  .masthead { margin-bottom: 34px; }
+  .kicker {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px;
+  }
+  h1 {
+    font-size: 40px; font-weight: 400; line-height: 1.05;
+    letter-spacing: -0.025em; margin-bottom: 16px; text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 16.5px; color: var(--ink-2); max-width: 58ch; margin: 0;
+  }
+  .standfirst b { color: var(--ink); font-weight: 600; }
+
+  /* ---- decision blocks ---- */
+  .decision { margin-top: 34px; }
+  .d-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .d-num {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13px;
+    color: var(--green-deep); flex: none; letter-spacing: 0.04em;
+  }
+  .d-stakes {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .decision h2 {
+    font-size: 25px; font-weight: 600; line-height: 1.18;
+    letter-spacing: -0.015em; margin-bottom: 12px; text-wrap: balance;
+  }
+  .why {
+    font-size: 15px; color: var(--ink-2); margin: 0 0 20px;
+    max-width: 62ch;
+  }
+  .why b { color: var(--ink); font-weight: 600; }
+
+  .options { display: grid; gap: 10px; }
+  @media (min-width: 620px) { .options { grid-template-columns: 1fr 1fr; } }
+
+  .opt {
+    background: var(--card);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .opt-label {
+    display: flex; align-items: baseline; gap: 8px;
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14.5px;
+  }
+  .opt-letter {
+    font-size: 11px; color: var(--ink-3); font-weight: 700;
+    letter-spacing: 0.08em; flex: none;
+  }
+  .opt p { margin: 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+  .opt .cost {
+    font-size: 12.5px; color: var(--ink-3);
+    border-top: 1.5px solid var(--hairline); padding-top: 8px; margin-top: 2px;
+  }
+  .opt .cost b { color: var(--ink-2); font-weight: 700; }
+
+  .rec {
+    margin-top: 12px;
+    background: var(--dark);
+    color: var(--dark-ink);
+    border-radius: 18px;
+    padding: 16px 18px;
+    display: flex; gap: 13px; align-items: flex-start;
+  }
+  .rec .mark {
+    flex: none; width: 26px; height: 26px; border-radius: 999px;
+    background: var(--green); color: var(--green-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12px;
+    margin-top: 1px;
+  }
+  .rec p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--dark-ink-2); }
+  .rec p b { color: var(--dark-ink); font-weight: 700; }
+
+  /* ---- also open ---- */
+  .also {
+    margin-top: 44px; padding-top: 26px;
+    border-top: 1.5px solid var(--hairline);
+  }
+  .also h2 {
+    font-size: 17px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 14px;
+  }
+  .also ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; }
+  .also li {
+    font-size: 14px; color: var(--ink-2); line-height: 1.55;
+    padding-left: 16px; position: relative;
+  }
+  .also li::before {
+    content: ""; position: absolute; left: 0; top: 9px;
+    width: 5px; height: 5px; border-radius: 999px; background: var(--ink-3);
+  }
+  .also li b { color: var(--ink); font-weight: 600; }
+
+  footer.close {
+    margin-top: 34px; padding: 18px 20px;
+    background: var(--card); border-radius: 18px; box-shadow: var(--shadow);
+    font-size: 14px; color: var(--ink-2);
+  }
+  footer.close b { color: var(--ink); font-weight: 600; }
+
+  .theme-toggle {
+    position: fixed; top: 18px; right: 18px; z-index: 10;
+    width: 36px; height: 36px; border-radius: 999px; border: none;
+    background: var(--card); box-shadow: var(--shadow); color: var(--ink);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .theme-toggle svg { width: 17px; height: 17px; }
+  .theme-toggle .moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+
+  :focus-visible { outline: 2px solid var(--green-deep); outline-offset: 3px; }
+</style>
+
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+  <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+  <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+</button>
+
+<div class="wrap">
+  <div class="masthead">
+    <div class="kicker">Design brief · 6 September 2026</div>
+    <h1>The next three decisions.</h1>
+    <p class="standfirst">Ranked by what they block. I read back through the foundation spec and the phase plan to check these against what's actually coming — each one below is either <b>a hole in the product</b> or <b>a place the design and the roadmap currently disagree</b>. Today's ranking work isn't here: flake score is Phase&nbsp;6, so it has room to sit.</p>
+  </div>
+
+  <!-- ============ 1 ============ -->
+  <section class="decision">
+    <div class="d-head">
+      <span class="d-num">01</span>
+      <span class="d-stakes">Blocks the + button on every screen</span>
+    </div>
+    <h2>What happens when someone wants to make a plan themselves?</h2>
+    <p class="why">The green <b>+</b> sits on every screen and goes nowhere. It's not a small gap: friend-initiated proposals are one of the two card types in the feed — &ldquo;Jeff wants to hang out&rdquo; has to come from somewhere. And this is the decision that defines what Spont <i>is</i>, because the moment you let someone pick a time by hand, you've built a calendar invite with extra steps.</p>
+
+    <div class="options">
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">A</span> Pick the person, not the time</div>
+        <p>You choose who. Spont finds the slots and sends them a proposal, exactly like a system suggestion but initiated by you.</p>
+        <p class="cost"><b>Cost:</b> you can't say &ldquo;Thursday at 8&rdquo; when you already know you mean Thursday at 8.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">B</span> Full composer</div>
+        <p>Pick who, pick a day, pick a time, send. The familiar thing everyone already knows how to use.</p>
+        <p class="cost"><b>Cost:</b> it's a calendar invite. The scheduling engine becomes optional, and the product's whole reason to exist becomes optional with it.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">C</span> Just raise a hand</div>
+        <p>You can't propose a time at all — only tell Spont &ldquo;I want to see Rod soon,&rdquo; which weights him up in the engine. A wish, not an invite.</p>
+        <p class="cost"><b>Cost:</b> nothing happens immediately. People used to sending invites will find it maddening at first.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">D</span> A, with B as an escape hatch</div>
+        <p>Spont picks by default; a &ldquo;pick it myself&rdquo; link underneath for when you genuinely already know.</p>
+        <p class="cost"><b>Cost:</b> escape hatches get used. Whatever's behind that link becomes the real flow for your power users.</p>
+      </div>
+    </div>
+
+    <div class="rec">
+      <span class="mark">✓</span>
+      <p><b>I'd take A, with C bolted on as a second action.</b> &ldquo;Pick the person, we'll find the time&rdquo; is the same promise the feed already makes, so it doesn't need a second mental model — and &ldquo;raise a hand&rdquo; covers the real case where you're not proposing anything, you just miss someone. D is the safe choice, and I'd expect the escape hatch to quietly eat the product.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section class="decision">
+    <div class="d-head">
+      <span class="d-num">02</span>
+      <span class="d-stakes">The most-seen screen in the app</span>
+    </div>
+    <h2>What does the feed look like when there's nothing in it?</h2>
+    <p class="why">There's a cap of <b>one proposal per day</b>, deliberately. That means a near-empty feed isn't an edge case — it's the normal state, and it's what most people will see most times they open the app. It's been flagged as undesigned since the original home-feed notes, and right now it's a placeholder sentence I wrote so the filters wouldn't break. Tap &ldquo;Today&rdquo; in the mockup and you're looking at the gap.</p>
+
+    <div class="options">
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">A</span> Say it plainly</div>
+        <p>&ldquo;Nothing open right now.&rdquo; A quiet line, one action underneath, no decoration.</p>
+        <p class="cost"><b>Cost:</b> honest but flat. Reads as the app having failed to find you anything.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">B</span> Never let it be empty</div>
+        <p>Backfill with what's already locked in, someone you haven't seen in a while, or a prompt to raise a hand.</p>
+        <p class="cost"><b>Cost:</b> manufactured activity. This is the road to a feed that's busy because it needs to be, not because anything happened.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">C</span> Empty is the win</div>
+        <p>Frame it as success: nothing to decide, you're set, three things already on the calendar. Close the app.</p>
+        <p class="cost"><b>Cost:</b> requires nerve. An app that congratulates you for leaving is measured differently than one that keeps you.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">D</span> Show the near miss</div>
+        <p>&ldquo;You and Edward were both nearly free Thursday.&rdquo; Explain what the engine tried, so quiet reads as working, not broken.</p>
+        <p class="cost"><b>Cost:</b> exposes free/busy inference in a way the privacy line may not comfortably cover.</p>
+      </div>
+    </div>
+
+    <div class="rec">
+      <span class="mark">✓</span>
+      <p><b>C, structured like A.</b> You've now said twice that the goal is less time in the app — an empty feed is that goal being met, and it's the one screen where you can prove the mission instead of asserting it. Keep it plain, keep one action available, and don't backfill. B is the version of this app I'd worry about becoming.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section class="decision">
+    <div class="d-head">
+      <span class="d-num">03</span>
+      <span class="d-stakes">Design and roadmap currently disagree</span>
+    </div>
+    <h2>Does anyone get to tune how Spont picks?</h2>
+    <p class="why">This one's a genuine contradiction, not an open question. The foundation spec commits Phase&nbsp;3 to <b>&ldquo;user-configurable, equally-weighted optimization signals&rdquo;</b> — recency, time-of-day preference, buffer around events, category balance — and names <b>Settings</b> as their home. The home-feed design went the other way and cut configuration entirely as a deliberate YAGNI call. Both can't ship. Phase 3 is the next real build after the label work, so this gets decided soon whether or not it gets decided on purpose.</p>
+
+    <div class="options">
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">A</span> No controls at all</div>
+        <p>Spont decides, full stop. Amend the spec to drop configurability.</p>
+        <p class="cost"><b>Cost:</b> when suggestions are wrong, there's no recourse but declining forever. And the engine never learns why.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">B</span> Build the settings panel</div>
+        <p>Four signals, four controls, as the spec describes. Honest and explicit.</p>
+        <p class="cost"><b>Cost:</b> a config screen in an app whose stated goal is that you don't open it. Almost nobody will touch it, and it'll shape the engine for the few who do.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">C</span> Learn from the decisions</div>
+        <p>No controls. The engine reads your accepts and declines — decline every 8am and it stops offering 8am.</p>
+        <p class="cost"><b>Cost:</b> invisible and slow. Declining for one reason teaches the machine another, and nobody can see or correct what it concluded.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-label"><span class="opt-letter">D</span> Ask in the moment</div>
+        <p>No settings page. Occasionally, on decline: &ldquo;too early?&rdquo; One tap, and the signal is set where the context actually is.</p>
+        <p class="cost"><b>Cost:</b> asking costs attention every time. Overdone, it turns every no into a survey.</p>
+      </div>
+    </div>
+
+    <div class="rec">
+      <span class="mark">✓</span>
+      <p><b>D on top of C.</b> It satisfies what Phase 3 actually needs — signals that reflect the person — without building the settings screen this product shouldn't want. It also gives the decline button a second job, which matters now that declining is the only feedback the engine gets. Whichever way you go, the foundation spec needs amending to match, and that's worth doing explicitly rather than letting Phase 3 discover it.</p>
+    </div>
+  </section>
+
+  <!-- ============ also open ============ -->
+  <section class="also">
+    <h2>Also open, deliberately not in the top three</h2>
+    <ul>
+      <li><b>How exposed is a low rank?</b> You've decided rank is visible to friends, but not whether Rod sees that he reads as &ldquo;Flaky.&rdquo; It's the riskiest call in the product — it's just Phase 6, so it has time.</li>
+      <li><b>Categories are about to exist.</b> Phase 2 builds a label taxonomy with privacy-scoped sharing. Cards cut category because there was no data for it; that reason expires next phase, and it's worth deciding before the data arrives rather than after.</li>
+      <li><b>Where do card photos come from?</b> Still placeholder art. Camera-roll access is a permission scope no phase currently covers.</li>
+      <li><b>Nothing happens when you tap &ldquo;I'm in.&rdquo;</b> The confirmation state got removed along with the flake experiment. Phase 4 writes to your calendar instantly — that deserves a visible moment.</li>
+      <li><b>The connect screen runs eleven seconds</b> for a one-second job. Either hold it deliberately or cut to success after two lines.</li>
+      <li><b>design-principles.md still describes the old system.</b> Today's direction contradicts it on shape, colour and type. Either rewrite it around this, or call the pivot an experiment — but not by default.</li>
+    </ul>
+  </section>
+
+  <footer class="close">
+    <b>To decide:</b> reply with a letter for each — e.g. &ldquo;1A, 2C, 3D&rdquo; — and I'll mock them up. If you'd rather see before you choose, 01 and 02 are both quick to build both ways.
+  </footer>
+</div>
+
+<script>
+  var root = document.documentElement;
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+</script>

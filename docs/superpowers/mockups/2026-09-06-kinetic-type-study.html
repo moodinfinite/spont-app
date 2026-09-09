@@ -1,0 +1,418 @@
+<title>Spont Kinetic Type Study</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&family=Manrope:wght@400;500;600;700&display=swap');
+
+  /* Eight more typographic treatments for the connect-screen taglines —
+     the artistic end of the range. Same copy, same green, motion only. */
+  :root {
+    --ground: #C6FF4E;
+    --ink: #15150F;
+    --ink-2: rgba(21, 21, 15, 0.66);
+    --ink-3: rgba(21, 21, 15, 0.42);
+    --ghost: rgba(21, 21, 15, 0.28);
+    --rule: rgba(21, 21, 15, 0.16);
+    --panel: rgba(255, 255, 255, 0.30);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #96C927;
+      --ink: #10160A;
+      --ink-2: rgba(16, 22, 10, 0.72);
+      --ink-3: rgba(16, 22, 10, 0.48);
+      --ghost: rgba(16, 22, 10, 0.3);
+      --rule: rgba(16, 22, 10, 0.2);
+      --panel: rgba(255, 255, 255, 0.20);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #96C927;
+    --ink: #10160A;
+    --ink-2: rgba(16, 22, 10, 0.72);
+    --ink-3: rgba(16, 22, 10, 0.48);
+    --ghost: rgba(16, 22, 10, 0.3);
+    --rule: rgba(16, 22, 10, 0.2);
+    --panel: rgba(255, 255, 255, 0.20);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Manrope', sans-serif; }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 34px 22px 60px; }
+
+  header.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .sub { margin: 10px 0 30px; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 56ch; }
+  .head-actions { display: flex; gap: 8px; flex: none; }
+  .ghost-btn {
+    border: none; border-radius: 999px;
+    background: var(--panel); color: var(--ink);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+    padding: 10px 16px; cursor: pointer;
+  }
+  .icon-only { width: 38px; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .icon-only svg { width: 17px; height: 17px; }
+  .icon-only .moon { display: none; }
+  :root[data-theme="dark"] .icon-only .sun { display: none; }
+  :root[data-theme="dark"] .icon-only .moon { display: block; }
+
+  .grid { display: grid; gap: 14px; }
+  @media (min-width: 680px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .panel {
+    border: 1.5px solid var(--rule);
+    border-radius: 22px;
+    background: var(--panel);
+    padding: 18px 20px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .panel-name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; }
+  .panel-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .panel-note { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); margin: 0; }
+
+  .stage {
+    height: 104px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    perspective: 700px;
+  }
+  .anim {
+    font-family: 'Sora', sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+    position: relative;
+    width: 100%;
+  }
+  .anim .ch { display: inline-block; white-space: pre; }
+
+  /* 1 — Decode: characters churn, then lock left to right */
+  .mode-decode.out { animation: fade 260ms ease both; }
+  @keyframes fade { to { opacity: 0; } }
+
+  /* 2 — Split-flap: each character flips down into place */
+  .mode-flap .ch { transform-origin: 50% 0; backface-visibility: hidden; }
+  .mode-flap.in .ch { animation: flap 380ms cubic-bezier(.3,1.2,.4,1) both; }
+  .mode-flap.out { animation: fade 240ms ease both; }
+  @keyframes flap {
+    from { transform: rotateX(-92deg); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+
+  /* 3 — Tracking collapse: letters start spread, tighten into the line */
+  .mode-track.in { animation: trackIn 760ms cubic-bezier(.2,.8,.25,1) both; }
+  .mode-track.out { animation: trackOut 320ms ease both; }
+  @keyframes trackIn {
+    from { letter-spacing: 0.42em; opacity: 0; }
+    to { letter-spacing: -0.01em; opacity: 1; }
+  }
+  @keyframes trackOut { to { letter-spacing: 0.16em; opacity: 0; } }
+
+  /* 4 — Overprint: an offset ghost slides into register */
+  .mode-print .layer { position: absolute; inset: 0; }
+  .mode-print .layer.ghost { color: var(--ghost); }
+  .mode-print.in .layer.ghost { animation: registerGhost 700ms cubic-bezier(.2,.8,.25,1) both; }
+  .mode-print.in .layer.solid { animation: registerSolid 700ms cubic-bezier(.2,.8,.25,1) both; }
+  .mode-print.out { animation: fade 260ms ease both; }
+  @keyframes registerGhost {
+    from { transform: translate(10px, 7px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  @keyframes registerSolid {
+    from { transform: translate(-10px, -7px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+
+  /* 5 — Scatter: characters find their seats */
+  .mode-scatter.in .ch {
+    animation: scatterIn 640ms cubic-bezier(.2,.8,.25,1) both;
+  }
+  .mode-scatter.out { animation: fade 240ms ease both; }
+  @keyframes scatterIn {
+    from {
+      transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.7);
+      opacity: 0;
+    }
+    to { transform: none; opacity: 1; }
+  }
+
+  /* 6 — Slit scan: a band opens from the centre line */
+  .mode-slit.in { animation: slitIn 640ms cubic-bezier(.4,0,.2,1) both; }
+  .mode-slit.out { animation: slitOut 340ms cubic-bezier(.4,0,.2,1) both; }
+  @keyframes slitIn {
+    from { clip-path: inset(48% 0 48% 0); opacity: 0.4; }
+    to { clip-path: inset(-8% 0 -8% 0); opacity: 1; }
+  }
+  @keyframes slitOut {
+    from { clip-path: inset(-8% 0 -8% 0); opacity: 1; }
+    to { clip-path: inset(48% 0 48% 0); opacity: 0; }
+  }
+
+  /* 7 — Weight bloom: the line arrives thin and gains body */
+  .mode-weight.in { animation: weightIn 820ms cubic-bezier(.2,.8,.25,1) both; }
+  .mode-weight.out { animation: weightOut 320ms ease both; }
+  @keyframes weightIn {
+    from { font-variation-settings: 'wght' 150; opacity: 0; letter-spacing: 0.06em; }
+    to { font-variation-settings: 'wght' 520; opacity: 1; letter-spacing: -0.01em; }
+  }
+  @keyframes weightOut {
+    to { font-variation-settings: 'wght' 150; opacity: 0; }
+  }
+
+  /* 8 — Stack: lines pile up instead of replacing each other */
+  .mode-stack { display: flex; flex-direction: column; gap: 6px; justify-content: flex-end; height: 100%; }
+  .mode-stack .stack-line {
+    font-size: 20px;
+    line-height: 1.24;
+    margin: 0;
+    animation: stackIn 520ms cubic-bezier(.2,.8,.25,1) both;
+    transition: opacity 420ms ease, font-size 420ms ease;
+  }
+  .mode-stack .stack-line.past { opacity: 0.34; font-size: 14px; }
+  @keyframes stackIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  footer.note {
+    margin-top: 26px; padding-top: 20px;
+    border-top: 1.5px solid var(--rule);
+    font-size: 13px; line-height: 1.6; color: var(--ink-2);
+  }
+  footer.note b { color: var(--ink); }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anim, .anim *, .stack-line { animation: none !important; opacity: 1 !important;
+      clip-path: none !important; transform: none !important; letter-spacing: -0.01em !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div><h1>Eight more, on the artistic end.</h1></div>
+    <div class="head-actions">
+      <button class="ghost-btn" id="restart">Replay all</button>
+      <button class="ghost-btn icon-only" id="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <p class="sub">Where the first six treated the line as a block that arrives, these treat the letters themselves as the material. Each panel loops two taglines so you can see the hand-off as well as the entrance.</p>
+
+  <div class="grid">
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Decode</span><span class="panel-tag">Searching</span></div>
+      <div class="stage"><p class="anim mode-decode" data-mode="decode"></p></div>
+      <p class="panel-note">Characters churn through noise and lock in left to right. The only one that literally looks like the app resolving an answer — a bit techy, very on-message.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Split-flap</span><span class="panel-tag">Departure board</span></div>
+      <div class="stage"><p class="anim mode-flap" data-mode="flap"></p></div>
+      <p class="panel-note">Each letter flips down like an airport board. Scheduling has always looked like this — it's the most thematically earned of the eight.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Tracking collapse</span><span class="panel-tag">Typographic</span></div>
+      <div class="stage"><p class="anim mode-track" data-mode="track"></p></div>
+      <p class="panel-note">Letters start spread wide and tighten into the line. Pure type craft — no gimmick, reads as design rather than effect. My pick for restraint.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Overprint</span><span class="panel-tag">Two into one</span></div>
+      <div class="stage"><p class="anim mode-print" data-mode="print"></p></div>
+      <p class="panel-note">Two misregistered copies slide into alignment. It's the product as a printing metaphor: two schedules, offset, coming into register.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Scatter</span><span class="panel-tag">Assembling</span></div>
+      <div class="stage"><p class="anim mode-scatter" data-mode="scatter"></p></div>
+      <p class="panel-note">Characters fly in from everywhere and find their seats. Playful and a little chaotic — closest to the warmth of the copy, furthest from calm.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Slit scan</span><span class="panel-tag">Graphic</span></div>
+      <div class="stage"><p class="anim mode-slit" data-mode="slit"></p></div>
+      <p class="panel-note">A band opens from the centre line and closes again. Cinematic and cheap to run — nothing here can stutter on a slow phone.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Weight bloom</span><span class="panel-tag">Variable font</span></div>
+      <div class="stage"><p class="anim mode-weight" data-mode="weight"></p></div>
+      <p class="panel-note">The line arrives thin and gains body as it settles. Subtle enough that people feel it rather than notice it. Needs the variable weight axis.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-name">Stack</span><span class="panel-tag">Accumulating</span></div>
+      <div class="stage"><div class="anim mode-stack" data-mode="stack"></div></div>
+      <p class="panel-note">Lines pile up instead of replacing each other — earlier ones shrink and fade upward. The only option where someone can read all five, which fixes the timing problem outright.</p>
+    </section>
+
+  </div>
+
+  <footer class="note">
+    <b>Two of these solve problems, not just decorate.</b> Stack lets all five lines coexist, so an eleven-second script stops being eleven seconds of waiting. Decode and Split-flap both make the waiting itself legible — the screen looks like it's working, which buys patience the other treatments have to ask for.
+  </footer>
+</div>
+
+<script>
+  var LINES = [
+    '“Sometime” is looking like Thursday.',
+    'Less “when are you free?” More “see you there.”',
+    'Your next hangout is hiding in your calendar.',
+    'Make room for your favorite people.',
+    'Good friends. Complicated calendars. We can help.'
+  ];
+
+  var GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\|<>*#—';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var panels = [];
+
+  function chars(text, decorate) {
+    return text.split('').map(function (c, i) {
+      var extra = decorate ? decorate(i) : '';
+      return '<span class="ch"' + extra + '>' + (c === ' ' ? '&nbsp;' : c) + '</span>';
+    }).join('');
+  }
+
+  function Panel(el, mode, offset) {
+    this.el = el;
+    this.mode = mode;
+    this.i = offset % LINES.length;
+    this.timers = [];
+  }
+  Panel.prototype.clear = function () { this.timers.forEach(clearTimeout); this.timers = []; };
+  Panel.prototype.later = function (fn, ms) { this.timers.push(setTimeout(fn, ms)); };
+
+  Panel.prototype.paint = function (text) {
+    var el = this.el, m = this.mode;
+    el.classList.remove('in', 'out');
+
+    if (m === 'flap') {
+      el.innerHTML = chars(text, function (i) { return ' style="animation-delay:' + (i * 22) + 'ms"'; });
+    } else if (m === 'scatter') {
+      el.innerHTML = chars(text, function (i) {
+        var dx = (Math.random() * 120 - 60).toFixed(1) + 'px';
+        var dy = (Math.random() * 90 - 45).toFixed(1) + 'px';
+        var rot = (Math.random() * 60 - 30).toFixed(1) + 'deg';
+        return ' style="--dx:' + dx + ';--dy:' + dy + ';--rot:' + rot +
+               ';animation-delay:' + (i * 14) + 'ms"';
+      });
+    } else if (m === 'print') {
+      el.innerHTML = '<span class="layer ghost">' + text + '</span>' +
+                     '<span class="layer solid">' + text + '</span>';
+    } else if (m === 'decode') {
+      el.textContent = text;
+    } else {
+      el.textContent = text;
+    }
+
+    void el.offsetWidth;
+    el.classList.add('in');
+    if (m === 'decode') this.decode(text);
+  };
+
+  Panel.prototype.decode = function (text) {
+    var el = this.el, self = this, locked = 0;
+    var LOCK_EVERY = 34;
+    (function tick() {
+      var out = '';
+      for (var i = 0; i < text.length; i++) {
+        if (i < locked || text[i] === ' ') out += text[i];
+        else out += GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+      }
+      el.textContent = out;
+      if (locked <= text.length) {
+        locked += 1;
+        self.later(tick, LOCK_EVERY);
+      }
+    })();
+  };
+
+  // Stack mode keeps its own history rather than swapping one line
+  Panel.prototype.runStack = function () {
+    var el = this.el, self = this;
+    el.innerHTML = '';
+    var shown = 0;
+    (function add() {
+      Array.prototype.forEach.call(el.children, function (c) { c.classList.add('past'); });
+      var p = document.createElement('p');
+      p.className = 'stack-line';
+      p.textContent = LINES[shown % LINES.length];
+      el.appendChild(p);
+      while (el.children.length > 4) el.removeChild(el.firstChild);
+      shown++;
+      self.later(shown >= LINES.length
+        ? function () { self.runStack(); }
+        : add, 1500);
+    })();
+  };
+
+  Panel.prototype.run = function () {
+    this.clear();
+    if (this.mode === 'stack') return this.runStack();
+
+    var self = this;
+    var text = LINES[this.i];
+    this.paint(text);
+
+    var hold = this.mode === 'decode' ? 1500 + text.length * 34 : 1800;
+    this.later(function () {
+      self.el.classList.remove('in');
+      self.el.classList.add('out');
+    }, hold);
+    this.later(function () {
+      self.i = (self.i + 1) % LINES.length;
+      self.run();
+    }, hold + 400);
+  };
+
+  document.querySelectorAll('.anim').forEach(function (el, i) {
+    var p = new Panel(el, el.getAttribute('data-mode'), i);
+    panels.push(p);
+    if (reduce) {
+      if (p.mode === 'stack') {
+        el.innerHTML = LINES.slice(0, 3).map(function (l) {
+          return '<p class="stack-line">' + l + '</p>';
+        }).join('');
+      } else if (p.mode === 'print') {
+        el.innerHTML = '<span class="layer solid">' + LINES[i % LINES.length] + '</span>';
+      } else {
+        el.textContent = LINES[i % LINES.length];
+      }
+    } else {
+      setTimeout(function () { p.run(); }, i * 150);
+    }
+  });
+
+  document.getElementById('restart').addEventListener('click', function () {
+    if (reduce) return;
+    panels.forEach(function (p, i) {
+      p.clear();
+      p.i = i % LINES.length;
+      setTimeout(function () { p.run(); }, i * 150);
+    });
+  });
+
+  var root = document.documentElement;
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+</script>

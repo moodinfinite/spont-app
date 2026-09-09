@@ -1,0 +1,513 @@
+<title>Spont Cold Start</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  /* Install → first proposal. The order matters: inviting comes before
+     preferences, because invites have latency and preferences don't. */
+  :root {
+    --ground: #C6FF4E;
+    --on-ground: #15150F;
+    --on-ground-2: rgba(21, 21, 15, 0.66);
+    --on-ground-3: rgba(21, 21, 15, 0.45);
+    --ground-chip: rgba(21, 21, 15, 0.10);
+    --page: #EDEEE9;
+    --card: #FFFFFF;
+    --ink: #15150F;
+    --ink-2: #6C6C62;
+    --ink-3: #A8A89C;
+    --btn-bg: #C6FF4E;
+    --btn-ink: #1C2B06;
+    --dark: #15150F;
+    --dark-ink: #F3F6EA;
+    --dark-ink-2: rgba(243, 246, 234, 0.68);
+    --chip: #E5E7DF;
+    --hairline: rgba(21, 21, 15, 0.10);
+    --dock: #17170F;
+    --dock-2: #2A2A1F;
+    --dock-ink: #F4F4EC;
+    --dock-ink-muted: rgba(244, 244, 236, 0.5);
+    --shadow: 0 14px 30px rgba(20, 20, 12, 0.10), 0 2px 8px rgba(20, 20, 12, 0.06);
+    --shadow-soft: 0 8px 18px rgba(20, 20, 12, 0.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #96C927;
+      --on-ground: #10160A;
+      --on-ground-2: rgba(16, 22, 10, 0.72);
+      --on-ground-3: rgba(16, 22, 10, 0.5);
+      --ground-chip: rgba(16, 22, 10, 0.14);
+      --page: #0D0D0B;
+      --card: #292921;
+      --ink: #F2F2EA;
+      --ink-2: #A3A398;
+      --ink-3: #6E6E63;
+      --btn-bg: #D2FF66;
+      --btn-ink: #16240A;
+      --dark: #D2FF66;
+      --dark-ink: #16240A;
+      --dark-ink-2: rgba(22, 36, 10, 0.72);
+      --chip: #35352C;
+      --hairline: rgba(242, 242, 234, 0.13);
+      --dock: #1A1A14;
+      --dock-2: #363630;
+      --dock-ink: #EFF3E6;
+      --dock-ink-muted: rgba(239, 243, 230, 0.42);
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.10);
+      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #96C927;
+    --on-ground: #10160A;
+    --on-ground-2: rgba(16, 22, 10, 0.72);
+    --on-ground-3: rgba(16, 22, 10, 0.5);
+    --ground-chip: rgba(16, 22, 10, 0.14);
+    --page: #0D0D0B;
+    --card: #292921;
+    --ink: #F2F2EA;
+    --ink-2: #A3A398;
+    --ink-3: #6E6E63;
+    --btn-bg: #D2FF66;
+    --btn-ink: #16240A;
+    --dark: #D2FF66;
+    --dark-ink: #16240A;
+    --dark-ink-2: rgba(22, 36, 10, 0.72);
+    --chip: #35352C;
+    --hairline: rgba(242, 242, 234, 0.13);
+    --dock: #1A1A14;
+    --dock-2: #363630;
+    --dock-ink: #EFF3E6;
+    --dock-ink-muted: rgba(239, 243, 230, 0.42);
+    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.10);
+    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Manrope', sans-serif; }
+  h1, h2, h3 { font-family: 'Sora', sans-serif; margin: 0; }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.on { display: block; }
+  .screen.green { background: var(--ground); color: var(--on-ground); }
+  .inner {
+    max-width: 480px; margin: 0 auto;
+    min-height: 100vh; padding: 28px 24px 32px;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+
+  .topline { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 9px; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px; }
+  .brand svg { width: 22px; height: 22px; }
+  .steps { display: flex; gap: 5px; }
+  .steps i { width: 18px; height: 3px; border-radius: 999px; background: var(--ground-chip); display: block; }
+  .steps i.on { background: var(--on-ground); }
+
+  .theme-toggle {
+    width: 34px; height: 34px; border-radius: 999px; border: none;
+    background: transparent; color: currentColor; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle svg { width: 18px; height: 18px; }
+  .theme-toggle .moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+
+  .body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+  .body.top { justify-content: flex-start; padding-top: 6px; }
+  h1.big {
+    font-size: 40px; font-weight: 400; line-height: 1.06;
+    letter-spacing: -0.025em; text-wrap: balance;
+  }
+  h2.mid {
+    font-size: 29px; font-weight: 400; line-height: 1.1;
+    letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .lede { font-size: 17px; line-height: 1.5; color: var(--on-ground-2); margin: 0; max-width: 30ch; }
+  .sub { font-size: 14px; line-height: 1.5; color: var(--on-ground-2); margin: 0; }
+
+  .foot { display: flex; flex-direction: column; gap: 10px; }
+  .cta {
+    width: 100%; border: none; border-radius: 999px;
+    background: var(--on-ground); color: var(--ground);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px;
+    padding: 17px 24px; cursor: pointer;
+  }
+  .cta.ghost { background: transparent; color: var(--on-ground-2); box-shadow: inset 0 0 0 1.5px var(--ground-chip); }
+  .fine { text-align: center; font-size: 12.5px; color: var(--on-ground-3); margin: 0; line-height: 1.5; }
+
+  /* ---- invite ---- */
+  .link-card {
+    background: var(--ground-chip); border-radius: 16px;
+    padding: 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .link-card .url {
+    flex: 1; min-width: 0; font-family: 'Sora', sans-serif; font-weight: 600;
+    font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .copy-btn {
+    flex: none; border: none; border-radius: 999px;
+    background: var(--on-ground); color: var(--ground);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+    padding: 9px 15px; cursor: pointer;
+  }
+  .invited { display: flex; flex-direction: column; gap: 0; }
+  .invited-row {
+    display: flex; align-items: center; gap: 11px; padding: 11px 2px;
+    font-size: 14px;
+  }
+  .invited-row + .invited-row { border-top: 1.5px solid var(--ground-chip); }
+  .av {
+    width: 34px; height: 34px; border-radius: 999px; flex: none;
+    background: var(--ground-chip); color: var(--on-ground);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12.5px;
+  }
+  .invited-row .who { flex: 1; font-weight: 700; }
+  .invited-row .state { font-size: 12.5px; color: var(--on-ground-3); font-weight: 600; }
+  .invited-row.joined .state { color: var(--on-ground); }
+  .count-note { font-size: 13px; color: var(--on-ground-2); margin: 0; }
+
+  /* ---- buckets ---- */
+  .bucket-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--on-ground-3); margin: 6px 0 8px;
+  }
+  .buckets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bucket {
+    border: none; border-radius: 999px; padding: 9px 14px; cursor: pointer;
+    background: var(--ground-chip); color: var(--on-ground-2);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+  }
+  .bucket[data-state="1"] { background: var(--on-ground); color: var(--ground); }
+  .bucket[data-state="2"] {
+    background: transparent; color: var(--on-ground-3);
+    box-shadow: inset 0 0 0 1.5px var(--ground-chip);
+    text-decoration: line-through; text-decoration-thickness: 1.5px;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 13px; }
+  .legend-item { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--on-ground-2); }
+  .legend-chip { width: 20px; height: 13px; border-radius: 999px; background: var(--ground-chip); flex: none; }
+  .legend-chip[data-s="1"] { background: var(--on-ground); }
+  .legend-chip[data-s="2"] { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ground-chip); position: relative; }
+  .legend-chip[data-s="2"]::after {
+    content: ""; position: absolute; left: 3px; right: 3px; top: 50%;
+    height: 1.5px; background: var(--on-ground-3);
+  }
+
+  /* ---- waiting feed ---- */
+  .feed-inner { max-width: 480px; margin: 0 auto; padding: 26px 18px 132px; }
+  .feed-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 16px; padding: 10px 4px 22px;
+  }
+  .feed-head h1 {
+    font-size: 34px; font-weight: 400; line-height: 1.02;
+    letter-spacing: -0.02em; color: var(--ink);
+  }
+  .icon-btn {
+    position: relative; width: 40px; height: 40px; border-radius: 999px;
+    background: var(--card); box-shadow: var(--shadow-soft); border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink); flex: none; cursor: pointer;
+  }
+  .icon-btn svg { width: 17px; height: 17px; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 999px;
+    background: var(--btn-bg); color: var(--btn-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px; flex: none;
+  }
+
+  .waiting {
+    background: var(--dark); color: var(--dark-ink);
+    border-radius: 16px; padding: 20px; margin-bottom: 8px;
+  }
+  .waiting h3 { font-size: 22px; font-weight: 400; letter-spacing: -0.015em; margin-bottom: 8px; }
+  .waiting p { margin: 0 0 16px; font-size: 13.5px; line-height: 1.55; color: var(--dark-ink-2); }
+  .slots { display: flex; flex-direction: column; gap: 0; margin-bottom: 18px; }
+  .slot {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 9px 0; font-size: 13.5px;
+  }
+  .slot + .slot { border-top: 1px solid rgba(243,246,234,0.14); }
+  :root[data-theme="dark"] .slot + .slot { border-top-color: rgba(22,36,10,0.16); }
+  .slot .day { font-weight: 700; }
+  .slot .time { color: var(--dark-ink-2); font-variant-numeric: tabular-nums; }
+  .waiting .btn-in {
+    width: 100%; border: none; border-radius: 999px; padding: 14px;
+    background: var(--btn-bg); color: var(--btn-ink);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13.5px; cursor: pointer;
+  }
+  :root[data-theme="dark"] .waiting .btn-in { background: var(--card); color: var(--ink); }
+
+  .section-label {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 6px; margin: 22px 0 10px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink-2);
+  }
+  .list { background: var(--card); border-radius: 16px; box-shadow: var(--shadow-soft); overflow: hidden; }
+  .list-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+  .list-row + .list-row { border-top: 1.5px solid var(--hairline); }
+  .list-row .av { background: var(--chip); color: var(--ink); }
+  .list-row .who { flex: 1; font-weight: 700; font-size: 14px; }
+  .list-row .state { font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
+  .closing-note { text-align: center; font-size: 12.5px; color: var(--ink-3); margin: 18px 10px 0; line-height: 1.5; }
+
+  .dock-wrap {
+    position: fixed; bottom: 20px; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 0 16px; z-index: 20;
+  }
+  .dock { display: flex; align-items: center; gap: 4px; background: var(--dock); border-radius: 999px; padding: 8px; box-shadow: var(--shadow); }
+  .dock a {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    min-width: 46px; min-height: 46px; padding: 10px 16px; border-radius: 999px;
+    color: var(--dock-ink-muted); text-decoration: none;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+  }
+  .dock a svg { width: 17px; height: 17px; }
+  .dock a.active { background: var(--dock-2); color: var(--dock-ink); }
+  .dock a:not(.active) span { display: none; }
+  .fab {
+    width: 52px; height: 52px; border-radius: 999px;
+    background: var(--btn-bg); color: var(--btn-ink); border: none;
+    box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center;
+    flex: none; cursor: pointer;
+  }
+  .fab svg { width: 20px; height: 20px; }
+
+  .restart {
+    position: fixed; top: 16px; left: 16px; z-index: 40;
+    border: none; border-radius: 999px; padding: 8px 14px;
+    background: var(--card); box-shadow: var(--shadow-soft); color: var(--ink-2);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 11.5px; cursor: pointer;
+  }
+
+  :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<button class="restart" id="restart" hidden>Start over</button>
+
+<!-- ============ 1. mission ============ -->
+<div class="screen green on" id="s-mission">
+  <div class="inner">
+    <div class="topline">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="9.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/><circle cx="14.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span>Spont</span>
+      </div>
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="body">
+      <h1 class="big">See your friends more.</h1>
+      <p class="lede">Spont finds when you and your friends are free, turning &ldquo;we should hang out sometime&rdquo; into an actual hangout.</p>
+      <p class="lede" style="color:var(--on-ground)">Three things to set up, once. Then you can mostly forget it's here.</p>
+    </div>
+    <div class="foot">
+      <button class="cta" data-go="s-calendar">Get started</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 2. calendar ============ -->
+<div class="screen green" id="s-calendar">
+  <div class="inner">
+    <div class="topline">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="9.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/><circle cx="14.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span>Spont</span>
+      </div>
+      <div class="steps"><i class="on"></i><i></i><i></i></div>
+    </div>
+    <div class="body">
+      <h2 class="mid">First, your calendar.</h2>
+      <p class="lede">So Spont can see the gaps. We only ever see free or busy — never what's actually on it.</p>
+    </div>
+    <div class="foot">
+      <button class="cta" data-go="s-invite">Connect Google Calendar</button>
+      <p class="fine">You can disconnect any time, and we never write anything you didn't say yes to.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 3. invite ============ -->
+<div class="screen green" id="s-invite">
+  <div class="inner">
+    <div class="topline">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="9.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/><circle cx="14.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span>Spont</span>
+      </div>
+      <div class="steps"><i class="on"></i><i class="on"></i><i></i></div>
+    </div>
+    <div class="body top">
+      <h2 class="mid">Now the part that matters.</h2>
+      <p class="sub">Spont can't do anything until someone else is on it. Send this to the people you actually want to see — a group chat works best.</p>
+
+      <div class="link-card">
+        <span class="url">spont.app/j/raghav-9f2</span>
+        <button class="copy-btn" id="copy-link">Copy</button>
+      </div>
+
+      <p class="count-note" id="invite-count">Nobody yet. Two or three is enough to start.</p>
+
+      <div class="invited" id="invited-list">
+        <div class="invited-row">
+          <span class="av">J</span><span class="who">Jeff</span><span class="state">Invited</span>
+        </div>
+        <div class="invited-row">
+          <span class="av">E</span><span class="who">Edward</span><span class="state">Invited</span>
+        </div>
+        <div class="invited-row joined">
+          <span class="av">M</span><span class="who">Ming</span><span class="state">Joined</span>
+        </div>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="cta" data-go="s-windows">Next</button>
+      <button class="cta ghost" data-go="s-windows">I'll invite people later</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 4. windows ============ -->
+<div class="screen green" id="s-windows">
+  <div class="inner">
+    <div class="topline">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="9.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/><circle cx="14.5" cy="12" r="6.2" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span>Spont</span>
+      </div>
+      <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+    </div>
+    <div class="body top">
+      <h2 class="mid">What are your preferences for hangout times?</h2>
+      <p class="sub">Your calendar already knows when you're <i>free</i>. This is about when you'd actually <i>want</i> to see someone — 6pm Tuesday and 6pm Saturday are different questions.</p>
+
+      <div class="legend">
+        <span class="legend-item"><span class="legend-chip" data-s="0"></span>No preference</span>
+        <span class="legend-item"><span class="legend-chip" data-s="1"></span>Up for it</span>
+        <span class="legend-item"><span class="legend-chip" data-s="2"></span>Never</span>
+      </div>
+
+      <p class="bucket-label">Weekdays</p>
+      <div class="buckets">
+        <button class="bucket" data-state="0">Before work</button>
+        <button class="bucket" data-state="0">Lunch</button>
+        <button class="bucket" data-state="1">Straight after work</button>
+        <button class="bucket" data-state="1">Evening</button>
+        <button class="bucket" data-state="2">Late</button>
+      </div>
+
+      <p class="bucket-label">Weekends</p>
+      <div class="buckets">
+        <button class="bucket" data-state="1">Morning</button>
+        <button class="bucket" data-state="1">Midday</button>
+        <button class="bucket" data-state="1">Afternoon</button>
+        <button class="bucket" data-state="0">Evening</button>
+        <button class="bucket" data-state="0">Late</button>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="cta" data-go="s-feed">Done</button>
+      <p class="fine">That's everything. You can change it later, but you shouldn't need to.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 5. the waiting feed ============ -->
+<div class="screen" id="s-feed">
+  <div class="feed-inner">
+    <header class="feed-head">
+      <h1>Welcome<br>Raghav.</h1>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M10 3a5 5 0 00-5 5v2.6c0 .5-.16 1-.46 1.4L3.6 13.6c-.6.8 0 1.9 1 1.9h10.8c1 0 1.6-1.1 1-1.9l-.94-1.6a2.4 2.4 0 01-.46-1.4V8a5 5 0 00-5-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 17a2 2 0 004 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <div class="avatar">R</div>
+      </div>
+    </header>
+
+    <div class="waiting">
+      <h3>You're half of a match.</h3>
+      <p>Here's when you're open over the next week. The moment someone joins, Spont looks for where their gaps line up with yours.</p>
+      <div class="slots">
+        <div class="slot"><span class="day">Tue 9</span><span class="time">6:00–8:00 PM</span></div>
+        <div class="slot"><span class="day">Thu 11</span><span class="time">7:00–9:30 PM</span></div>
+        <div class="slot"><span class="day">Sat 13</span><span class="time">1:00–6:00 PM</span></div>
+      </div>
+      <button class="btn-in" data-go="s-invite">Invite more people</button>
+    </div>
+
+    <div class="section-label"><span>Invited</span><span>3</span></div>
+    <div class="list">
+      <div class="list-row">
+        <span class="av">M</span><span class="who">Ming</span><span class="state">Joined — connecting calendar</span>
+      </div>
+      <div class="list-row">
+        <span class="av">J</span><span class="who">Jeff</span><span class="state">Invited 2 days ago</span>
+      </div>
+      <div class="list-row">
+        <span class="av">E</span><span class="who">Edward</span><span class="state">Invited 2 days ago</span>
+      </div>
+    </div>
+
+    <p class="closing-note">We'll let you know the moment there's something to say yes to. Nothing to check in the meantime.</p>
+  </div>
+
+  <div class="dock-wrap">
+    <nav class="dock" aria-label="Primary">
+      <a href="#" class="active" aria-current="page">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M3 9.2 10 3.6l7 5.6V16.5H12v-5H8v5H3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Home</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 20 20" fill="none"><circle cx="8" cy="7.2" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M2.6 16.6c0-3 2.4-4.7 5.4-4.7s5.4 1.7 5.4 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M14.2 5.1a3.1 3.1 0 0 1 0 5.4M15.6 12.6c1.4.7 2.2 2 2.2 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>People</span>
+      </a>
+    </nav>
+    <button class="fab" aria-label="New"><svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+</div>
+
+<script>
+  var restart = document.getElementById('restart');
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(function (s) {
+      s.classList.toggle('on', s.id === id);
+    });
+    restart.hidden = (id === 's-mission');
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-go]').forEach(function (b) {
+    b.addEventListener('click', function () { show(b.getAttribute('data-go')); });
+  });
+  restart.addEventListener('click', function () { show('s-mission'); });
+
+  document.querySelectorAll('.bucket').forEach(function (b) {
+    b.addEventListener('click', function () {
+      b.setAttribute('data-state', String((parseInt(b.getAttribute('data-state'), 10) + 1) % 3));
+    });
+  });
+
+  document.getElementById('copy-link').addEventListener('click', function () {
+    var b = this;
+    b.textContent = 'Copied';
+    setTimeout(function () { b.textContent = 'Copy'; }, 1600);
+  });
+
+  var root = document.documentElement;
+  document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var c = root.getAttribute('data-theme');
+      var isDark = c === 'dark' || (!c && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    });
+  });
+</script>

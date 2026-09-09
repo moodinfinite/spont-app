@@ -1,0 +1,227 @@
+<title>Spont Add Button</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  /* What the + does. Today it opens a half-built create flow; the real
+     question is whether "add" means a person, a plan, or a wish. */
+  :root {
+    --page: #edeee9; --card: #fff; --ink: #15150f; --ink-2: #6c6c62; --ink-3: #a8a89c;
+    --btn-bg: #c6ff4e; --btn-ink: #1c2b06; --dark: #15150f; --dark-ink: #f3f6ea;
+    --dark-ink-2: rgba(243,246,234,.68); --chip: #e5e7df; --hairline: rgba(21,21,15,.1);
+    --shadow: 0 14px 30px rgba(20,20,12,.1), 0 2px 8px rgba(20,20,12,.06);
+    --shadow-soft: 0 8px 18px rgba(20,20,12,.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --page: #0d0d0b; --card: #292921; --ink: #f2f2ea; --ink-2: #a3a398; --ink-3: #6e6e63;
+      --btn-bg: #d2ff66; --btn-ink: #16240a; --dark: #d2ff66; --dark-ink: #16240a;
+      --dark-ink-2: rgba(22,36,10,.72); --chip: #35352c; --hairline: rgba(242,242,234,.13);
+      --shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(242,242,234,.1);
+      --shadow-soft: 0 8px 18px rgba(0,0,0,.4), inset 0 0 0 1px rgba(242,242,234,.09);
+    }
+  }
+  :root[data-theme='dark'] {
+    --page: #0d0d0b; --card: #292921; --ink: #f2f2ea; --ink-2: #a3a398; --ink-3: #6e6e63;
+    --btn-bg: #d2ff66; --btn-ink: #16240a; --dark: #d2ff66; --dark-ink: #16240a;
+    --dark-ink-2: rgba(22,36,10,.72); --chip: #35352c; --hairline: rgba(242,242,234,.13);
+    --shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(242,242,234,.1);
+    --shadow-soft: 0 8px 18px rgba(0,0,0,.4), inset 0 0 0 1px rgba(242,242,234,.09);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Manrope', sans-serif; }
+  h1, h2, h3, .sora { font-family: 'Sora', sans-serif; margin: 0; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 34px 22px 60px; }
+
+  header.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  h1.title { font-size: 32px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; }
+  .sub { margin: 10px 0 30px; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 60ch; }
+  .toggle-btn {
+    flex: none; width: 38px; height: 38px; border: none; border-radius: 999px;
+    background: var(--card); box-shadow: var(--shadow-soft); color: var(--ink);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .toggle-btn svg { width: 17px; height: 17px; }
+  .toggle-btn .moon { display: none; }
+  :root[data-theme='dark'] .toggle-btn .sun { display: none; }
+  :root[data-theme='dark'] .toggle-btn .moon { display: block; }
+
+  .grid { display: grid; gap: 18px; }
+  @media (min-width: 700px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .option { display: flex; flex-direction: column; gap: 12px; }
+  .option-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .option-name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; }
+  .option-tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  .option-note { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); margin: 0; }
+
+  .sheet {
+    background: var(--card); border-radius: 22px 22px 16px 16px;
+    box-shadow: var(--shadow); padding: 10px 18px 20px; min-height: 300px;
+  }
+  .grabber { width: 42px; height: 4px; border-radius: 999px; background: var(--hairline); margin: 0 auto 16px; }
+  .sheet h3 { font-size: 21px; font-weight: 400; letter-spacing: -.018em; margin-bottom: 4px; }
+  .lede { font-size: 13px; color: var(--ink-2); margin: 0 0 16px; line-height: 1.5; }
+
+  .action {
+    display: flex; align-items: center; gap: 12px; padding: 14px 14px;
+    border-radius: 14px; background: var(--chip); margin-bottom: 8px; cursor: pointer;
+  }
+  .action .ico {
+    width: 34px; height: 34px; border-radius: 999px; flex: none; background: var(--card);
+    display: flex; align-items: center; justify-content: center; color: var(--ink);
+  }
+  .action .ico svg { width: 16px; height: 16px; }
+  .action .txt { flex: 1; }
+  .action .t { display: block; font-weight: 700; font-size: 14px; }
+  .action .d { display: block; font-size: 12px; color: var(--ink-2); margin-top: 1px; }
+  .action.primary { background: var(--dark); }
+  .action.primary .t { color: var(--dark-ink); }
+  .action.primary .d { color: var(--dark-ink-2); }
+  .action.primary .ico { background: var(--btn-bg); color: var(--btn-ink); }
+
+  .row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; }
+  .row + .row { border-top: 1.5px solid var(--hairline); }
+  .av {
+    width: 34px; height: 34px; border-radius: 999px; background: var(--chip); flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12.5px;
+  }
+  .who { flex: 1; font-weight: 700; font-size: 14px; }
+  .who small { display: block; font-weight: 500; font-size: 12px; color: var(--ink-2); }
+  .tick {
+    width: 22px; height: 22px; border-radius: 999px; flex: none;
+    box-shadow: inset 0 0 0 1.5px var(--hairline); color: transparent;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tick.on { background: var(--btn-bg); color: var(--btn-ink); box-shadow: none; }
+  .tick svg { width: 11px; height: 11px; }
+
+  .btn {
+    border: none; border-radius: 999px; padding: 14px 20px; cursor: pointer; width: 100%;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 14px;
+    background: var(--btn-bg); color: var(--btn-ink); margin-top: 14px;
+  }
+  .ghost { background: transparent; color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--hairline); margin-top: 8px; }
+
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .chip {
+    border: none; border-radius: 999px; padding: 9px 14px; background: var(--chip);
+    color: var(--ink-2); font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+  }
+  .chip.on { background: var(--btn-bg); color: var(--btn-ink); }
+
+  footer.note {
+    margin-top: 30px; padding-top: 20px; border-top: 1.5px solid var(--hairline);
+    font-size: 13px; line-height: 1.6; color: var(--ink-2);
+  }
+  footer.note b { color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div><h1 class="title">What the + does.</h1></div>
+    <button class="toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+      <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+    </button>
+  </header>
+
+  <p class="sub">The green + sits on every screen and currently opens a half-built create flow. The question underneath is what &ldquo;add&rdquo; means in an app that schedules <i>for</i> you: a person, a plan, or a wish. These are four answers.</p>
+
+  <div class="grid">
+
+    <!-- 1 -->
+    <section class="option">
+      <div class="option-head"><span class="option-name">1 · Ask for a menu first</span><span class="option-tag">Safe</span></div>
+      <div class="sheet">
+        <div class="grabber"></div>
+        <h3>What are you adding?</h3>
+        <p class="lede">Three things live behind this button.</p>
+        <div class="action primary">
+          <span class="ico"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <span class="txt"><span class="t">A hangout</span><span class="d">Pick who — we&rsquo;ll find the time</span></span>
+        </div>
+        <div class="action">
+          <span class="ico"><svg viewBox="0 0 20 20" fill="none"><circle cx="8" cy="7" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M2.4 17c0-3.2 2.5-5 5.6-5 1.2 0 2.3.3 3.2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M15 11.5v5M12.5 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="txt"><span class="t">A friend</span><span class="d">Send someone your invite link</span></span>
+        </div>
+        <div class="action">
+          <span class="ico"><svg viewBox="0 0 20 20" fill="none"><circle cx="6.4" cy="6.8" r="2.6" fill="currentColor"/><circle cx="13.6" cy="6.8" r="2.6" fill="currentColor"/><circle cx="10" cy="13.6" r="2.6" fill="currentColor"/></svg></span>
+          <span class="txt"><span class="t">A group</span><span class="d">A crew you see together</span></span>
+        </div>
+      </div>
+      <p class="option-note">Honest about the three jobs, and nothing is buried. But it puts a decision in front of the action every single time — a menu is a tax on the common case.</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="option">
+      <div class="option-head"><span class="option-name">2 · Straight to who</span><span class="option-tag">Current direction</span></div>
+      <div class="sheet">
+        <div class="grabber"></div>
+        <h3>Who do you want to see?</h3>
+        <p class="lede">Pick one. We&rsquo;ll handle the when.</p>
+        <div class="row"><span class="av">J</span><span class="who">Jeff<small>62h together</small></span><span class="tick on"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="row"><span class="av">E</span><span class="who">Edward<small>28h together</small></span><span class="tick"></span></div>
+        <div class="row"><span class="av">M</span><span class="who">Ming<small>19h together</small></span><span class="tick"></span></div>
+        <button class="btn">Find us a time</button>
+        <button class="btn ghost">I already know when</button>
+      </div>
+      <p class="option-note">One screen, one job, no menu. Adding a friend or group moves to the People page where it arguably belongs. The + becomes unambiguous: it means &ldquo;I want to see someone.&rdquo;</p>
+    </section>
+
+    <!-- 3 -->
+    <section class="option">
+      <div class="option-head"><span class="option-name">3 · Raise a hand</span><span class="option-tag">Most on-mission</span></div>
+      <div class="sheet">
+        <div class="grabber"></div>
+        <h3>Who are you missing?</h3>
+        <p class="lede">No time, no invite — just tell Spont who to prioritise. It&rsquo;ll surface them the moment your calendars allow.</p>
+        <div class="row"><span class="av">J</span><span class="who">Jeff<small>Last seen 3 weeks ago</small></span><span class="tick on"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="row"><span class="av">R</span><span class="who">Rod<small>Last seen 4 months ago</small></span><span class="tick on"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="row"><span class="av">E</span><span class="who">Edward<small>Last seen last week</small></span><span class="tick"></span></div>
+        <button class="btn">Bump these two</button>
+      </div>
+      <p class="option-note">Never sends anything, so it can&rsquo;t be declined or ignored — it only weights the engine. Nothing happens immediately, which will madden anyone expecting to send an invite.</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="option">
+      <div class="option-head"><span class="option-name">4 · Who and roughly when</span><span class="option-tag">Most control</span></div>
+      <div class="sheet">
+        <div class="grabber"></div>
+        <h3>See Jeff</h3>
+        <p class="lede">Narrow it if you like, or leave it and we&rsquo;ll take the next good window.</p>
+        <p style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 6px">When</p>
+        <div class="chips">
+          <button class="chip on">Any time</button>
+          <button class="chip">This week</button>
+          <button class="chip">This weekend</button>
+          <button class="chip">Evenings</button>
+        </div>
+        <p style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:16px 0 6px">How long</p>
+        <div class="chips">
+          <button class="chip">1h</button>
+          <button class="chip on">2h</button>
+          <button class="chip">An evening</button>
+        </div>
+        <button class="btn">Send it</button>
+      </div>
+      <p class="option-note">Gives people the steering they'll ask for without letting them pick an exact slot the other person may not have free. A middle path between &ldquo;you decide&rdquo; and &ldquo;I decide.&rdquo;</p>
+    </section>
+
+  </div>
+
+  <footer class="note">
+    <b>My pick is 2, with 3 as a second action inside it.</b> The + should mean one thing, and &ldquo;I want to see someone&rdquo; is the only meaning that isn't already served elsewhere — adding friends belongs on People, groups belong on the Groups tab. Option 4 is what people will ask for after a week of use; worth keeping in a drawer rather than building now. Option 1 is the safe choice that quietly admits the button doesn't know what it's for.
+  </footer>
+</div>
+
+<script>
+  var root = document.documentElement
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var c = root.getAttribute('data-theme')
+    var isDark = c === 'dark' || (!c && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark')
+  })
+</script>

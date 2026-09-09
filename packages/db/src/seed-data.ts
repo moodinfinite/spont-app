@@ -7,15 +7,16 @@ function daysFromNow(days: number, hour: number): Date {
   return date
 }
 
-const SEED_USERS = [
-  { name: 'Alice', email: 'alice@example.com' },
-  { name: 'Bob', email: 'bob@example.com' },
-  { name: 'Carol', email: 'carol@example.com' },
-  { name: 'Dave', email: 'dave@example.com' },
-  { name: 'Erin', email: 'erin@example.com' },
+export const SEED_USERS = [
+  { name: 'Raghav', email: 'raghav@example.com' },
+  { name: 'Jeff', email: 'jeff@example.com' },
+  { name: 'Edward', email: 'edward@example.com' },
+  { name: 'Ming', email: 'ming@example.com' },
+  { name: 'Rod', email: 'rod@example.com' },
+  { name: 'John', email: 'john@example.com' },
 ]
 
-const EVENT_TEMPLATES = [
+export const EVENT_TEMPLATES = [
   { dayOffset: 1, startHour: 9, endHour: 10, rawLabel: 'Gym' },
   { dayOffset: 1, startHour: 13, endHour: 17, rawLabel: 'Client Call' },
   { dayOffset: 3, startHour: 19, endHour: 21, rawLabel: 'Date Night' },

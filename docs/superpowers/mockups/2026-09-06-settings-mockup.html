@@ -1,0 +1,470 @@
+<title>Spont Settings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root {
+    --page: #EDEEE9;
+    --card: #FFFFFF;
+    --ink: #15150F;
+    --ink-2: #6C6C62;
+    --ink-3: #A8A89C;
+    --btn-bg: #C6FF4E;
+    --btn-ink: #1C2B06;
+    --dark: #15150F;
+    --dark-ink: #F3F6EA;
+    --dark-ink-2: rgba(243, 246, 234, 0.68);
+    --chip: #E5E7DF;
+    --hairline: rgba(21, 21, 15, 0.09);
+    --dock: #17170F;
+    --dock-2: #2A2A1F;
+    --dock-ink: #F4F4EC;
+    --dock-ink-muted: rgba(244, 244, 236, 0.5);
+    --shadow: 0 14px 30px rgba(20, 20, 12, 0.10), 0 2px 8px rgba(20, 20, 12, 0.06);
+    --shadow-soft: 0 8px 18px rgba(20, 20, 12, 0.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #0D0D0B;
+      --card: #292921;
+      --ink: #F2F2EA;
+      --ink-2: #A3A398;
+      --ink-3: #6E6E63;
+      --btn-bg: #D2FF66;
+      --btn-ink: #16240A;
+      --dark: #D2FF66;
+      --dark-ink: #16240A;
+      --dark-ink-2: rgba(22, 36, 10, 0.72);
+      --chip: #35352C;
+      --hairline: rgba(242, 242, 234, 0.13);
+      --dock: #1A1A14;
+      --dock-2: #363630;
+      --dock-ink: #EFF3E6;
+      --dock-ink-muted: rgba(239, 243, 230, 0.42);
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.10);
+      --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #0D0D0B;
+    --card: #292921;
+    --ink: #F2F2EA;
+    --ink-2: #A3A398;
+    --ink-3: #6E6E63;
+    --btn-bg: #D2FF66;
+    --btn-ink: #16240A;
+    --dark: #D2FF66;
+    --dark-ink: #16240A;
+    --dark-ink-2: rgba(22, 36, 10, 0.72);
+    --chip: #35352C;
+    --hairline: rgba(242, 242, 234, 0.13);
+    --dock: #1A1A14;
+    --dock-2: #363630;
+    --dock-ink: #EFF3E6;
+    --dock-ink-muted: rgba(239, 243, 230, 0.42);
+    --shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(242, 242, 234, 0.10);
+    --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 242, 234, 0.09);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Manrope', sans-serif; }
+  h1, h2, h3 { font-family: 'Sora', sans-serif; margin: 0; }
+  .page { max-width: 480px; margin: 0 auto; padding: 34px 18px 132px; }
+
+  .theme-toggle {
+    position: fixed; top: 18px; right: max(14px, calc(50vw - 240px + 14px));
+    z-index: 30; width: 36px; height: 36px; border-radius: 999px; border: none;
+    background: transparent; color: var(--ink-2);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .theme-toggle svg { width: 18px; height: 18px; }
+  .theme-toggle .moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+
+  header.head { padding: 0 4px 22px; display: flex; align-items: center; gap: 14px; }
+  .back {
+    width: 40px; height: 40px; border-radius: 999px; flex: none;
+    background: var(--card); box-shadow: var(--shadow-soft);
+    border: none; color: var(--ink); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+  }
+  .back svg { width: 17px; height: 17px; }
+  header.head h1 { font-size: 34px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.02; }
+
+  .section-label {
+    padding: 0 6px; margin: 24px 0 10px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink-2);
+  }
+  .section-note { padding: 0 6px; margin: -4px 0 12px; font-size: 12.5px; color: var(--ink-3); line-height: 1.5; }
+
+  .panel {
+    background: var(--card); border-radius: 16px;
+    box-shadow: var(--shadow-soft); overflow: hidden;
+  }
+
+  /* --- signal row: label + description + 3-way weight --- */
+  .signal { padding: 16px 18px; }
+  .signal + .signal { border-top: 1.5px solid var(--hairline); }
+  .signal-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 3px; }
+  .signal-name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14.5px; }
+  .signal-desc { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; margin: 0 0 12px; max-width: 44ch; }
+  .weights { display: flex; gap: 6px; }
+  .weight {
+    flex: 1; border: none; border-radius: 999px; padding: 9px 6px;
+    background: var(--chip); color: var(--ink-2);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12px;
+    cursor: pointer;
+  }
+  .weight[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); }
+  .signal.is-off .signal-name, .signal.is-off .signal-desc { opacity: 0.55; }
+
+  /* --- time buckets --- */
+  .bucket-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--ink-3);
+    margin: 16px 0 8px;
+  }
+
+  .buckets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bucket {
+    border: none; border-radius: 999px; padding: 9px 14px; cursor: pointer;
+    background: var(--chip); color: var(--ink-2);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+  }
+  /* 1 = up for it */
+  .bucket[data-state="1"] { background: var(--btn-bg); color: var(--btn-ink); }
+  /* 2 = never — the input that does the most work, so it gets its own look */
+  .bucket[data-state="2"] {
+    background: transparent;
+    color: var(--ink-3);
+    box-shadow: inset 0 0 0 1.5px var(--hairline);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 14px 0 6px; }
+  .legend-item {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 600; color: var(--ink-2);
+  }
+  .legend-chip {
+    width: 22px; height: 14px; border-radius: 999px; flex: none;
+    background: var(--chip);
+  }
+  .legend-chip[data-state="1"] { background: var(--btn-bg); }
+  .legend-chip[data-state="2"] {
+    background: transparent; box-shadow: inset 0 0 0 1.5px var(--hairline);
+    position: relative;
+  }
+  .legend-chip[data-state="2"]::after {
+    content: ""; position: absolute; left: 3px; right: 3px; top: 50%;
+    height: 1.5px; background: var(--ink-3);
+  }
+  .bucket-hint { font-size: 12px; color: var(--ink-3); margin: 0 0 4px; line-height: 1.5; }
+  .bucket-hint b { color: var(--ink-2); font-weight: 700; }
+
+  .pending {
+    display: inline-block; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    background: var(--chip); color: var(--ink-3);
+    border-radius: 999px; padding: 4px 9px; margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* --- plain rows --- */
+  .row { display: flex; align-items: center; gap: 14px; padding: 15px 18px; }
+  .row + .row { border-top: 1.5px solid var(--hairline); }
+  .row-text { flex: 1; min-width: 0; }
+  .row-name { display: block; font-weight: 700; font-size: 14px; }
+  .row-sub { display: block; font-size: 12.5px; color: var(--ink-2); margin-top: 2px; line-height: 1.45; }
+  .row-value { font-size: 13px; color: var(--ink-2); font-weight: 600; flex: none; }
+
+  .seg { display: flex; gap: 5px; flex: none; }
+  .seg button {
+    border: none; border-radius: 999px; min-width: 38px; padding: 8px 10px;
+    background: var(--chip); color: var(--ink-2);
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+    cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); }
+
+  .switch {
+    flex: none; width: 46px; height: 27px; border-radius: 999px;
+    border: none; background: var(--chip); cursor: pointer;
+    position: relative; transition: background 200ms ease;
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 21px; height: 21px; border-radius: 999px;
+    background: var(--card); box-shadow: var(--shadow-soft);
+    transition: transform 200ms cubic-bezier(.2,.8,.25,1);
+  }
+  .switch[aria-checked="true"] { background: var(--btn-bg); }
+  .switch[aria-checked="true"]::after { transform: translateX(19px); }
+
+  .explain {
+    background: var(--dark); color: var(--dark-ink);
+    border-radius: 16px; padding: 18px; margin-top: 10px;
+  }
+  .explain h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .explain p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--dark-ink-2); }
+
+  .danger { color: #E14B3A; font-weight: 700; }
+
+  .closing-note {
+    text-align: center; font-size: 12.5px; color: var(--ink-3);
+    margin: 20px 10px 0; line-height: 1.5;
+  }
+
+  /* dock */
+  .dock-wrap {
+    position: fixed; bottom: 20px; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 0 16px; z-index: 20;
+  }
+  .dock {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--dock); border-radius: 999px; padding: 8px; box-shadow: var(--shadow);
+  }
+  .dock a {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    min-width: 46px; min-height: 46px;
+    padding: 10px 16px; border-radius: 999px;
+    color: var(--dock-ink-muted); text-decoration: none;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px; white-space: nowrap;
+  }
+  .dock a svg { width: 17px; height: 17px; flex: none; }
+  .dock a.active { background: var(--dock-2); color: var(--dock-ink); }
+  .dock a:not(.active) span { display: none; }
+  .fab {
+    width: 52px; height: 52px; border-radius: 999px;
+    background: var(--btn-bg); color: var(--btn-ink); border: none;
+    box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: center; flex: none; cursor: pointer;
+  }
+  .fab svg { width: 20px; height: 20px; }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+  <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+  <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+</button>
+
+<div class="page">
+  <header class="head">
+    <a class="back" href="https://claude.ai/code/artifact/3eeb03bb-9eb7-47bd-a454-a368e8868b22" target="_top" aria-label="Back">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <h1>Settings.</h1>
+  </header>
+
+  <div class="section-label">How Spont picks</div>
+  <p class="section-note">Four signals, weighted evenly unless you say otherwise. Turn one off and Spont stops considering it.</p>
+
+  <div class="panel">
+    <div class="signal">
+      <div class="signal-top"><span class="signal-name">Time since you last met</span></div>
+      <p class="signal-desc">Favours the people you haven't seen in a while over the ones you saw on Tuesday.</p>
+      <div class="weights" role="group" aria-label="Time since you last met">
+        <button class="weight" aria-pressed="false">Off</button>
+        <button class="weight" aria-pressed="true">Normal</button>
+        <button class="weight" aria-pressed="false">More</button>
+      </div>
+    </div>
+
+    <div class="signal">
+      <div class="signal-top"><span class="signal-name">Your hangout times</span></div>
+      <p class="signal-desc">Your calendar already knows when you're <i>free</i>. This is when you'd
+        actually <i>want</i> to see someone — 6pm Tuesday and 6pm Saturday are different questions,
+        so they're asked separately.</p>
+
+      <div class="legend">
+        <span class="legend-item"><span class="legend-chip" data-state="0"></span>No preference</span>
+        <span class="legend-item"><span class="legend-chip" data-state="1"></span>Up for it</span>
+        <span class="legend-item"><span class="legend-chip" data-state="2"></span>Never</span>
+      </div>
+      <p class="bucket-hint">Tap a time to cycle through the three.</p>
+
+      <p class="bucket-label">Weekdays</p>
+      <div class="buckets" data-set="weekday">
+        <button class="bucket" type="button" data-state="0" data-key="wd-before">Before work</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-lunch">Lunch</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-after">Straight after work</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-evening">Evening</button>
+        <button class="bucket" type="button" data-state="0" data-key="wd-late">Late</button>
+      </div>
+
+      <p class="bucket-label">Weekends</p>
+      <div class="buckets" data-set="weekend">
+        <button class="bucket" type="button" data-state="0" data-key="we-morning">Morning</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-midday">Midday</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-afternoon">Afternoon</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-evening">Evening</button>
+        <button class="bucket" type="button" data-state="0" data-key="we-late">Late</button>
+      </div>
+
+    </div>
+
+    <div class="signal">
+      <div class="signal-top"><span class="signal-name">Room around your day</span></div>
+      <p class="signal-desc">How much breathing space to leave either side of whatever's already
+        booked, so nothing lands hard against a meeting.</p>
+      <div class="weights" role="group" aria-label="Room around your day">
+        <button class="weight" aria-pressed="false">None</button>
+        <button class="weight" aria-pressed="true">30 min</button>
+        <button class="weight" aria-pressed="false">60 min</button>
+        <button class="weight" aria-pressed="false">90 min</button>
+      </div>
+    </div>
+
+    <div class="signal is-off">
+      <div class="signal-top">
+        <span class="signal-name">A mix of things<span class="pending">Soon</span></span>
+      </div>
+      <p class="signal-desc">Balances the kinds of plans you make, once Spont knows what kind each one is.</p>
+      <div class="weights" role="group" aria-label="A mix of things">
+        <button class="weight" aria-pressed="true">Off</button>
+        <button class="weight" aria-pressed="false" disabled>Normal</button>
+        <button class="weight" aria-pressed="false" disabled>More</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="explain">
+    <h3>Not sure? Leave it alone.</h3>
+    <p>Every signal starts even, and Spont keeps learning from what you say yes and no to either way. These are here for when something feels consistently off — not a setup step.</p>
+  </div>
+
+  <div class="section-label">Proposals</div>
+  <div class="panel">
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">How many a day</span>
+        <span class="row-sub">The cap on what reaches your feed. More isn't better.</span>
+      </span>
+      <span class="seg" role="group" aria-label="Proposals per day">
+        <button aria-pressed="false">1</button>
+        <button aria-pressed="true">2</button>
+        <button aria-pressed="false">3</button>
+      </span>
+    </div>
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">How far ahead</span>
+        <span class="row-sub">Spont won't propose anything past this.</span>
+      </span>
+      <span class="row-value">30 days</span>
+    </div>
+  </div>
+
+  <div class="section-label">Calendar</div>
+  <div class="panel">
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">Google Calendar</span>
+        <span class="row-sub">raghav@gmail.com · connected</span>
+      </span>
+      <span class="row-value">Change</span>
+    </div>
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">What Spont can see</span>
+        <span class="row-sub">Free or busy only — never what's actually on your calendar.</span>
+      </span>
+    </div>
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">Add accepted plans to my calendar</span>
+        <span class="row-sub">Writes the event the moment you say you're in.</span>
+      </span>
+      <button class="switch" role="switch" aria-checked="true" aria-label="Add accepted plans to my calendar"></button>
+    </div>
+  </div>
+
+  <div class="section-label">You</div>
+  <div class="panel">
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">Your standing</span>
+        <span class="row-sub">Solid · Season 2 ends in 18 days</span>
+      </span>
+      <span class="row-value">View</span>
+    </div>
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">Friends can see your tier</span>
+        <span class="row-sub">They see Solid. They never see the number behind it.</span>
+      </span>
+      <button class="switch" role="switch" aria-checked="true" aria-label="Friends can see your tier"></button>
+    </div>
+    <div class="row">
+      <span class="row-text">
+        <span class="row-name">Notifications</span>
+        <span class="row-sub">Email and push, when something needs you.</span>
+      </span>
+      <span class="row-value">Manage</span>
+    </div>
+    <div class="row">
+      <span class="row-text"><span class="row-name danger">Log out</span></span>
+    </div>
+  </div>
+
+  <p class="closing-note">Spont works fine if you never open this screen. That's the goal.</p>
+</div>
+
+<div class="dock-wrap">
+  <nav class="dock" aria-label="Primary">
+    <a href="https://claude.ai/code/artifact/3eeb03bb-9eb7-47bd-a454-a368e8868b22" target="_top">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M3 9.2 10 3.6l7 5.6V16.5H12v-5H8v5H3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="https://claude.ai/code/artifact/57f4a873-6e36-4732-80da-02b1521ff6a1" target="_top">
+      <svg viewBox="0 0 20 20" fill="none"><circle cx="8" cy="7.2" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M2.6 16.6c0-3 2.4-4.7 5.4-4.7s5.4 1.7 5.4 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M14.2 5.1a3.1 3.1 0 0 1 0 5.4M15.6 12.6c1.4.7 2.2 2 2.2 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span>People</span>
+    </a>
+  </nav>
+  <button class="fab" aria-label="New">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<script>
+  var root = document.documentElement;
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var c = root.getAttribute('data-theme');
+    var isDark = c === 'dark' || (!c && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // weight + segmented groups are single-select
+  document.querySelectorAll('.weights, .seg').forEach(function (group) {
+    group.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (!b || b.disabled) return;
+      group.querySelectorAll('button').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      var signal = group.closest('.signal');
+      if (signal) {
+        var t = b.textContent.trim();
+        signal.classList.toggle('is-off', t === 'Off' || t === 'None');
+      }
+    });
+  });
+
+  // Time buckets cycle: plain → up for it → never.
+  document.querySelectorAll('.bucket').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var next = (parseInt(b.getAttribute('data-state'), 10) + 1) % 3;
+      b.setAttribute('data-state', String(next));
+    });
+  });
+
+  document.querySelectorAll('.switch').forEach(function (s) {
+    s.addEventListener('click', function () {
+      s.setAttribute('aria-checked', s.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+    });
+  });
+</script>

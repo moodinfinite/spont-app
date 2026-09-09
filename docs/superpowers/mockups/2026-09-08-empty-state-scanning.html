@@ -1,0 +1,292 @@
+<title>Spont Scanning Empty State</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  /* Option E, animated. A scan line sweeps each day in turn; where it crosses
+     a gap long enough to matter, that gap lights up and stays lit.
+     The point: the screen is empty because nothing has lined up *yet*, not
+     because the app has stopped. */
+  :root {
+    --page: #edeee9; --card: #fff; --ink: #15150f; --ink-2: #6c6c62; --ink-3: #a8a89c;
+    --btn-bg: #c6ff4e; --btn-ink: #1c2b06; --dark: #15150f; --dark-ink: #f3f6ea;
+    --dark-ink-2: rgba(243,246,234,.68); --chip: #e5e7df; --busy: #c2c8b8;
+    --hairline: rgba(21,21,15,.1);
+    --shadow: 0 14px 30px rgba(20,20,12,.1), 0 2px 8px rgba(20,20,12,.06);
+    --shadow-soft: 0 8px 18px rgba(20,20,12,.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --page: #0d0d0b; --card: #292921; --ink: #f2f2ea; --ink-2: #a3a398; --ink-3: #6e6e63;
+      --btn-bg: #d2ff66; --btn-ink: #16240a; --dark: #d2ff66; --dark-ink: #16240a;
+      --dark-ink-2: rgba(22,36,10,.72); --chip: #35352c; --busy: #474d3b;
+      --hairline: rgba(242,242,234,.13);
+      --shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(242,242,234,.1);
+      --shadow-soft: 0 8px 18px rgba(0,0,0,.4), inset 0 0 0 1px rgba(242,242,234,.09);
+    }
+  }
+  :root[data-theme='dark'] {
+    --page: #0d0d0b; --card: #292921; --ink: #f2f2ea; --ink-2: #a3a398; --ink-3: #6e6e63;
+    --btn-bg: #d2ff66; --btn-ink: #16240a; --dark: #d2ff66; --dark-ink: #16240a;
+    --dark-ink-2: rgba(22,36,10,.72); --chip: #35352c; --busy: #474d3b;
+    --hairline: rgba(242,242,234,.13);
+    --shadow: 0 14px 30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(242,242,234,.1);
+    --shadow-soft: 0 8px 18px rgba(0,0,0,.4), inset 0 0 0 1px rgba(242,242,234,.09);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Manrope', sans-serif; }
+  h1, h2, h3 { font-family: 'Sora', sans-serif; margin: 0; }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 34px 22px 60px; }
+  header.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  h1.title { font-size: 32px; font-weight: 400; letter-spacing: -.02em; line-height: 1.1; }
+  .sub { margin: 10px 0 28px; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; }
+  .toggle-btn {
+    flex: none; width: 38px; height: 38px; border: none; border-radius: 999px;
+    background: var(--card); box-shadow: var(--shadow-soft); color: var(--ink);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .toggle-btn svg { width: 17px; height: 17px; }
+  .toggle-btn .moon { display: none; }
+  :root[data-theme='dark'] .toggle-btn .sun { display: none; }
+  :root[data-theme='dark'] .toggle-btn .moon { display: block; }
+
+  .layout { display: grid; gap: 20px; }
+  @media (min-width: 760px) { .layout { grid-template-columns: 380px 1fr; align-items: start; } }
+
+  /* the screen itself */
+  .screen {
+    background: var(--page); border: 1.5px solid var(--hairline);
+    border-radius: 22px; padding: 22px 18px 24px;
+  }
+  .screen-head {
+    font-family: 'Sora', sans-serif; font-weight: 400; font-size: 26px;
+    letter-spacing: -.02em; margin-bottom: 20px;
+  }
+  .panel { background: var(--card); border-radius: 16px; box-shadow: var(--shadow-soft); overflow: hidden; }
+
+  .lead { text-align: center; padding: 22px 20px 18px; }
+  .lead h2 { font-weight: 400; font-size: 21px; letter-spacing: -.015em; margin-bottom: 6px; }
+  .lead p { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 0; }
+
+  /* the week */
+  .week { padding: 4px 0 8px; }
+  .day {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 16px; font-size: 13px;
+  }
+  .day-name { width: 38px; flex: none; font-weight: 700; color: var(--ink-2); }
+  .day.is-scanning .day-name { color: var(--ink); }
+
+  .track {
+    position: relative; flex: 1; height: 9px; border-radius: 999px;
+    background: var(--chip); overflow: hidden;
+  }
+  .busy { position: absolute; top: 0; bottom: 0; background: var(--busy); }
+
+  /* an opening starts invisible and is "discovered" by the scan */
+  .open {
+    position: absolute; top: 0; bottom: 0; border-radius: 999px;
+    background: var(--btn-bg); transform: scaleX(0); transform-origin: left center;
+    transition: transform 320ms cubic-bezier(.2,.8,.25,1);
+  }
+  .open.found { transform: scaleX(1); }
+
+  /* the scan line */
+  .scan {
+    position: absolute; top: -3px; bottom: -3px; width: 2px;
+    background: var(--ink); opacity: 0; left: 0;
+    box-shadow: 0 0 8px 1px var(--ink);
+  }
+  .day.is-scanning .scan { animation: sweep 900ms linear; }
+
+  @keyframes sweep {
+    0% { left: 0; opacity: 0; }
+    8% { opacity: .85; }
+    92% { opacity: .85; }
+    100% { left: 100%; opacity: 0; }
+  }
+
+  .foot-note {
+    text-align: center; font-size: 12.5px; color: var(--ink-3);
+    margin: 16px 10px 0; line-height: 1.5;
+  }
+
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+  .btn {
+    border: none; border-radius: 999px; padding: 11px 18px; cursor: pointer;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px;
+    background: var(--card); box-shadow: var(--shadow-soft); color: var(--ink-2);
+  }
+
+  .notes { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); }
+  .notes h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; color: var(--ink); }
+  .notes p { margin: 0 0 14px; }
+  .notes b { color: var(--ink); }
+  .notes ul { margin: 0 0 14px; padding-left: 18px; }
+  .notes li { margin-bottom: 7px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .day.is-scanning .scan { animation: none; }
+    .open { transition: none; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div><h1 class="title">Still looking.</h1></div>
+    <button class="toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+      <svg class="sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2.2M10 15.8V18M18 10h-2.2M4.2 10H2M15.5 4.5l-1.5 1.5M6 12.5l-1.5 1.5M15.5 15.5l-1.5-1.5M6 7.5l-1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg class="moon" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 018.5 3a7 7 0 109 8.5Z" fill="currentColor"/></svg>
+    </button>
+  </header>
+
+  <p class="sub">Option E with the scan animated. A line sweeps each day in turn; grey is where you&rsquo;re booked, and where the scan crosses a gap long enough to matter, it lights green and stays lit. It loops slowly, so the screen reads as working rather than waiting.</p>
+
+  <div class="layout">
+    <div>
+      <div class="screen">
+        <div class="screen-head">Welcome Raghav.</div>
+
+        <div class="panel" style="margin-bottom:10px">
+          <div class="lead">
+            <h2>Still looking.</h2>
+            <p>Nothing lines up this week — here&rsquo;s where you&rsquo;re open.</p>
+          </div>
+        </div>
+
+        <div class="panel week" id="week"></div>
+
+        <p class="foot-note">We look every morning. Green is a window worth using.</p>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="replay">Replay scan</button>
+        <button class="btn" id="speed">Slower</button>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h3>Why this one works as the first thing you see</h3>
+      <p>An empty feed is the state people hit most, and the risk is that it reads as a <b>broken app</b> rather than a quiet week. This is the only option that shows the engine doing its job — you can watch it check.</p>
+
+      <h3>Decisions baked into it</h3>
+      <ul>
+        <li><b>Grey is busy, green is a real opening.</b> Only gaps long enough to hold a hangout light up, so green always means &ldquo;usable&rdquo;, never just &ldquo;free&rdquo;.</li>
+        <li><b>The scan is sequential, one day at a time.</b> Sweeping all seven at once looks decorative; one at a time looks like searching.</li>
+        <li><b>Found windows stay lit</b> rather than fading with the scan. The end state is a readable week, not an animation you had to catch.</li>
+        <li><b>It loops slowly</b> — about nine seconds per pass, then a pause. Fast enough to notice, slow enough not to nag.</li>
+        <li><b>Frozen under reduced motion</b>, landing straight on the found state.</li>
+      </ul>
+
+      <h3>What it can&rsquo;t do</h3>
+      <p>It needs your calendar connected and it needs at least a few busy blocks to look like anything — a completely empty week renders as one long green bar, which is honest but says little. Worth pairing with the plainer copy for that case.</p>
+
+      <p><b>Still open:</b> whether this shows only your own availability, or the overlap once a friend exists. Overlap is the real product — but until someone joins there is none, which is exactly the state this screen is for.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // A plausible week. Busy blocks as [startPercent, widthPercent]; the
+  // opening is the gap we'd actually propose into.
+  var WEEK = [
+    { day: 'Mon', busy: [[10, 46], [70, 22]], open: null },
+    { day: 'Tue', busy: [[6, 30], [44, 18]], open: [64, 30] },
+    { day: 'Wed', busy: [[14, 62]], open: null },
+    { day: 'Thu', busy: [[8, 26], [40, 12], [58, 30]], open: null },
+    { day: 'Fri', busy: [[12, 34]], open: [52, 40] },
+    { day: 'Sat', busy: [[70, 24]], open: [10, 52] },
+    { day: 'Sun', busy: [[20, 18], [50, 40]], open: null },
+  ]
+
+  var STEP = 1000 // gap between days
+  var LOOP_PAUSE = 3200
+  var slow = false
+
+  var week = document.getElementById('week')
+
+  WEEK.forEach(function (d) {
+    var row = document.createElement('div')
+    row.className = 'day'
+    var bars = d.busy
+      .map(function (b) {
+        return '<span class="busy" style="left:' + b[0] + '%;width:' + b[1] + '%"></span>'
+      })
+      .join('')
+    var open = d.open
+      ? '<span class="open" style="left:' + d.open[0] + '%;width:' + d.open[1] + '%"></span>'
+      : ''
+    row.innerHTML =
+      '<span class="day-name">' + d.day + '</span>' +
+      '<span class="track">' + bars + open + '<span class="scan"></span></span>'
+    week.appendChild(row)
+  })
+
+  var rows = Array.prototype.slice.call(week.children)
+  var timers = []
+
+  function clearTimers() {
+    timers.forEach(clearTimeout)
+    timers = []
+  }
+
+  function run() {
+    clearTimers()
+    rows.forEach(function (r) {
+      r.classList.remove('is-scanning')
+      var o = r.querySelector('.open')
+      if (o) o.classList.remove('found')
+    })
+
+    var step = slow ? STEP * 1.8 : STEP
+
+    rows.forEach(function (row, i) {
+      timers.push(
+        setTimeout(function () {
+          row.classList.add('is-scanning')
+          // Light the opening as the line passes over it, not before.
+          var open = row.querySelector('.open')
+          if (open) {
+            var at = parseFloat(open.style.left) / 100
+            timers.push(
+              setTimeout(function () {
+                open.classList.add('found')
+              }, 900 * at),
+            )
+          }
+          timers.push(
+            setTimeout(function () {
+              row.classList.remove('is-scanning')
+            }, 900),
+          )
+        }, i * step),
+      )
+    })
+
+    timers.push(setTimeout(run, rows.length * step + LOOP_PAUSE))
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    rows.forEach(function (r) {
+      var o = r.querySelector('.open')
+      if (o) o.classList.add('found')
+    })
+  } else {
+    run()
+  }
+
+  document.getElementById('replay').addEventListener('click', run)
+  document.getElementById('speed').addEventListener('click', function () {
+    slow = !slow
+    this.textContent = slow ? 'Faster' : 'Slower'
+    run()
+  })
+
+  var root = document.documentElement
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var c = root.getAttribute('data-theme')
+    var isDark = c === 'dark' || (!c && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark')
+  })
+</script>

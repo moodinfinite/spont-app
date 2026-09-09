@@ -4,7 +4,8 @@ import { seedDatabase } from '../src/seed-data'
 async function main() {
   await resetDb()
   await seedDatabase(prisma)
-  console.log('Seeded 5 users with mock calendars.')
+  const count = await prisma.user.count()
+  console.log(`Seeded ${count} users with mock calendars.`)
 }
 
 main()

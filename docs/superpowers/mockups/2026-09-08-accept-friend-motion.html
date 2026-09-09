@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Accepting a friend — motion options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* Tokens lifted verbatim from apps/web/app/globals.css so what you see here
+   is what the app would actually render. */
+:root {
+  --page:#edeee9; --card:#ffffff; --ink:#15150f; --ink-2:#6c6c62; --ink-3:#a8a89c;
+  --btn-bg:#c6ff4e; --btn-ink:#1c2b06; --dark:#15150f; --dark-ink:#f3f6ea;
+  --chip:#e5e7df; --warn:#e14b3a; --hairline:rgba(21,21,15,.1);
+  --shadow:0 14px 30px rgba(20,20,12,.1), 0 2px 8px rgba(20,20,12,.06);
+  --shadow-soft:0 8px 18px rgba(20,20,12,.07);
+  --lift:0 20px 40px rgba(20,20,12,.16), 0 4px 12px rgba(20,20,12,.1);
+  --radius:16px;
+}
+:root[data-theme='dark'] {
+  --page:#0d0d0b; --card:#292921; --ink:#f2f2ea; --ink-2:#a3a398; --ink-3:#6e6e63;
+  --btn-bg:#d2ff66; --btn-ink:#16240a; --dark:#d2ff66; --dark-ink:#16240a;
+  --chip:#35352c; --warn:#ff6a57; --hairline:rgba(242,242,234,.13);
+  --shadow:0 14px 30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(242,242,234,.1);
+  --shadow-soft:0 8px 18px rgba(0,0,0,.4), inset 0 0 0 1px rgba(242,242,234,.09);
+  --lift:0 22px 44px rgba(0,0,0,.6), inset 0 0 0 1px rgba(242,242,234,.16);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--page); color:var(--ink);
+  font-family:'Manrope', system-ui, sans-serif;
+  padding:34px 20px 70px;
+}
+.wrap { max-width:1120px; margin:0 auto; }
+
+/* ---------- page head ---------- */
+.head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:8px; }
+h1 { font-family:'Sora',system-ui,sans-serif; font-weight:400; font-size:34px; letter-spacing:-.02em; margin:0; }
+.lede { color:var(--ink-2); font-size:14.5px; line-height:1.6; max-width:640px; margin:12px 0 0; }
+.controls { display:flex; gap:8px; flex:none; }
+.ctl {
+  border:none; border-radius:999px; padding:9px 15px; background:var(--card);
+  box-shadow:var(--shadow-soft); color:var(--ink);
+  font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;
+}
+.ctl:hover { transform:translateY(-1px); }
+
+/* ---------- option grid ---------- */
+.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(310px,1fr)); gap:20px; margin-top:30px; }
+.opt { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-soft); padding:20px 20px 22px; }
+.opt-head { display:flex; align-items:baseline; gap:9px; }
+.letter {
+  font-family:'Sora',system-ui,sans-serif; font-size:12px; font-weight:700;
+  background:var(--btn-bg); color:var(--btn-ink);
+  width:22px; height:22px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+}
+.opt h2 { font-family:'Sora',system-ui,sans-serif; font-weight:600; font-size:17.5px; letter-spacing:-.01em; }
+.why { color:var(--ink-2); font-size:13px; line-height:1.55; margin:9px 0 16px; min-height:58px; }
+.why b { color:var(--ink); font-weight:700; }
+
+/* ---------- the little phone screen ---------- */
+.frame {
+  background:var(--page); border-radius:13px; padding:14px 13px 16px;
+  height:326px; overflow:hidden; position:relative;
+  box-shadow:inset 0 0 0 1px var(--hairline);
+}
+.tabs { display:flex; gap:7px; margin-bottom:14px; }
+.pill {
+  display:inline-flex; align-items:center; gap:6px;
+  border-radius:999px; padding:6px 12px; background:var(--card);
+  box-shadow:var(--shadow-soft); font-size:12px; font-weight:700;
+}
+.pill.on { background:var(--btn-bg); color:var(--btn-ink); box-shadow:none; }
+.pill .count { font-variant-numeric:tabular-nums; transition:transform 240ms cubic-bezier(.2,1.5,.4,1); display:inline-block; }
+.pill .count.bump { transform:scale(1.5); }
+.pill .dot { width:5px; height:5px; border-radius:999px; background:var(--warn); transition:opacity 200ms; }
+.pill.on .dot { background:var(--btn-ink); }
+.pill .dot.gone { opacity:0; }
+
+.sec {
+  display:flex; justify-content:space-between;
+  font-size:9.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--ink-2); padding:0 4px 7px;
+}
+.panel { background:var(--card); border-radius:13px; box-shadow:var(--shadow-soft); overflow:hidden; }
+.row {
+  display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--card);
+  position:relative; overflow:hidden;
+}
+.row + .row { box-shadow:inset 0 1px 0 var(--hairline); }
+.av {
+  width:29px; height:29px; border-radius:999px; background:var(--chip);
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:11.5px; font-weight:700; flex:none; position:relative;
+}
+.nm { font-size:13.5px; font-weight:700; flex:1; white-space:nowrap; }
+.acts { display:flex; gap:6px; flex:none; overflow:hidden; }
+.yes, .no {
+  border:none; border-radius:999px; padding:7px 13px; font-family:inherit;
+  font-weight:700; font-size:11.5px; cursor:pointer; white-space:nowrap;
+}
+.yes { background:var(--btn-bg); color:var(--btn-ink); }
+.no { background:transparent; color:var(--ink-2); box-shadow:inset 0 0 0 1.5px var(--hairline); }
+.wait-wrap { overflow:hidden; }
+.wait-inner { padding-bottom:13px; }
+
+/* the green ring that flashes on an avatar when someone lands */
+.av::after {
+  content:''; position:absolute; inset:-4px; border-radius:999px;
+  box-shadow:0 0 0 0 var(--btn-bg); opacity:0;
+}
+.av.flash::after { animation:ring 620ms cubic-bezier(.2,.8,.25,1) forwards; }
+@keyframes ring {
+  0%   { opacity:1; box-shadow:0 0 0 0 var(--btn-bg); }
+  100% { opacity:0; box-shadow:0 0 0 11px var(--btn-bg); }
+}
+
+.replay {
+  margin-top:13px; border:none; border-radius:999px; padding:8px 15px;
+  background:var(--chip); color:var(--ink); font-family:inherit;
+  font-weight:700; font-size:12px; cursor:pointer;
+}
+.replay:hover { background:var(--btn-bg); color:var(--btn-ink); }
+
+/* ---------- B: two avatars meet ---------- */
+.mine {
+  position:absolute; right:12px; top:50%; margin-top:-14.5px;
+  opacity:0; transform:translateX(14px);
+}
+.meet-cap {
+  position:absolute; left:0; right:0; text-align:center; bottom:8px;
+  font-size:11px; font-weight:700; color:var(--ink-2); opacity:0;
+  transition:opacity 260ms;
+}
+.meet-cap.on { opacity:1; }
+
+/* ---------- C: the sweep ---------- */
+.sweep {
+  position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(90deg, transparent, var(--btn-bg) 45%, transparent);
+  opacity:.85; transform:translateX(-110%);
+}
+.sweep.go { transition:transform 420ms cubic-bezier(.3,.7,.3,1); transform:translateX(110%); }
+
+/* ---------- D: the undo window ---------- */
+.done-txt { font-size:13.5px; font-weight:700; flex:1; }
+.undo {
+  border:none; background:transparent; color:var(--ink-2);
+  font-family:inherit; font-weight:700; font-size:11.5px; cursor:pointer;
+  text-decoration:underline; text-underline-offset:2px;
+}
+.ring { width:22px; height:22px; flex:none; transform:rotate(-90deg); }
+.ring circle { fill:none; stroke-width:2.4; }
+.ring .bg { stroke:var(--hairline); }
+.ring .fg { stroke:var(--btn-ink); stroke-linecap:round; stroke-dasharray:56.5; stroke-dashoffset:0; }
+:root[data-theme='dark'] .ring .fg { stroke:var(--btn-ink); }
+.ring .fg.drain { transition:stroke-dashoffset 3000ms linear; stroke-dashoffset:56.5; }
+.row.added { background:var(--btn-bg); }
+.row.added .done-txt, .row.added .undo { color:var(--btn-ink); }
+.row.added .av { background:rgba(28,43,6,.14); color:var(--btn-ink); }
+
+/* ---------- footer ---------- */
+.foot {
+  margin-top:34px; background:var(--card); border-radius:var(--radius);
+  box-shadow:var(--shadow-soft); padding:22px 24px;
+}
+.foot h3 { font-family:'Sora',system-ui,sans-serif; font-weight:600; font-size:17px; margin:0 0 10px; }
+.foot p { color:var(--ink-2); font-size:13.5px; line-height:1.65; margin:0 0 10px; max-width:760px; }
+.foot p:last-child { margin-bottom:0; }
+.foot b { color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <h1>Accepting a friend.</h1>
+    </div>
+    <div class="controls">
+      <button class="ctl" id="theme">Dark</button>
+      <button class="ctl" id="all">Play all</button>
+    </div>
+  </div>
+  <p class="lede">
+    Accepting used to do nothing you could see — the page refreshed and the row was
+    somewhere else. These are the four studies the built version was chosen from; it
+    blends <b>D</b> and <b>A</b>. Tap Accept in any screen.
+  </p>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="foot">
+    <h3>What was chosen — 2026-09-08</h3>
+    <p>
+      <b>D&rsquo;s confirmation joined to A&rsquo;s travel, with the undo dropped.</b>
+      Tapping Accept turns the row green where you tapped it and it reads
+      <b>Added Ming</b>; after a beat it lifts, carries down into Your people,
+      and the green drains out of it as it settles into an ordinary row. No
+      undo: nobody accepts a friend by accident, and offering to take it back
+      implies the other person has already been told something we&rsquo;d have
+      to un-tell them.
+    </p>
+    <p>
+      One thing the built version makes obvious that these studies don&rsquo;t:
+      when Waiting on you sits directly above Your people, the row itself only
+      travels about eight pixels. The distance is real but it is mostly
+      <em>closed</em> rather than <em>crossed</em> — the section above collapses
+      and the list below rises to meet a row that barely moves. It reads well,
+      but the movement belongs to the page more than to the row.
+    </p>
+    <p>
+      Live in <b>apps/web/app/friends/friends-client.tsx</b> and the
+      &ldquo;Accepting someone&rdquo; block of <b>globals.css</b>. Reduced-motion
+      keeps the confirmation and drops the travel. This file is the shareable
+      copy — open it in any browser, no build step.
+    </p>
+  </div>
+  </div>
+</div>
+
+<script>
+const OPTIONS = [
+  { key:'a', letter:'A', name:'It lands',
+    why:'The row sheds its buttons, lifts, and travels down into <b>Your people</b>, which opens to receive it. You see exactly where they went.' },
+  { key:'b', letter:'B', name:'Two become one',
+    why:'Your avatar slides in to meet theirs, they touch, a ring goes out. It celebrates the connection rather than the list.' },
+  { key:'c', letter:'C', name:'Quiet sweep',
+    why:'A wash of green crosses the row, it collapses, and the friend count ticks up. Almost no ceremony — the fastest to build.' },
+  { key:'d', letter:'D', name:'Undo window',
+    why:'The row turns into <b>Added Ming</b> with a five-second draining ring, matching how accepting a proposal already works.' },
+]
+
+const screen = (key) => `
+  <div class="tabs">
+    <span class="pill on">Friends <b class="count">2</b><i class="dot"></i></span>
+    <span class="pill">Groups <b>1</b></span>
+  </div>
+  <div class="wait-wrap">
+    <div class="wait-inner">
+      <div class="sec"><span>Waiting on you</span><span>1</span></div>
+      <div class="panel">
+        <div class="row waiting">
+          <span class="av them">M</span>
+          <span class="nm">Ming</span>
+          <span class="acts">
+            <button class="yes">Accept</button>
+            <button class="no">No</button>
+          </span>
+          ${key === 'b' ? '<span class="av mine">R</span><span class="meet-cap">You and Ming</span>' : ''}
+          ${key === 'c' ? '<span class="sweep"></span>' : ''}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sec"><span>Your people</span></div>
+  <div class="panel yours">
+    <div class="row"><span class="av">J</span><span class="nm">Jeff</span></div>
+    <div class="row"><span class="av">E</span><span class="nm">Edward</span></div>
+  </div>`
+
+document.getElementById('grid').innerHTML = OPTIONS.map(o => `
+  <div class="opt" data-opt="${o.key}">
+    <div class="opt-head"><span class="letter">${o.letter}</span><h2>${o.name}</h2></div>
+    <p class="why">${o.why}</p>
+    <div class="frame">${screen(o.key)}</div>
+    <button class="replay">Replay</button>
+  </div>`).join('')
+
+const wait = (ms) => new Promise(r => setTimeout(r, ms))
+
+/* Deliberately a timer, not requestAnimationFrame: rAF is paused while the
+   tab is in the background, which stranded these sequences half-played. */
+const soon = (fn) => setTimeout(fn, 20)
+
+/* Take the row out of flow at exactly where it sits, so collapsing the
+   section above it doesn't drag it along. */
+function detach(frame, row) {
+  const f = frame.getBoundingClientRect()
+  const r = row.getBoundingClientRect()
+  row.style.width = r.width + 'px'
+  row.style.position = 'absolute'
+  row.style.left = (r.left - f.left) + 'px'
+  row.style.top = (r.top - f.top) + 'px'
+  row.style.zIndex = '5'
+  row.style.borderRadius = '13px'
+  return { height: r.height, top: r.top - f.top }
+}
+
+/* Where that row needs to end up: the top of Your people, once the section
+   above has collapsed out of the way. */
+function landingTop(frame, waitWrap) {
+  const f = frame.getBoundingClientRect()
+  const y = frame.querySelector('.yours').getBoundingClientRect()
+  return (y.top - f.top) - waitWrap.offsetHeight
+}
+
+function collapseWait(waitWrap) {
+  waitWrap.style.height = waitWrap.offsetHeight + 'px'
+  void waitWrap.offsetHeight
+  waitWrap.style.transition = 'height 420ms cubic-bezier(.2,.8,.25,1), opacity 200ms'
+  waitWrap.style.opacity = '0'
+  waitWrap.style.height = '0px'
+}
+
+/* Drop a real row into Your people, growing the panel to fit it. */
+function settle(frame, label, flash) {
+  const yours = frame.querySelector('.yours')
+  const el = document.createElement('div')
+  el.className = 'row'
+  el.innerHTML = `<span class="av${flash ? ' flash' : ''}">${label[0]}</span><span class="nm">${label}</span>`
+  el.style.height = '0px'
+  el.style.overflow = 'hidden'
+  yours.prepend(el)
+  void el.offsetHeight
+  soon(() => {
+    el.style.transition = 'height 340ms cubic-bezier(.2,.8,.25,1)'
+    el.style.height = '51px'
+  })
+  return el
+}
+
+function tick(frame) {
+  const c = frame.querySelector('.count')
+  const d = frame.querySelector('.dot')
+  c.textContent = '3'
+  c.classList.add('bump')
+  d.classList.add('gone')
+  setTimeout(() => c.classList.remove('bump'), 250)
+}
+
+const RUN = {
+  /* A — the row travels to where it now lives. */
+  async a(frame) {
+    const row = frame.querySelector('.waiting')
+    const waitWrap = frame.querySelector('.wait-wrap')
+    const acts = row.querySelector('.acts')
+
+    acts.style.transition = 'max-width 240ms ease, opacity 160ms ease, margin 240ms ease'
+    acts.style.maxWidth = acts.offsetWidth + 'px'
+    void acts.offsetWidth
+    acts.style.maxWidth = '0px'; acts.style.opacity = '0'; acts.style.marginLeft = '-10px'
+    await wait(250)
+
+    const { height } = detach(frame, row)
+    const target = landingTop(frame, waitWrap)
+    row.style.boxShadow = 'var(--lift)'
+    collapseWait(waitWrap)
+
+    // A placeholder opens a gap at the top of Your people to receive it.
+    const yours = frame.querySelector('.yours')
+    const gap = document.createElement('div')
+    gap.style.height = '0px'; gap.style.transition = 'height 480ms cubic-bezier(.2,.8,.25,1)'
+    yours.prepend(gap)
+    row.style.transition = 'top 480ms cubic-bezier(.2,.8,.25,1), box-shadow 480ms ease'
+    void gap.offsetHeight
+    soon(() => { gap.style.height = height + 'px'; row.style.top = target + 'px' })
+    await wait(540)
+
+    row.remove(); gap.remove()
+    const landed = settle(frame, 'Ming', true)
+    landed.style.height = height + 'px'
+    tick(frame)
+  },
+
+  /* B — the two of you meet in the middle. */
+  async b(frame) {
+    const row = frame.querySelector('.waiting')
+    const waitWrap = frame.querySelector('.wait-wrap')
+    const acts = row.querySelector('.acts')
+    const them = row.querySelector('.them')
+    const mine = row.querySelector('.mine')
+    const nm = row.querySelector('.nm')
+    const cap = row.querySelector('.meet-cap')
+
+    acts.style.transition = 'opacity 180ms ease'; acts.style.opacity = '0'
+    nm.style.transition = 'opacity 200ms ease'; nm.style.opacity = '0'
+    await wait(210)
+
+    const w = row.offsetWidth
+    them.style.transition = 'transform 460ms cubic-bezier(.3,.9,.3,1)'
+    mine.style.transition = 'transform 460ms cubic-bezier(.3,.9,.3,1), opacity 200ms ease'
+    them.style.transform = `translateX(${w / 2 - 42}px)`
+    mine.style.opacity = '1'
+    mine.style.transform = `translateX(-${w / 2 - 42}px)`
+    await wait(470)
+
+    them.classList.add('flash')
+    cap.classList.add('on')
+    await wait(900)
+
+    cap.classList.remove('on')
+    collapseWait(waitWrap)
+    settle(frame, 'Ming', true)
+    tick(frame)
+    await wait(440)
+  },
+
+  /* C — barely there on purpose. */
+  async c(frame) {
+    const row = frame.querySelector('.waiting')
+    const waitWrap = frame.querySelector('.wait-wrap')
+    frame.querySelector('.sweep').classList.add('go')
+    await wait(300)
+    collapseWait(waitWrap)
+    settle(frame, 'Ming', false)
+    tick(frame)
+    await wait(440)
+  },
+
+  /* D — five seconds to change your mind (three here, so you don't wait). */
+  async d(frame, ctx) {
+    const row = frame.querySelector('.waiting')
+    const waitWrap = frame.querySelector('.wait-wrap')
+    row.classList.add('added')
+    row.innerHTML = `
+      <span class="av">M</span>
+      <span class="done-txt">Added Ming</span>
+      <button class="undo">Undo</button>
+      <svg class="ring" viewBox="0 0 22 22">
+        <circle class="bg" cx="11" cy="11" r="9"></circle>
+        <circle class="fg" cx="11" cy="11" r="9"></circle>
+      </svg>`
+    soon(() => frame.querySelector('.fg').classList.add('drain'))
+
+    let undone = false
+    row.querySelector('.undo').addEventListener('click', () => { undone = true; reset(ctx) })
+    await wait(3050)
+    if (undone) return
+
+    collapseWait(waitWrap)
+    settle(frame, 'Ming', false)
+    tick(frame)
+    await wait(440)
+  },
+}
+
+function reset(ctx) {
+  ctx.busy = false
+  ctx.frame.innerHTML = screen(ctx.key)
+  bindAccept(ctx)
+}
+
+function bindAccept(ctx) {
+  const yes = ctx.frame.querySelector('.yes')
+  if (yes) yes.addEventListener('click', () => play(ctx))
+  const no = ctx.frame.querySelector('.no')
+  if (no) no.addEventListener('click', () => reset(ctx))
+}
+
+async function play(ctx) {
+  if (ctx.busy) return
+  ctx.busy = true
+  await RUN[ctx.key](ctx.frame, ctx)
+  ctx.busy = false
+}
+
+const CTX = [...document.querySelectorAll('.opt')].map(opt => {
+  const ctx = { key: opt.dataset.opt, frame: opt.querySelector('.frame'), busy: false }
+  bindAccept(ctx)
+  opt.querySelector('.replay').addEventListener('click', () => { reset(ctx); setTimeout(() => play(ctx), 60) })
+  return ctx
+})
+
+document.getElementById('all').addEventListener('click', () => {
+  CTX.forEach(ctx => { reset(ctx); setTimeout(() => play(ctx), 60) })
+})
+
+const themeBtn = document.getElementById('theme')
+themeBtn.addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark'
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark')
+  themeBtn.textContent = dark ? 'Dark' : 'Light'
+})
+</script>
+</body>
+</html>

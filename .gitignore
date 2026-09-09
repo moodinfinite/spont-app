@@ -6,3 +6,8 @@ next-env.d.ts
 *.log
 .claude/memory/*/ephemeral/*
 !.claude/memory/*/ephemeral/.gitkeep
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+.neon
+.vercel

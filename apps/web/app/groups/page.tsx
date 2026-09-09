@@ -5,7 +5,7 @@ import { GroupsClient } from './groups-client'
 
 export default async function GroupsPage() {
   const userId = getCurrentUserId()
-  if (!userId) redirect('/login')
+  if (!userId) redirect('/welcome')
 
   const memberships = await prisma.groupMembership.findMany({
     where: { userId, status: 'ACCEPTED' },
