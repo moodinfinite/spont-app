@@ -30,6 +30,13 @@ behaves strangely, read the dashboard before trusting the CLI.** Fixed by
 adding the address at github.com/settings/emails, which also links the
 existing commits retroactively.
 
+**A dev server left running holds the old Prisma client, and an advisory
+lock.** Two symptoms from one cause. After a migration, queries selecting
+a new column throw against the stale client — quietly, if the caller
+catches its own errors. And `prisma migrate dev` will sit on
+"Timed out trying to acquire a postgres advisory lock" until the server
+lets go. Stop the dev server, migrate, start it again.
+
 **`prisma migrate dev` hangs without `--name`.** It's waiting for a
 migration name on a prompt you can't see in a captured shell.
 
