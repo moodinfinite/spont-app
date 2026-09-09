@@ -1,4 +1,4 @@
-# Where the design stands — updated 2026-09-08 (evening)
+# Where the design stands — updated 2026-09-08 (late)
 
 A snapshot for whoever picks this up next (Raghav asked for this
 specifically). Companion to [[home-feed-visual-direction]],
@@ -84,6 +84,15 @@ that drove the second half of the day.
   Settings. The old two-state toggle had no way back to following your
   phone once you'd touched it, and nothing on screen said so. Stored per
   device in localStorage, not on the account.
+- **Notifications** — a dot on a dock tab and nothing else. Home when a
+  proposal needs an answer, People when a friend request or group invite
+  does. No bell, no count, nothing pushed. Watch out for the dock's label
+  animation: it was written as "every span in a dock link" and swallowed the
+  dot whole until it was scoped to `.dock-label`.
+- **Page headers** — light/dark and your avatar are back on every screen,
+  as one shared `HeadActions` component. Settings holds the fuller versions
+  of both. They were briefly removed when Settings joined the dock; putting
+  them back was a deliberate call on 2026-09-08.
 - **Accepting a friend** — the row turns green where you tapped it and
   reads "Added Ming", then carries down to the slot they'll occupy in
   Your people and drains back to an ordinary row. No undo: nobody
@@ -110,7 +119,13 @@ that drove the second half of the day.
 
 ## Open, in rough priority order
 
-1. **Does a late cancel cost you tier?** Right now cancelling is free at
+1. **Calendar write-back.** Accepting a proposal changes nothing outside
+   Spont. The rules already say who should hold an event
+   (`shouldHoldEvent`), and the undo window is where the write goes; the
+   Google call is what's missing. This is what makes the app real to
+   somebody who doesn't open it.
+2. **Generation wants to be a morning job**, not a feed-load side effect.
+3. **Does a late cancel cost you tier?** Right now cancelling is free at
    any distance, so bailing twenty minutes before and four days before
    are identical to the system. This is the last piece of the
    reliability model and the one with the sharpest edges.
@@ -143,6 +158,14 @@ middle of clicking through the app logs you out and voids your session
 cookie, because the seeded users come back with new ids. `npm run db:seed`
 puts them back. This cost real confusion once: the symptom is every route
 redirecting to `/welcome` while the cookie still looks fine.
+
+**Production is one migration behind.** `drop_notifications` has been
+applied to dev but not to production — the deploy pipeline runs `next
+build`, never `prisma migrate deploy`. The app is fine either way since
+nothing references the table, but production still has an empty
+`Notification` table and the drift will surface on the next migration.
+Applying it needs the production connection string, which Vercel keeps
+hidden from the CLI; Neon has it.
 
 **Sessions outliving their user.** Related, and now fixed in
 `app/layout.tsx`: the dock used to render whenever the cookie *verified*,
