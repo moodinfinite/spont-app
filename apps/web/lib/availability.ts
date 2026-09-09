@@ -35,7 +35,7 @@ export interface CalendarSource {
   provider: string
 }
 
-async function busyBetween(
+export async function busyBetween(
   account: CalendarSource,
   start: Date,
   end: Date,

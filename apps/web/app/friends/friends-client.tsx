@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { AddFriendButton } from '@/components/add-friend-button'
+import { HeadActions } from '@/components/head-actions'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -19,6 +20,7 @@ export function FriendsClient({
   directory,
   groups,
   groupInvites,
+  you,
   inviteCode,
 }: {
   accepted: UserSummary[]
@@ -27,6 +29,7 @@ export function FriendsClient({
   directory: UserSummary[]
   groups: { id: string; name: string; memberCount: number }[]
   groupInvites: { id: string; name: string }[]
+  you: string
   inviteCode: string
 }) {
   const router = useRouter()
@@ -201,6 +204,7 @@ export function FriendsClient({
     <main className="page" ref={pageRef}>
       <header className="page-head">
         <h1>People.</h1>
+        <HeadActions initial={you} />
       </header>
 
       <div className="tabs" role="tablist">

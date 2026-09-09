@@ -14,8 +14,24 @@ import { AddMenu } from './add-menu'
  * free of controls entirely. A gear, not a person: a single-person icon read
  * as a near-copy of People's two-person one, which is why "You" was dropped
  * from the dock the first time.
+ *
+ * A tab carries a dot when something behind it needs an answer: an
+ * unanswered proposal on Home, a friend request or group invite on People.
+ * A dot rather than a count — the number doesn't change what you do, and
+ * this is the whole of Spont's notification surface. There is no bell, and
+ * nothing pushes.
  */
-export function Dock({ inviteCode }: { inviteCode: string }) {
+export function Dock({
+  inviteCode,
+  homeWaiting = false,
+  peopleWaiting = false,
+}: {
+  inviteCode: string
+  /** Something on the feed needs an answer. */
+  homeWaiting?: boolean
+  /** A friend request or a group invite is sitting on People. */
+  peopleWaiting?: boolean
+}) {
   const pathname = usePathname()
   const current = (href: string) =>
     pathname === href || (href !== '/' && pathname.startsWith(href)) ? 'page' : undefined
@@ -32,7 +48,8 @@ export function Dock({ inviteCode }: { inviteCode: string }) {
               strokeLinejoin="round"
             />
           </svg>
-          <span>Home</span>
+          <span className="dock-label">Home</span>
+          {homeWaiting && <span className="dock-dot" aria-label="Waiting on you" />}
         </Link>
         <Link href="/friends" aria-current={current('/friends')}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -50,7 +67,8 @@ export function Dock({ inviteCode }: { inviteCode: string }) {
               strokeLinecap="round"
             />
           </svg>
-          <span>People</span>
+          <span className="dock-label">People</span>
+          {peopleWaiting && <span className="dock-dot" aria-label="Waiting on you" />}
         </Link>
         <Link href="/settings" aria-current={current('/settings')}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -63,7 +81,7 @@ export function Dock({ inviteCode }: { inviteCode: string }) {
               strokeLinejoin="round"
             />
           </svg>
-          <span>Settings</span>
+          <span className="dock-label">Settings</span>
         </Link>
       </nav>
       <AddMenu inviteCode={inviteCode} />

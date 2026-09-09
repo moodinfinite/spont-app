@@ -59,6 +59,7 @@ export default async function FriendsPage() {
         memberCount: m.group.members.length,
       }))}
       groupInvites={groupInvites.map((m) => ({ id: m.group.id, name: m.group.name }))}
+      you={me.name.trim().charAt(0).toUpperCase()}
       inviteCode={userId.slice(-6)}
     />
   )

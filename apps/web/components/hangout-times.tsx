@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * Weekdays and weekends are asked separately because they aren't the same
@@ -27,6 +27,15 @@ const WEEKEND = [
 type State = 'none' | 'yes' | 'never'
 const NEXT: Record<State, State> = { none: 'yes', yes: 'never', never: 'none' }
 
+/** Absent and 'none' mean the same thing, so a plain deep-equal won't do. */
+function sameTimes(a: Record<string, State>, b: Record<string, State>): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)])
+  for (const k of keys) {
+    if ((a[k] ?? 'none') !== (b[k] ?? 'none')) return false
+  }
+  return true
+}
+
 export function HangoutTimes({
   initial,
   onSaved,
@@ -38,12 +47,25 @@ export function HangoutTimes({
 }) {
   const router = useRouter()
   const [times, setTimes] = useState<Record<string, State>>(initial)
+  /** What the server last confirmed, so the button knows if there's anything to do. */
+  const [saved, setSaved] = useState<Record<string, State>>(initial)
   const [saving, setSaving] = useState(false)
+  const [justSaved, setJustSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const dirty = !sameTimes(times, saved)
+
   function cycle(key: string) {
+    setJustSaved(false)
     setTimes((t) => ({ ...t, [key]: NEXT[t[key] ?? 'none'] }))
   }
+
+  // The tick doesn't stay. It's a receipt, not a state.
+  useEffect(() => {
+    if (!justSaved) return
+    const t = setTimeout(() => setJustSaved(false), 2200)
+    return () => clearTimeout(t)
+  }, [justSaved])
 
   async function save() {
     setSaving(true)
@@ -58,9 +80,17 @@ export function HangoutTimes({
       setSaving(false)
       return
     }
-    if (onSaved) router.push(onSaved)
-    router.refresh()
     setSaving(false)
+    if (onSaved) {
+      router.push(onSaved)
+      router.refresh()
+      return
+    }
+    // Everything else on this screen saves on tap and shows it immediately.
+    // This button is the one thing that didn't say anything back.
+    setSaved(times)
+    setJustSaved(true)
+    router.refresh()
   }
 
   const group = (rows: readonly (readonly [string, string])[]) => (
@@ -108,12 +138,23 @@ export function HangoutTimes({
 
       <button
         type="button"
-        className="btn btn-yes"
-        style={{ display: 'block', width: '100%', marginTop: 22 }}
+        className={`btn btn-yes btn-save${justSaved ? ' is-saved' : ''}`}
+        style={{ marginTop: 22 }}
         onClick={save}
-        disabled={saving}
+        disabled={saving || (!dirty && !onSaved)}
       >
-        {saving ? 'Saving…' : cta}
+        <span className="save-label">
+          {saving ? 'Saving…' : justSaved ? 'Saved' : dirty || onSaved ? cta : 'Up to date'}
+        </span>
+        <svg className="save-tick" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path
+            d="M4 10.5l4 4 8-9"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
     </div>
   )

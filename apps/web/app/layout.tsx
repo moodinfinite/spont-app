@@ -4,6 +4,7 @@ import { getCurrentUserId } from '@/lib/session'
 import { prisma } from '@spont/db'
 import { Dock } from '@/components/dock'
 import { ThemeScript } from '@/components/theme-toggle'
+import { hasPeopleWaiting, hasUnanswered } from '@/lib/proposals'
 
 export const metadata = { title: 'Spont' }
 
@@ -26,6 +27,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     ? await prisma.user.findUnique({ where: { id: userId }, select: { id: true } })
     : null
 
+  /**
+   * The dots the dock carries. Two counts on every page load, and only for a
+   * signed-in person — cheap enough to be worth not having a bell.
+   */
+  const [homeWaiting, peopleWaiting] = user
+    ? await Promise.all([hasUnanswered(user.id), hasPeopleWaiting(user.id)])
+    : [false, false]
+
   return (
     <html lang="en">
       <head>
@@ -35,7 +44,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {children}
         {/* The same short code the People page shares — the tail of the id,
             not the whole thing. */}
-        {user && <Dock inviteCode={user.id.slice(-6)} />}
+        {user && (
+          <Dock
+            inviteCode={user.id.slice(-6)}
+            homeWaiting={homeWaiting}
+            peopleWaiting={peopleWaiting}
+          />
+        )}
       </body>
     </html>
   )

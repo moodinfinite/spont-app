@@ -5,6 +5,7 @@ import { LogoutButton } from '@/components/logout-button'
 import { HangoutTimes } from '@/components/hangout-times'
 import { PreferencePicker } from '@/components/preference-picker'
 import { ThemeChoice } from '@/components/theme-toggle'
+import { HeadActions } from '@/components/head-actions'
 
 /**
  * A stop on the dock, alongside Home and People.
@@ -27,6 +28,7 @@ export default async function SettingsPage() {
     <main className="page">
       <header className="page-head">
         <h1>Settings.</h1>
+        <HeadActions initial={user.name.trim().charAt(0).toUpperCase()} linked={false} />
       </header>
 
       <div className="section-label">
@@ -94,35 +96,9 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      <div className="section-label">
-        <span>Calendar</span>
-      </div>
-      <div className="panel">
-        <div className="row">
-          <span className="row-text">
-            <span className="row-name">{calendar ? 'Google Calendar' : 'Not connected'}</span>
-            <span className="row-sub">
-              {calendar
-                ? 'Connected. Free or busy only — never what’s actually on it.'
-                : 'Spont can’t find anything until a calendar is connected.'}
-            </span>
-          </span>
-        </div>
-      </div>
-
-      <div className="section-label">
-        <span>Appearance</span>
-      </div>
-      <div className="panel">
-        <div className="row">
-          <span className="row-text">
-            <span className="row-name">Light or dark</span>
-            <span className="row-sub">Follow your phone, or override it on this device.</span>
-          </span>
-          <ThemeChoice />
-        </div>
-      </div>
-
+      {/* Your account, your calendar and how the app looks are all the same
+          question — "this is me and this device" — and three one-row panels
+          in a stack made them look like three unrelated systems. */}
       <div className="section-label">
         <span>You</span>
       </div>
@@ -136,6 +112,27 @@ export default async function SettingsPage() {
             <span className="row-sub">{user.email}</span>
           </span>
         </div>
+
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">{calendar ? 'Google Calendar' : 'No calendar yet'}</span>
+            <span className="row-sub">
+              {calendar
+                ? 'Free or busy only — never what’s actually on it.'
+                : 'Spont can’t find anything until a calendar is connected.'}
+            </span>
+          </span>
+          <span className="row-value">{calendar ? 'Connected' : 'Off'}</span>
+        </div>
+
+        <div className="row">
+          <span className="row-text">
+            <span className="row-name">Light or dark</span>
+            <span className="row-sub">Follow your phone, or override it on this device.</span>
+          </span>
+          <ThemeChoice />
+        </div>
+
         <LogoutButton />
       </div>
 

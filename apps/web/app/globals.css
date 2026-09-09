@@ -264,26 +264,38 @@ a {
 }
 
 /* The right slot of a section label, when that section has one thing you'd
-   actually want to do. Quiet enough not to compete with the list under it. */
+   actually want to do.
+
+   It began as a raised white pill, which made this one label 29px tall
+   against 17px for every other — the section it belonged to visibly sat
+   lower than its neighbours. It now borrows the label's own size and colour
+   and pulls its padding back out of the flow, so the row keeps its rhythm
+   and the button reads as part of the heading rather than floating above
+   it. */
 .section-action {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   border: none;
   border-radius: 999px;
-  padding: 6px 12px 6px 9px;
-  background: var(--card);
-  box-shadow: var(--shadow-soft);
-  color: var(--ink);
+  padding: 4px 10px 4px 8px;
+  margin: -4px 0;
+  background: var(--chip);
+  color: var(--ink-2);
   font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  text-transform: none;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
-.section-action svg { width: 13px; height: 13px; }
+.section-action:hover {
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+}
+
+.section-action svg { width: 11px; height: 11px; }
 
 .note {
   text-align: center;
@@ -403,6 +415,8 @@ a {
 }
 
 .dock a {
+  /* The waiting dot hangs off this — see .dock-dot. */
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -427,7 +441,7 @@ a {
 /* The label collapses rather than disappearing, so the pill grows and
    shrinks between the two states instead of jumping. display:none can't be
    animated; max-width can. */
-.dock a span {
+.dock a .dock-label {
   display: inline-block;
   overflow: hidden;
   max-width: 0;
@@ -437,7 +451,7 @@ a {
     opacity 180ms ease;
 }
 
-.dock a[aria-current='page'] span {
+.dock a[aria-current='page'] .dock-label {
   max-width: 80px;
   opacity: 1;
   transition:
@@ -1005,6 +1019,202 @@ a {
   .row-added.in-flight,
   .wait-collapse,
   .landing-gap {
+    transition: none;
+  }
+}
+
+/* ---------------- Proposal cards ----------------
+   A suggestion inverts the ground rather than using the accent, so a feed of
+   them doesn't become a wall of neon. Ported from
+   docs/superpowers/mockups/2026-09-06-home-feed-mockup-v2-rounded.html */
+
+.card-suggested {
+  padding: 20px 18px 18px;
+  margin-bottom: 10px;
+}
+
+.sug-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.sug-top svg {
+  width: 22px;
+  height: 22px;
+}
+
+.sug-eyebrow {
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dark-ink-2);
+}
+
+.card-headline {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  max-width: 16ch;
+  margin: 0 0 14px;
+  color: var(--dark-ink);
+  text-wrap: balance;
+}
+
+.sug-reason {
+  font-size: 13.5px;
+  margin: 0 0 16px;
+  max-width: 32ch;
+}
+
+.stat-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dark-ink-2);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Both halves of the decision together, at the foot of the card. */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The undo window. The ring is the clock: when it has drained, the answer is
+   final and the card becomes an Upcoming row. */
+.undo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.undo-ring {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  transform: rotate(-90deg);
+}
+
+.undo-ring circle {
+  fill: none;
+  stroke-width: 2.4;
+}
+
+.undo-ring .track {
+  stroke: var(--dark-ink-2);
+  opacity: 0.3;
+}
+
+.undo-ring .sweep {
+  stroke: var(--dark-ink);
+  stroke-linecap: round;
+  stroke-dasharray: 62.8;
+  stroke-dashoffset: 0;
+}
+
+.undo-ring .sweep.draining {
+  transition: stroke-dashoffset 5000ms linear;
+  stroke-dashoffset: 62.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .undo-ring .sweep.draining {
+    transition: none;
+  }
+}
+
+/* ---------------- Upcoming ---------------- */
+
+.upcoming-when {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+/* The whole of Spont's notification surface: a dot on the tab that has
+   something waiting. No bell, no badge count, nothing pushed.
+
+   The label rule above is scoped to .dock-label rather than to any span
+   precisely because of this — as "\.dock a span" it collapsed the dot to
+   zero width along with the labels, and the dot was invisible on every tab
+   except the one you were already on. */
+.dock-dot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--warn);
+}
+
+.dock a[aria-current='page'] .dock-dot {
+  background: var(--dock-ink);
+}
+
+/* The save button on the hangout times. Everything else on Settings saves on
+   tap and shows it at once; this one had to say something back, so the label
+   steps aside for a tick that draws itself and then hands the label back. */
+.btn-save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  transition:
+    background-color 240ms ease,
+    color 240ms ease,
+    opacity 240ms ease;
+}
+
+.btn-save:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.btn-save.is-saved:disabled {
+  opacity: 1;
+}
+
+.save-tick {
+  width: 0;
+  height: 17px;
+  opacity: 0;
+  flex: none;
+  transition:
+    width 260ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 160ms ease;
+}
+
+.save-tick path {
+  stroke-dasharray: 21;
+  stroke-dashoffset: 21;
+}
+
+.btn-save.is-saved .save-tick {
+  width: 17px;
+  opacity: 1;
+}
+
+.btn-save.is-saved .save-tick path {
+  transition: stroke-dashoffset 340ms cubic-bezier(0.4, 0, 0.2, 1) 120ms;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-tick,
+  .btn-save.is-saved .save-tick path {
     transition: none;
   }
 }
